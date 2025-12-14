@@ -1,0 +1,29 @@
+# Tanjai POS - Project Context & Rules
+
+## Project Overview
+Tanjai POS is an AI-Augmented, Offline-First Modular Monolith designed for Thai SME restaurants.
+It focuses on speed, scalability, and seamless user experience.
+
+## Architecture
+- **Framework**: Next.js 14/15 (App Router)
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
+- **State Management**: React Query (TanStack Query) for async, Zustand (if needed) for local.
+- **Offline Strategy**: Serwist (PWA) + IndexedDB + PersistQueryClientProvider.
+
+## Directory Structure
+- `src/features/`: Feature-based modules (e.g., `inventory`, `order`, `auth`). Each feature should contain its own components, hooks, and server actions.
+- `src/lib/`: Shared core utilities (DB client, validation schemas).
+- `src/components/`: Shared UI components (Design System).
+
+## Coding Standards
+- **Server Actions**: Place in `src/features/[feature]/actions.ts`. Use `"use server"`.
+- **Client Components**: Use `"use client"` only when necessary.
+- **Naming**: `snake_case` for DB columns, `camelCase` for variables/functions, `PascalCase` for components.
+- **Types**: Use TypeScript strictly. No `any`.
+- **Tailwind**: Use utility classes. Avoid excessive `@apply`.
+
+## Tech Specifics
+- **Supabase**: Use `createClient` from `@supabase/ssr`.
+- **Realtime**: Use Supabase Realtime for order updates.
+- **PWA**: Serwist for service worker management.
