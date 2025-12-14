@@ -14,10 +14,13 @@ export type Order = {
 
 export default function RealtimeOrderList({ initialOrders }: { initialOrders: Order[] }) {
     // Subscribe to new orders insert
-    useRealtimeSubscription("orders", "INSERT", (payload) => {
+    useRealtimeSubscription("orders", {
+        event: "INSERT",
+        callback: (payload) => {
         // In a real app, we might update local state here or allow router.refresh() to handle it.
         // implementing a toast or just logging for this scaffold
         console.log("New order received!", payload.new);
+        }
     });
 
     return (

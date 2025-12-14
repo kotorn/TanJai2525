@@ -1,0 +1,13 @@
+Failed to compile.
+
+./src/features/order/components/RealtimeOrderList.tsx:17:49
+Type error: Expected 2 arguments, but got 3.
+
+[0m [90m 15 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mRealtimeOrderList[39m({ initialOrders }[33m:[39m { initialOrders[33m:[39m [33mOrder[39m[] }) {
+ [90m 16 |[39m     [90m// Subscribe to new orders insert[39m
+[31m[1m>[22m[39m[90m 17 |[39m     useRealtimeSubscription([32m"orders"[39m[33m,[39m [32m"INSERT"[39m[33m,[39m (payload) [33m=>[39m {
+ [90m    |[39m                                                 [31m[1m^[22m[39m
+ [90m 18 |[39m         [90m// In a real app, we might update local state here or allow router.refresh() to handle it.[39m
+ [90m 19 |[39m         [90m// implementing a toast or just logging for this scaffold[39m
+ [90m 20 |[39m         console[33m.[39mlog([32m"New order received!"[39m[33m,[39m payload[33m.[39m[36mnew[39m)[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
