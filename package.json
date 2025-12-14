@@ -12,6 +12,8 @@
     "@serwist/next": "^9.2.3",
     "@serwist/precaching": "^9.2.3",
     "@serwist/sw": "^9.2.3",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.87.1",
     "@tanstack/react-query": "^5.90.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
