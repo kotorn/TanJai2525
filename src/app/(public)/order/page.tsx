@@ -52,6 +52,7 @@ export default async function OrderPage({
                 <MenuBrowser 
                     categories={session.categories} 
                     items={session.items} 
+                    tableId={tableId}
                 />
             </Suspense>
         </div>

@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Plus, Image as ImageIcon } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ItemDetailsModal from "./ItemDetailsModal";
 import { useCartStore } from "../store/cart-store";
-import { formatCurrency } from "@/lib/utils"; // Assuming utility, otherwise inline
 
 interface MenuBrowserProps {
     categories: any[];
     items: any[];
+    tableId: string; // Add prop
 }
 
-export default function MenuBrowser({ categories, items }: MenuBrowserProps) {
+export default function MenuBrowser({ categories, items, tableId }: MenuBrowserProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]?.id || "");
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,11 +93,13 @@ export default function MenuBrowser({ categories, items }: MenuBrowserProps) {
             {/* Floating Browse Cart Button */}
             {cartTotalItems > 0 && (
                 <div className="fixed bottom-4 left-4 right-4 animate-in slide-in-from-bottom-5 z-20">
-                    <Button className="w-full bg-black text-white hover:bg-gray-900 rounded-full h-14 shadow-lg flex justify-between px-6 text-base">
-                        <span className="bg-white/20 px-2 py-1 rounded text-sm font-bold">{cartTotalItems} Items</span>
-                        <span>View Cart</span>
-                        <span className="font-bold">฿{cartTotalPrice}</span>
-                    </Button>
+                    <Link href={`/order/cart?tableId=${tableId}`}>
+                        <Button className="w-full bg-black text-white hover:bg-gray-900 rounded-full h-14 shadow-lg flex justify-between px-6 text-base">
+                            <span className="bg-white/20 px-2 py-1 rounded text-sm font-bold">{cartTotalItems} Items</span>
+                            <span>View Cart</span>
+                            <span className="font-bold">฿{cartTotalPrice}</span>
+                        </Button>
+                    </Link>
                 </div>
             )}
 

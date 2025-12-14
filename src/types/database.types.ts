@@ -64,6 +64,38 @@ export interface Database {
                 Insert: Omit<Table, 'id' | 'created_at' | 'updated_at'> & { id?: string }
                 Update: Partial<Omit<Table, 'id' | 'created_at' | 'updated_at'>>
             }
+            orders: {
+                Row: Order
+                Insert: Omit<Order, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+                Update: Partial<Omit<Order, 'id' | 'created_at' | 'updated_at'>>
+            }
+            order_items: {
+                Row: OrderItem
+                Insert: Omit<OrderItem, 'id' | 'created_at'> & { id?: string }
+                Update: Partial<Omit<OrderItem, 'id' | 'created_at'>>
+            }
         }
     }
+}
+
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served' | 'paid' | 'cancelled';
+
+export interface Order {
+    id: string
+    restaurant_id: string
+    table_id: string
+    status: OrderStatus
+    total_amount: number
+    created_at: string
+    updated_at: string
+}
+
+export interface OrderItem {
+    id: string
+    order_id: string
+    menu_item_id: string
+    quantity: number
+    price: number
+    options: Json // stores the selected options snapshot
+    created_at: string
 }

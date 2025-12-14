@@ -40,12 +40,35 @@ const MenuItemSchema = z.object({
     is_available: z.boolean().default(true),
 });
 
+import { SupabaseClient } from '@supabase/supabase-js'
+
 /**
  * Helper to get the current user's restaurant ID.
  * Simplification: Fetches the *first* restaurant created by the user (or available to them).
  * In a multi-tenant real-world scenario, you'd likely pick the 'active' restaurant from context/session.
  */
-async function getRestaurantId(supabase: any) {
+/**
+ * Mock Data Store (Global for dev server lifetime)
+ */
+let mockCategories: Category[] = [
+    { id: "cat-1", restaurant_id: "mock-rest-1", name: "Recommended", sort_order: 0, created_at: new Date().toISOString() },
+    { id: "cat-2", restaurant_id: "mock-rest-1", name: "Main Dishes", sort_order: 1, created_at: new Date().toISOString() },
+    { id: "cat-3", restaurant_id: "mock-rest-1", name: "Beverages", sort_order: 2, created_at: new Date().toISOString() },
+];
+
+let mockItems: MenuItem[] = [
+    { id: "item-1", restaurant_id: "mock-rest-1", category_id: "cat-1", name: "Pad Thai", price: 120, description: "Classic Thai stir-fried noodles", image_url: null, is_available: true, created_at: new Date().toISOString() },
+    { id: "item-2", restaurant_id: "mock-rest-1", category_id: "cat-1", name: "Tom Yum Kung", price: 180, description: "Spicy prawn soup", image_url: null, is_available: true, created_at: new Date().toISOString() },
+];
+
+function isMockMode() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return !url || url.includes("your-project-url");
+}
+
+async function getRestaurantId(supabase: SupabaseClient) {
+    if (isMockMode()) return "mock-rest-1";
+
     // 1. Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
@@ -72,6 +95,15 @@ export async function getMenuData() {
         return { categories: [], items: [] };
     }
 
+    if (isMockMode()) {
+        console.warn("[Mock Mode] Fetching menu data");
+        // Sort mock data
+        return {
+            categories: [...mockCategories].sort((a, b) => a.sort_order - b.sort_order),
+            items: [...mockItems].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        };
+    }
+
     const { data: categories, error: catError } = await supabase
         .from("menu_categories")
         .select("*")
@@ -92,7 +124,7 @@ export async function getMenuData() {
         categories: (categories as Category[]) || [],
         items: (items as MenuItem[]) || []
     };
-}
+};
 
 export async function createCategory(data: { name: string; sort_order?: number }) {
     const supabase = await createClient();
@@ -104,6 +136,18 @@ export async function createCategory(data: { name: string; sort_order?: number }
 
     const restaurant_id = await getRestaurantId(supabase);
     if (!restaurant_id) return { error: "No restaurant found" };
+
+    if (isMockMode()) {
+        mockCategories.push({
+            id: `cat-${Date.now()}`,
+            restaurant_id,
+            name: result.data.name,
+            sort_order: result.data.sort_order,
+            created_at: new Date().toISOString()
+        });
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
 
     const { error } = await supabase
         .from('menu_categories')
@@ -120,6 +164,12 @@ export async function createCategory(data: { name: string; sort_order?: number }
 }
 
 export async function deleteCategory(id: string) {
+    if (isMockMode()) {
+        mockCategories = mockCategories.filter(c => c.id !== id);
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase
         .from('menu_categories')
@@ -131,7 +181,9 @@ export async function deleteCategory(id: string) {
     return { success: true };
 }
 
-export async function createMenuItem(data: any) {
+type CreateMenuItemData = z.infer<typeof MenuItemSchema>;
+
+export async function createMenuItem(data: CreateMenuItemData) {
     const supabase = await createClient();
     const result = MenuItemSchema.safeParse(data);
 
@@ -145,12 +197,23 @@ export async function createMenuItem(data: any) {
     const payload = {
         name: result.data.name,
         price: result.data.price,
-        description: result.data.description,
-        image_url: result.data.image_url,
+        description: result.data.description || null,
+        image_url: result.data.image_url || null,
         is_available: result.data.is_available,
         category_id: result.data.category_id || null,
         restaurant_id: restaurant_id
     };
+
+    if (isMockMode()) {
+        mockItems.unshift({
+            id: `item-${Date.now()}`,
+            created_at: new Date().toISOString(),
+            // @ts-ignore
+            ...payload
+        });
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
 
     const { error } = await supabase.from('menu_items').insert(payload);
 
@@ -160,6 +223,12 @@ export async function createMenuItem(data: any) {
 }
 
 export async function deleteMenuItem(id: string) {
+    if (isMockMode()) {
+        mockItems = mockItems.filter(i => i.id !== id);
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase
         .from('menu_items')
@@ -172,6 +241,15 @@ export async function deleteMenuItem(id: string) {
 }
 
 export async function updateCategoryOrder(items: { id: string; sort_order: number }[]) {
+    if (isMockMode()) {
+        items.forEach(item => {
+            const cat = mockCategories.find(c => c.id === item.id);
+            if (cat) cat.sort_order = item.sort_order;
+        });
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
+
     const supabase = await createClient();
     
     // Process updates
@@ -188,11 +266,21 @@ export async function updateCategoryOrder(items: { id: string; sort_order: numbe
 }
 
 export async function updateMenuItem(id: string, data: Partial<MenuItem>) {
+    // Sanitize
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, created_at, restaurant_id, ...updates } = data;
+
+    if (isMockMode()) {
+        const item = mockItems.find(i => i.id === id);
+        if (item) {
+            Object.assign(item, updates);
+        }
+        revalidatePath('/dashboard/menu');
+        return { success: true };
+    }
+
     const supabase = await createClient();
     
-    // Sanitize
-    const { id: _, created_at, restaurant_id, ...updates } = data as any;
-
     const { error } = await supabase
         .from('menu_items')
         .update(updates)
