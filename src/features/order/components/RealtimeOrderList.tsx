@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 // Placeholder type
-type Order = {
+export type Order = {
     id: string;
     status: string;
     total_amount: number;

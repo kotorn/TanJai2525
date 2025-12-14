@@ -1,8 +1,8 @@
-import RealtimeOrderList from "@/features/order/components/RealtimeOrderList";
+import RealtimeOrderList, { type Order } from "@/features/order/components/RealtimeOrderList";
 
 export default function KDSPage() {
     // In a real implementation, we would fetch initial orders from the server here.
-    const initialOrders: any[] = [];
+    const initialOrders: Order[] = [];
 
     return (
         <div className="flex h-full flex-col gap-4">

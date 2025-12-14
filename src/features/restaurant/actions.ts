@@ -148,6 +148,16 @@ export async function verifyOtp(phoneNumber: string, otp: string) {
 }
 
 export async function registerRestaurant(data: RestaurantProfile & { phoneNumber: string }) {
+    // Check for Mock Mode
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const isMock = !supabaseUrl || supabaseUrl.includes("your-project-url");
+
+    if (isMock) {
+        console.warn("[Mock Mode] Registering restaurant:", data.name);
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+        return { success: true, restaurantId: `mock-restaurant-${Date.now()}` };
+    }
+
     const supabase = await createClient()
 
     let slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')

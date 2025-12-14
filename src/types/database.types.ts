@@ -34,6 +34,18 @@ export interface MenuItem {
     updated_at: string
 }
 
+export interface Table {
+    id: string
+    restaurant_id: string
+    name: string
+    capacity: number
+    location: string | null
+    status: string
+    qr_code_url: string | null
+    created_at: string
+    updated_at: string
+}
+
 export interface Database {
     public: {
         Tables: {
@@ -46,6 +58,11 @@ export interface Database {
                 Row: MenuItem
                 Insert: Omit<MenuItem, 'id' | 'created_at' | 'updated_at'> & { id?: string }
                 Update: Partial<Omit<MenuItem, 'id' | 'created_at' | 'updated_at'>>
+            }
+            tables: {
+                Row: Table
+                Insert: Omit<Table, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+                Update: Partial<Omit<Table, 'id' | 'created_at' | 'updated_at'>>
             }
         }
     }

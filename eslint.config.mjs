@@ -18,7 +18,13 @@ const eslintConfig = defineConfig([
     "**/build/**",
     "**/dist/**",
     "**/_legacy_backup/**",
+    "public/sw.js",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

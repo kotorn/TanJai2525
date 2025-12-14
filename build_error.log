@@ -1,0 +1,18 @@
+
+> tanjai-pos@0.1.0 build
+> next build --webpack
+
+   ▲ Next.js 16.0.10 (webpack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ (serwist) Bundling the service worker script with the URL '/sw.js' and the scope '/'...
+Failed to compile.
+
+./src/features/menu/components/MenuItemList.tsx
+Module not found: Can't resolve '@/components/ui/switch'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors

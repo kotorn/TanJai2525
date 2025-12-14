@@ -1,77 +1,68 @@
-"use server";
+'use server'
 
-import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import { createClient } from '@/lib/supabase/server'
+import { getMenuData } from '@/features/menu/actions'
 
-const CreateOrderSchema = z.object({
-    items: z.array(
-        z.object({
-            menu_item_id: z.string().uuid(),
-            quantity: z.number().min(1),
-            price: z.number().min(0),
-        })
-    ),
-    total_amount: z.number().min(0),
-});
-
-export async function createOrder(data: z.infer<typeof CreateOrderSchema>) {
+export async function getSession(tableId: string) {
     const supabase = await createClient();
 
-    // Validate input
-    const result = CreateOrderSchema.safeParse(data);
-    if (!result.success) {
-        return { error: "Invalid input data" };
-    }
-
-    const { items, total_amount } = result.data;
-
-    // 1. Get Tenant ID (RLS will enforce this, but we need it for inserting)
-    // In a real generic insert, we might rely on default values, but here explicit is safer.
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { error: "Unauthorized" };
-    }
-
-    // Transaction wrapping is tricky in Supabase HTTP API.
-    // Ideally, we use a Postgres Function (RPC) for atomic Order + Inventory.
-    // For Day 3 Skeleton, we'll demonstrate the JS-side logic structure.
-
-    // A. Create Order
-    const { data: order, error: orderError } = await supabase
-        .from("orders") // Assumes orders table exists (it wasn't in Day 2 schema, might need to add it or its a pending task)
-        .insert({
-            status: "pending",
-            total_amount,
-        })
-        .select()
+    // 1. Fetch Table details
+    // We select *, but also want the restaurant details.
+    // Assuming simple structure for now.
+    const { data: table, error: tableError } = await supabase
+        .from('tables')
+        .select(`
+            *,
+            restaurants (
+                id,
+                name,
+                slug,
+                banner_url,
+                logo_url,
+                cuisine_type
+            )
+        `)
+        .eq('id', tableId)
         .single();
-
-    if (orderError) {
-        console.error("Order creation failed", orderError);
-        return { error: "Failed to create order" };
+    
+    if (tableError || !table) {
+        console.error("Session Error: Table not found", tableError);
+        return { error: "Invalid Table ID" };
     }
 
-    // B. Create Order Items
-    const orderItems = items.map((item) => ({
-        order_id: order.id,
-        menu_item_id: item.menu_item_id,
-        quantity: item.quantity,
-        price: item.price,
-    }));
-
-    const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-
-    if (itemsError) {
-        // In a real app, we would rollback here (delete the order).
-        // Or better, use call a Postgres function: `perform_order_transaction(...)`
-        console.error("Order items failed", itemsError);
-        return { error: "Failed to create order items" };
+    if (table.status !== 'available' && table.status !== 'occupied') {
+        // Maybe later block if 'reserved'? For now allow ordering.
     }
 
-    revalidatePath("/pos");
-    return { success: true, orderId: order.id };
+    // 2. Fetch Menu
+    // We can reuse getMenuData, but we might want to filter by this restaurant specifically.
+    // getMenuData currently fetches ALL (or RLS filtered).
+    // Logic: getMenuData uses RLS based on Auth User.
+    // HERE: The customer is NOT authenticated as a restaurant owner.
+    // So getMenuData() might return nothing if RLS blocks public access.
+    
+    // ACTION: We need a PUBLIC get menu action.
+    const { data: categories, error: catError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('restaurant_id', table.restaurant_id)
+        .order('sort_order');
+
+    const { data: items, error: itemError } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('restaurant_id', table.restaurant_id)
+        .eq('is_available', true)
+        .order('created_at');
+
+    if (catError || itemError) {
+        return { error: "Failed to load menu" };
+    }
+
+    return {
+        table,
+        restaurant: table.restaurants, // Valid due to inner join structure helper or simple return
+        categories: categories || [],
+        items: items || []
+    };
 }
