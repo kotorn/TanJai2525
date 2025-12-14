@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🍜 Tanjai POS (ทันใจ POS)
 
-# Run and deploy your AI Studio app
+**Tanjai POS** is a modern, web-based Point of Sale system specifically designed for Thai street food vendors and small restaurants. It focuses on speed, simplicity, and local payment behaviors (PromptPay/Cash).
 
-This contains everything you need to run your app locally.
+> **Slogan:** สั่งง่าย ได้ไว ถูกใจร้าน (Easy Order, Fast Service, Merchant Friendly)
 
-View your app in AI Studio: https://ai.studio/apps/drive/1yk4PmuHMnbZ3eq1Jbadc_q05HV11HwWH
+## 🚀 Key Features
+- **Scan-to-Order:** Customer scans QR code at the table to order (No app download required).
+- **Real-time Kitchen Display:** Orders sent directly to kitchen/bar stations via WebSocket.
+- **Smart Stock:** Inventory deduction logic based on order placement.
+- **Thai Payment:** Built-in PromptPay QR generator & Slip verification support.
+- **Offline-First Design:** Handles unstable internet connections gracefully.
 
-## Run Locally
+## 🛠 Tech Stack
+- **Frontend:** Next.js 14 (App Router), Tailwind CSS, Lucide Icons
+- **Backend:** Node.js, Express.js, Socket.io
+- **Database:** PostgreSQL (Supabase)
+- **Deployment:** Vercel (Frontend), Render/DigitalOcean (Backend)
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 📂 Project Structure
+```bash
+tanjai-pos/
+├── client/          # Next.js Frontend
+│   ├── src/app      # App Router Pages
+│   └── ...
+├── server/          # Node.js Backend
+│   ├── config/      # Database Config
+│   ├── routes/      # API Endpoints
+│   └── ...
+└── README.md
