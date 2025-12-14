@@ -85,6 +85,7 @@ export default function MenuItemList({
             price: parseFloat(newItemPrice),
             category_id: selectedCategory,
             image_url: newItemImage,
+            is_available: true,
         });
 
         if (res.error) {
@@ -106,8 +107,7 @@ export default function MenuItemList({
             price: parseFloat(editItemPrice),
             description: editItemDesc,
             image_url: editItemImage,
-            is_available: editItemAvailable,
-            options: editItemOptions
+            is_available: editItemAvailable
         });
 
         if (res.error) {

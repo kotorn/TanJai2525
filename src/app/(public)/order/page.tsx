@@ -50,8 +50,8 @@ export default async function OrderPage({
                     tableName={session.table.name} 
                 />
                 <MenuBrowser 
-                    categories={session.categories} 
-                    items={session.items} 
+                    categories={session.categories ?? []} 
+                    items={session.items ?? []} 
                     tableId={tableId}
                 />
             </Suspense>

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { submitOrder } from "@/features/order/actions";
 import { toast } from "sonner";
 
-export default function CartPage() {
+function CartContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tableId = searchParams.get("tableId");
@@ -133,5 +133,16 @@ export default function CartPage() {
                 </Button>
             </div>
         </div>
+    );
+}
+
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+export default function CartPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="animate-spin text-orange-500" /></div>}>
+            <CartContent />
+        </Suspense>
     );
 }

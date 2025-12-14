@@ -1,0 +1,74 @@
+﻿
+> tanjai-pos@0.1.0 build
+> next build --webpack
+
+   Γû▓ Next.js 16.0.10 (webpack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô (serwist) Bundling the service worker script with the URL '/sw.js' and the scope '/'...
+ Γ£ô Compiled successfully in 5.2s
+   Running TypeScript ...
+node.exe : Failed to 
+compile.
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Failed    
+ to compile.:Stri    
+ng) [], RemoteEx    
+ception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+
+./src/app/(public)/or
+der/page.tsx:53:21
+Type error: Type 
+'any[] | undefined' 
+is not assignable to 
+type 'any[]'.
+  Type 'undefined' 
+is not assignable to 
+type 'any[]'.
+
+[0m [90m 51 |[39m 
+                [33m
+/[39m[33m>[39m
+ [90m 52 |[39m     
+            [33m<[3
+9m[33mMenuBrowser[3
+9m 
+[31m[1m>[22m[39m
+[90m 53 |[39m       
+              categor
+ies[33m=[39m{sessio
+n[33m.[39mcategorie
+s} 
+ [90m    |[39m     
+                
+[31m[1m^[22m[39m
+ [90m 54 |[39m     
+                items
+[33m=[39m{session[
+33m.[39mitems} 
+ [90m 55 |[39m     
+                table
+Id[33m=[39m{tableId
+}
+ [90m 56 |[39m     
+            [33m/[3
+9m[33m>[39m[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null
