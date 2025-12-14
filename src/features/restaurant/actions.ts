@@ -128,3 +128,55 @@ export async function deleteRestaurant(id: string) {
 
     revalidatePath('/dashboard/restaurants')
 }
+
+import { RestaurantProfile } from './schemas/onboarding.schema'
+
+export async function sendOtp(phoneNumber: string) {
+    console.log(`[Mock SMS] Sending OTP to ${phoneNumber}`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    return { success: true }
+}
+
+export async function verifyOtp(phoneNumber: string, otp: string) {
+    console.log(`[Mock OTP] Verifying OTP ${otp} for ${phoneNumber}`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Accept 123456 as valid OTP for testing
+    if (otp === "123456") return { success: true }
+    
+    return { success: false, error: "รหัส OTP ไม่ถูกต้อง" }
+}
+
+export async function registerRestaurant(data: RestaurantProfile & { phoneNumber: string }) {
+    const supabase = await createClient()
+
+    let slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+    // Fallback for non-latin names
+    if (!slug || slug.length < 2) {
+        slug = 'restaurant'
+    }
+    // Append random string to ensure uniqueness
+    slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`
+
+    const { data: restaurant, error } = await supabase
+        .from('restaurants')
+        .insert({
+            name: data.name,
+            slug: slug,
+            cuisine_type: data.cuisineType,
+            phone: data.phoneNumber,
+            address: data.address,
+            logo_url: data.logoUrl,
+            banner_url: data.bannerUrl,
+            settings: data.description ? { description: data.description } : {},
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Registration error:', error)
+        return { success: false, error: 'Failed to create restaurant' }
+    }
+
+    return { success: true, restaurantId: restaurant.id }
+}
