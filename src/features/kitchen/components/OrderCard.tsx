@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Clock, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { updateOrderStatus } from '@/features/order/actions';
+import { updateKitchenOrderStatus } from '@/features/kitchen/actions';
 import { toast } from 'sonner';
 
 interface OrderCardProps {
@@ -30,7 +30,7 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const handleUpdateStatus = async (newStatus: string) => {
     setIsUpdating(true);
     try {
-      const result = await updateOrderStatus(order.id, newStatus);
+      const result = await updateKitchenOrderStatus(order.id, newStatus);
       if (result.success) {
         toast.success(newStatus === 'preparing' ? 'เริ่มทำออเดอร์' : 'ออเดอร์เสร็จสิ้น');
         onStatusChange();
@@ -97,7 +97,7 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
         
         {order.status === 'preparing' && (
           <Button
-            onClick={() => handleUpdateStatus('ready')} // Or 'completed' / 'served'
+            onClick={() => handleUpdateStatus('done')} // Mark as done to hide from KDS
             disabled={isUpdating}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           >

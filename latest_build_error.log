@@ -1,13 +1,15 @@
 Failed to compile.
 
-./src/features/order/components/RealtimeOrderList.tsx:17:49
-Type error: Expected 2 arguments, but got 3.
+./src/lib/supabase/realtime.ts:49:17
+Type error: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '"postgres_changes"' is not assignable to parameter of type '"system"'.
 
-[0m [90m 15 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mRealtimeOrderList[39m({ initialOrders }[33m:[39m { initialOrders[33m:[39m [33mOrder[39m[] }) {
- [90m 16 |[39m     [90m// Subscribe to new orders insert[39m
-[31m[1m>[22m[39m[90m 17 |[39m     useRealtimeSubscription([32m"orders"[39m[33m,[39m [32m"INSERT"[39m[33m,[39m (payload) [33m=>[39m {
- [90m    |[39m                                                 [31m[1m^[22m[39m
- [90m 18 |[39m         [90m// In a real app, we might update local state here or allow router.refresh() to handle it.[39m
- [90m 19 |[39m         [90m// implementing a toast or just logging for this scaffold[39m
- [90m 20 |[39m         console[33m.[39mlog([32m"New order received!"[39m[33m,[39m payload[33m.[39m[36mnew[39m)[33m;[39m[0m
+[0m [90m 47 |[39m             [33m.[39mchannel([32m`public:${table}`[39m)
+ [90m 48 |[39m             [33m.[39mon(
+[31m[1m>[22m[39m[90m 49 |[39m                 [32m'postgres_changes'[39m[33m,[39m
+ [90m    |[39m                 [31m[1m^[22m[39m
+ [90m 50 |[39m                 {
+ [90m 51 |[39m                     event[33m:[39m options[33m.[39mevent[33m,[39m
+ [90m 52 |[39m                     schema[33m:[39m [32m'public'[39m[33m,[39m[0m
 Next.js build worker exited with code: 1 and signal: null
