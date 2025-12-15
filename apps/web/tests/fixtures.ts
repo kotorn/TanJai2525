@@ -37,6 +37,7 @@ type AntigravityFixtures = {
   chaosLogic: ChaosLogic;
   networkSniffer: void;
   phantomFinger: void;
+  hostileEnvironment: void;
 };
 
 // --- Helpers ---
@@ -188,13 +189,28 @@ export const test = base.extend<AntigravityFixtures>({
       
       // Auto-apply Ischemic Network if project name matches
       if (testInfo.project.name.includes('Ischemic')) {
-           console.log('[Fixture] Automatically applying Global Network Arrhythmia for Ischemic Patient...');
+           console.log('[Fixture] 🩸 Applying Global Network Arrhythmia (Ischemic Network)...');
            // Apply jitter to ALL routes for this project
            await chaos.induceNetworkJitter('**/*', 500);
       }
 
       await use(chaos);
   },
+
+  // 🌍 Hostile Environment (The Matrix Enforcer)
+  hostileEnvironment: [async ({ page, context }, use, testInfo) => {
+    // 1. 🩸 Ischemic Network (already handled in chaosLogic above, but let's double check coverage)
+    // (Handled via chaosLogic for now as it needs page.route)
+
+    // 2. 🦠 Infected Mobile: CPU Throttling
+    if (testInfo.project.name.includes('Infected Mobile')) {
+        console.log('[Fixture] 🦠 Infecting Mobile Device: CPU Throttling x4...');
+        const client = await context.newCDPSession(page);
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    }
+
+    await use();
+  }, { auto: true }],
 
   // 👆 The "Phantom Finger" (Visual Touch Feedback)
   phantomFinger: [async ({ page }, use) => {

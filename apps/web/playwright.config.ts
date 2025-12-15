@@ -74,12 +74,7 @@ export default defineConfig({
         userAgent: 'Mozilla/5.0 (Linux; Android 7.1.2; AOSP) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
         hasTouch: true,
         isMobile: true,
-        // Simulate "Ischemic Network" (Slow 3G + Jitter) - this applies to the context
-        // Note: Playwright doesn't easily support jitter natively in config, 
-        // will rely on CDPSession in fixtures or just use harsh throttling here.
-        // We can simulate Network Arrhythmia via fixture, but baseline throttling here:
-        // Sadly 'offline' is boolean in 'use'. 
-        // Detailed network emulation happens better in the test/fixture via CDPSession.
+        // CPU Throttling (4x) is handled in fixtures.ts via CDPSession
       },
     },
 
@@ -90,8 +85,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
-        // Playwright doesn't support jitter natively in 'use', so we rely on the fixture.
-        // But we set a flag if needed, or just rely on the name.
+        // Network Jitter is handled in fixtures.ts
       },
     }
   ],
