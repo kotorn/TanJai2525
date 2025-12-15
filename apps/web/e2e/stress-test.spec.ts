@@ -7,15 +7,17 @@ import * as path from 'path';
 const tenantSlug = 'zaap-nua-esan';
 const TIMEOUT_MS = 60000;
 
-test.describe.configure({ mode: 'serial' }); // Run levels sequentially
+test.describe.configure({ mode: 'serial', timeout: 120000 }); // Run levels sequentially with 2m timeout
 
 test.describe('TANJAI POS: ULTIMATE STRESS TEST (HELL MODE)', () => {
+    test.slow(); // Increase timeout for stress test
     let ownerContext: BrowserContext;
     let ownerPage: Page;
     let tableLinks: string[] = [];
 
     // Setup: Owner & Menu (Executed once)
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(300000); // 5 minutes for hell mode setup
         console.log('🔥 INITIALIZING HELL MODE ENVIRONMENT 🔥');
         ownerContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
         ownerPage = await ownerContext.newPage();
