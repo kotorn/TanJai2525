@@ -12,7 +12,14 @@ test.describe('UI/UX Guardian Audit', () => {
     // For this initial script, we will check generic elements if we can't mock API easily yet.
     
     // Visit the home page or a relevant page
-    await page.goto('/'); 
+    try {
+        await page.goto('/');
+        console.log('Navigated to:', await page.url());
+        console.log('Page title:', await page.title());
+    } catch (e) {
+        console.error('Navigation failed:', e);
+        throw e;
+    }
 
     // Look for potential text containers
     const menuItems = page.locator('h3, .line-clamp-2'); // Adjust selector based on actual generic components if specific ones aren't guaranteed
