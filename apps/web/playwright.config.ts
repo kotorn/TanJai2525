@@ -22,10 +22,11 @@ export default defineConfig({
         },
     },
     webServer: {
-        command: 'npx next dev -p 3000',
+        command: 'npx turbo run dev --filter=web',
         url: 'http://localhost:3000',
         reuseExistingServer: !process.env.CI,
         timeout: 120 * 1000,
+        cwd: path.resolve(__dirname, '../../'),
     },
     projects: [
         {
