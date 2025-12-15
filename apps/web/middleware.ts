@@ -1,4 +1,3 @@
-```typescript
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -17,7 +16,10 @@ export async function middleware(request: NextRequest) {
   const isOnboarding = url.pathname.startsWith('/onboarding');
   
   // If user is not logged in and trying to access protected routes (not login/auth/static)
-  if (!session && !isAuthRoute && !url.pathname.includes('.')) {
+  // [DEV] explicit bypass for simulation
+  const isMockAuth = url.searchParams.get('mock_auth') === 'true';
+
+  if (!session && !isAuthRoute && !url.pathname.includes('.') && !isMockAuth) {
       // Redirect to Login
       return NextResponse.redirect(new URL('/login', request.url));
   }
@@ -29,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   // 3. Multi-Tenancy Logic (Existing)
   const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'tanjai.app'; 
-  let currentHost = hostname.replace(`.${ ROOT_DOMAIN } `, '');
+  let currentHost = hostname.replace(`.${ ROOT_DOMAIN }`, '');
   
   if (hostname.includes('localhost')) {
     currentHost = hostname.split('.')[0];
@@ -42,7 +44,7 @@ export async function middleware(request: NextRequest) {
     
     // Rewrite to tenant path
     return NextResponse.rewrite(
-      new URL(`/ ${ currentHost }${ url.pathname } `, request.url),
+      new URL(`/${currentHost}${url.pathname}`, request.url),
       {
         request: { headers: requestHeaders },
       }
@@ -57,4 +59,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
-```

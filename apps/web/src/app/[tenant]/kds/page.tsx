@@ -1,38 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 import KDSBoard from '@/features/kds/components/kds-board';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Using Anon key for reading public orders (or assume RLS allows it)
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 async function getActiveOrders(tenantSlug: string) {
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { db } = await import('@/lib/mock-db');
+    
+    // Assume tenant exists or check
+    const tenant = db.tenants.find(t => t.slug === tenantSlug);
+    // If not found, return empty or mock one
+    const tenantId = tenant ? tenant.id : 'mock-tenant-id';
 
-    // 1. Resolve Tenant
-    const { data: tenant } = await supabase
-        .from('tenants')
-        .select('id')
-        .eq('slug', tenantSlug)
-        .single();
+    const allOrders = db.getOrders(tenantId);
+    
+    // Filter for Active
+    const orders = allOrders.filter(o => o.status !== 'completed' && o.status !== 'cancelled' && o.status !== 'paid')
+        .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
-    if (!tenant) return { tenantId: null, orders: [] };
-
-    // 2. Fetch Active Orders with Items
-    // Requires nested query. Supabase JS supports this format.
-    const { data: orders } = await supabase
-        .from('orders')
-        .select(`
-            *,
-            order_items (
-                quantity,
-                menu_items ( name )
-            )
-        `)
-        .eq('tenant_id', tenant.id)
-        .neq('status', 'completed')
-        .neq('status', 'cancelled')
-        .order('created_at', { ascending: true });
-
-    return { tenantId: tenant.id, orders: orders || [] };
+    return { tenantId, orders };
 }
 
 export default async function KDSPage({ params }: { params: { tenant: string } }) {

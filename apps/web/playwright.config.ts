@@ -14,7 +14,7 @@ export default defineConfig({
         viewport: { width: 390, height: 844 }, // Mobile first default
         headless: false,
         launchOptions: {
-            slowMo: 1000,
+            slowMo: 100,
         }
     },
     /*

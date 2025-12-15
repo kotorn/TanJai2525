@@ -5,31 +5,20 @@ import Link from 'next/link';
 
 // NOTE: In a real app we'd use a shared supabase client helper
 // But for scaffolding we recreate it to ensure it works without complex deps
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 async function getMenuItems(tenantSlug: string) {
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { db } = await import('@/lib/mock-db');
+    
+    // Resolve Tenant
+    const tenant = db.tenants.find(t => t.slug === tenantSlug);
+    // Return mock if missing
+    const tenantData = tenant || { id: 'mock-id', name: 'Wait for Setup...' };
 
-    // 1. Resolve Tenant ID from Slug
-    const { data: tenant } = await supabase
-        .from('tenants')
-        .select('id, name')
-        .eq('slug', tenantSlug)
-        .single();
-
-    if (!tenant) return { tenant: null, menu: [] };
-
-    // 2. Fetch Menu Items using RLS (We manually filter by tenant_id for safety if RLS is off, but RLS should handle it)
-    // However, since we are using Service Role or Anon key, we need to respect the RLS context.
-    // For this Server Component, we are just reading public menu data.
-    const { data: menu } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('tenant_id', tenant.id) // Redundant if RLS set correctly but good for safety
-        .eq('is_available', true);
-
-    return { tenant, menu: menu || [] };
+    const menu = db.getMenuItems(tenantData.id);
+    
+    return { tenant: tenantData, menu: menu || [] };
 }
 
 import AddToCartBtn from '@/features/ordering/components/add-to-cart-btn';

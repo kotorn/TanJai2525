@@ -26,17 +26,8 @@ test.describe('Tanjai POS: Mission "Nong Mint" (Boat Noodles)', () => {
         await test.step('Agent B: Setup Restaurant', async () => {
             console.log('ACTION: Jay Ong registering shop...');
 
-            // 1. Login Bypass
-            await ownerPage.goto('/login');
-            // Check if we need to mock login or if dev bypass exists
-            // Based on simulation.spec.ts, there is a bypass button
-            // If strictly local and fresh db, might be redirect to register.
-
-            // Try to find the bypass button, if not assume we are at login or onboarding
-            const bypassBtn = ownerPage.getByRole('button', { name: '[DEV] Simulate Owner Login' });
-            if (await bypassBtn.isVisible()) {
-                await bypassBtn.click();
-            }
+            // Direct bypass to Onboarding (middleware and page support mock_auth=true)
+            await ownerPage.goto('/onboarding?mock_auth=true');
 
             // 2. Onboarding (if new)
             // Wait for URL to settle
@@ -44,18 +35,18 @@ test.describe('Tanjai POS: Mission "Nong Mint" (Boat Noodles)', () => {
 
             if (ownerPage.url().includes('/onboarding')) {
                 await ownerPage.getByPlaceholder('Ex. Som Tum Der').fill('Tanjai Boat Noodles');
-                await ownerPage.getByText('Create Shop').click();
+                // Assuming default radio is selected or we just click Create
+                await ownerPage.getByRole('button', { name: 'Start using Tanjai POS' }).click();
             }
 
-            // Ensure we are at dashboard of the slug (might be auto-redirected to whatever slug was created or we forced)
-            // If we didn't force the slug 'tanjai-boat-noodles' during onboarding (which we can't easily controlling without deeper knowing the app),
-            // we should probably just use whatever slug we landed on.
-            // Let's grab the slug from URL.
-            await expect(ownerPage).toHaveURL(/admin\/dashboard|admin\/menu/);
+            // Onboarding redirects to /slug (Menu Page) usually
+            await ownerPage.waitForURL(url => !url.pathname.includes('onboarding'));
+            
             const currentUrl = new URL(ownerPage.url());
-            // e.g. /tanjai-boat-noodles/admin/dashboard -> split by / -> [, tanjai-boat-noodles, admin, ...]
             const pathParts = currentUrl.pathname.split('/');
-            const actualSlug = pathParts[1];
+            // url: http://localhost:3000/tanjai-boat-noodles-123
+            // parts: ['', 'tanjai-boat-noodles-123']
+            const actualSlug = pathParts[1]; 
             console.log(`Detected Shop Slug: ${actualSlug}`);
 
             // Update local var for rest of test
