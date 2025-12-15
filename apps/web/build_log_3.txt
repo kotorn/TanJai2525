@@ -1,0 +1,671 @@
+
+> web@1.0.0 build
+> next build
+
+  โ–ฒ Next.js 14.2.3
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ โ  Compiled with warnings
+
+./src/features/menu/components/MenuManager.tsx
+Attempted import error: 'Toaster' is not exported from '@tanjai/ui' (imported as 'Toaster').
+
+Import trace for requested module:
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'Form' is not exported from '@tanjai/ui' (imported as 'Form').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'Form' is not exported from '@tanjai/ui' (imported as 'Form').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormDescription' is not exported from '@tanjai/ui' (imported as 'FormDescription').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormDescription' is not exported from '@tanjai/ui' (imported as 'FormDescription').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/ordering/hooks/use-order.ts
+Attempted import error: 'processOrder' is not exported from '../actions' (imported as 'processOrder').
+
+Import trace for requested module:
+./src/features/ordering/hooks/use-order.ts
+./src/app/[tenant]/cart/page.tsx
+
+./src/app/[tenant]/page.tsx
+Attempted import error: '@/features/ordering/components/menu-grid' does not contain a default export (imported as 'MenuGrid').
+
+Import trace for requested module:
+./src/app/[tenant]/page.tsx
+
+ โ  Compiled with warnings
+
+./src/features/menu/components/MenuManager.tsx
+Attempted import error: 'Toaster' is not exported from '@tanjai/ui' (imported as 'Toaster').
+
+Import trace for requested module:
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'Form' is not exported from '@tanjai/ui' (imported as 'Form').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/CategoryForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/CategoryForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'Form' is not exported from '@tanjai/ui' (imported as 'Form').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormMessage' is not exported from '@tanjai/ui' (imported as 'FormMessage').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormDescription' is not exported from '@tanjai/ui' (imported as 'FormDescription').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormField' is not exported from '@tanjai/ui' (imported as 'FormField').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormItem' is not exported from '@tanjai/ui' (imported as 'FormItem').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormControl' is not exported from '@tanjai/ui' (imported as 'FormControl').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormLabel' is not exported from '@tanjai/ui' (imported as 'FormLabel').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/menu/components/forms/ItemForm.tsx
+Attempted import error: 'FormDescription' is not exported from '@tanjai/ui' (imported as 'FormDescription').
+
+Import trace for requested module:
+./src/features/menu/components/forms/ItemForm.tsx
+./src/features/menu/components/MenuManager.tsx
+
+./src/features/ordering/hooks/use-order.ts
+Attempted import error: 'processOrder' is not exported from '../actions' (imported as 'processOrder').
+
+Import trace for requested module:
+./src/features/ordering/hooks/use-order.ts
+./src/app/[tenant]/cart/page.tsx
+
+./src/features/ordering/hooks/use-order.ts
+Attempted import error: 'processOrder' is not exported from '../actions' (imported as 'processOrder').
+
+Import trace for requested module:
+./src/features/ordering/hooks/use-order.ts
+./src/app/[tenant]/cart/page.tsx
+
+ โ“ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+TypeError: (0 , i.createClientComponentClient) is not a function
+    at C (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\.next\server\app\(dashboard)\dashboard\menu\page.js:21:6782)
+    at nj (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:46251)
+    at nM (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47571)
+    at nM (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:61546)
+    at nN (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nB (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680)
+    at nN (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64853)
+    at nB (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680) {
+  digest: '1506267445'
+}
+
+Error occurred prerendering page "/dashboard/menu". Read more: https://nextjs.org/docs/messages/prerender-error
+
+TypeError: (0 , i.createClientComponentClient) is not a function
+    at C (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\.next\server\app\(dashboard)\dashboard\menu\page.js:21:6782)
+    at nj (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:46251)
+    at nM (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:47571)
+    at nM (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:61546)
+    at nN (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64546)
+    at nB (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680)
+    at nN (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:64853)
+    at nB (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:67538)
+    at nD (C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:66680)
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ โ“ Generating static pages (10/10)
+
+> Export encountered errors on following paths:
+	/(dashboard)/dashboard/menu/page: /dashboard/menu
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web
+npm error workspace web@1.0.0
+npm error location C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build

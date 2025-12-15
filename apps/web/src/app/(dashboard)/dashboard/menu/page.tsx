@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { MenuManager } from '@/features/menu/components/MenuManager';
 
 export const metadata = {

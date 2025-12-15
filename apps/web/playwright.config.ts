@@ -22,13 +22,13 @@ export default defineConfig({
     navigationTimeout: 15000,
   },
 
-  webServer: {
-    command: 'npx turbo run dev --filter=web',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    cwd: path.resolve(__dirname, '../../'),
-  },
+//   webServer: {
+//     command: 'npx turbo run dev --filter=web',
+//     url: 'http://localhost:3000',
+//     reuseExistingServer: !process.env.CI,
+//     timeout: 120 * 1000,
+//     cwd: path.resolve(__dirname, '../../'),
+//   },
 
   projects: [
     // 1. 🟢 Healthy Modern (Control Group)

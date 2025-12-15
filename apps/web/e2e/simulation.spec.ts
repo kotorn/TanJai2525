@@ -18,12 +18,13 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation (Human Mode)', () => {
     test.beforeAll(async ({ browser }) => {
         // --- Scene 1: Owner Setup ---
         console.log('Scene 1: Owner Setup (Admin Context)');
-        ownerContext = await browser.newContext();
+        ownerContext = await browser.newContext({ baseURL: 'http://localhost:3000' });
         ownerPage = await ownerContext.newPage();
         await injectCursorVisuals(ownerPage);
     });
 
     test('Execute Full Resilient Scenario: One Day at Tanjai', async ({ browser }) => {
+        test.setTimeout(120000); // Allow 2 minutes for full day simulation
         // ==========================================
         // 08:00 - SHOP OPEN
         // ==========================================
@@ -97,6 +98,7 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation (Human Mode)', () => {
                 for (let j = 0; j < BATCH_SIZE && (i + j) < TOTAL_CUSTOMERS; j++) {
                     const custId = i + j + 1;
                     const context = await browser.newContext({ 
+                        baseURL: 'http://localhost:3000',
                         viewport: { width: 390, height: 844 }, 
                         isMobile: true, 
                         hasTouch: true 

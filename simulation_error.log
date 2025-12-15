@@ -1,0 +1,29 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] apps\web\e2e\simulation.spec.ts:26:9 โ€บ Tanjai POS: Resilient Rush Hour Simulation (Human Mode) โ€บ Execute Full Resilient Scenario: One Day at Tanjai
+[1A[2Kapps\web\e2e\simulation.spec.ts:26:9 โ€บ Tanjai POS: Resilient Rush Hour Simulation (Human Mode) โ€บ Execute Full Resilient Scenario: One Day at Tanjai
+Scene 1: Owner Setup (Admin Context)
+
+[1A[2K[08:00] Shop Opening...
+
+[1A[2K  1) apps\web\e2e\simulation.spec.ts:26:9 โ€บ Tanjai POS: Resilient Rush Hour Simulation (Human Mode) โ€บ Execute Full Resilient Scenario: One Day at Tanjai โ€บ 08:00 - Owner Setup & Open Shift 
+
+    Error: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
+    Call log:
+    [2m  - navigating to "/login", waiting until "load"[22m
+
+
+      31 |             console.log('[08:00] Shop Opening...');
+      32 |             // 1. Login Bypass
+    > 33 |             await ownerPage.goto('/login');
+         |                             ^
+      34 |             await humanClick(ownerPage, 'button:has-text("[DEV] Simulate Owner Login")');
+      35 |             await expect(ownerPage).toHaveURL(/\/onboarding/);
+      36 |
+        at C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\e2e\simulation.spec.ts:33:29
+        at C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\e2e\simulation.spec.ts:30:20
+
+
+[1A[2K  1 failed
+    apps\web\e2e\simulation.spec.ts:26:9 โ€บ Tanjai POS: Resilient Rush Hour Simulation (Human Mode) โ€บ Execute Full Resilient Scenario: One Day at Tanjai 

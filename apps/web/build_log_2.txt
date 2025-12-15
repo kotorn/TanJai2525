@@ -1,0 +1,60 @@
+
+> web@1.0.0 build
+> next build
+
+  โ–ฒ Next.js 14.2.3
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/features/ordering/actions.ts
+Error: 
+  x It is not allowed to define inline "use server" annotated Server Actions in Client Components.
+  | To use Server Actions in a Client Component, you can either export them from a separate file with "use server" at the top, or pass them down through props from a Server Component.
+  | 
+  | Read more: https://nextjs.org/docs/app/api-reference/functions/server-actions#with-client-components
+  | 
+    ,-[C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web\src\features\ordering\actions.ts:11:1]
+ 11 | };
+ 12 | 
+ 13 | export async function submitOrder(restaurantId: string, tableId: string, items: CartItem[], totalAmount: number, specialInstructions?: string) {
+ 14 |   'use server';
+    :   ^^^^^^^^^^^^
+ 15 |   
+ 16 |   const supabase = await createClient(); // Use the await keyword here
+ 16 | 
+    `----
+
+Import trace for requested module:
+./src/features/ordering/actions.ts
+./src/features/ordering/hooks/use-order.ts
+./src/app/[tenant]/cart/page.tsx
+
+../../packages/ui/src/components/collapsible.tsx
+Module not found: Can't resolve '@radix-ui/react-collapsible'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+../../packages/ui/src/index.ts
+./src/features/ordering/components/menu-grid.tsx
+
+../../packages/ui/src/components/radio-group.tsx
+Module not found: Can't resolve '@radix-ui/react-radio-group'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+../../packages/ui/src/index.ts
+./src/features/ordering/components/menu-grid.tsx
+
+
+> Build failed because of webpack errors
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web
+npm error workspace web@1.0.0
+npm error location C:\Users\TCHANGTHONG\Project\tanjai-pos\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
