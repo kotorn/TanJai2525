@@ -1,4 +1,11 @@
-# ⚡ COPY THIS → PASTE TO ANTIGRAVITY → DONE
+# ⚡ COPY THIS → PASTE TO ANTIGRAVITY → DONE (คำสั่งบรรทัดเดียว)
+
+## วิธีใช้งาน (Usage)
+1. **Copy**: คัดลอกข้อความด้านล่างทั้งหมด (Select All + Copy)
+2. **Paste**: วางลงในช่องแชทของ Antigravity
+3. **Run**: กดส่งแล้วรอ AI สร้างโค้ดให้
+
+---
 
 ```
 Generate a complete Playwright TypeScript stress test suite for "Tanjai POS" (Thai restaurant system at localhost:3000) with these requirements:
@@ -8,7 +15,7 @@ CONFIG (playwright.config.ts):
 - recordVideo: { dir: 'test-results/videos', size: { width: 1920, height: 1080 } }
 - 3 projects: Admin Desktop, Customer Mobile (iPhone 14), Kitchen Tablet
 
-TEST SUITE (e2e/stress-test.spec.ts) - 7 Progressive Levels:
+TEST SUITE (apps/web/e2e/stress-test.spec.ts) - 7 Progressive Levels:
 
 1. CONCURRENT RUSH: 3 customers (Tables 1-3) order simultaneously, verify Kitchen receives all orders within 2s
 
@@ -32,7 +39,7 @@ TEST SUITE (e2e/stress-test.spec.ts) - 7 Progressive Levels:
    7.7 Thai Language: Verify Thai text (ส้มตำไทย, ตะกร้าสินค้า, ครัว) displays without garbled characters - check font rendering
    7.8 Animations: Test cart badge animation, button hover states, modal animations - capture screenshots of animated states
 
-HELPERS (helpers/test-utils.ts):
+HELPERS (apps/web/e2e/helpers/test-utils.ts):
 - addItemToCart(page, itemName)
 - submitOrder(page)
 - navigateToKitchen(page, slug)  
@@ -43,7 +50,7 @@ HELPERS (helpers/test-utils.ts):
 
 DEPENDENCIES TO ADD:
 - @axe-core/playwright (for accessibility testing)
-- Update package.json with: "test:ux": "npx playwright test e2e/stress-test.spec.ts --grep 'Level 7'"
+- Update package.json with: "test:ux": "npx playwright test apps/web/e2e/stress-test.spec.ts --grep 'Level 7' -c apps/web/playwright.config.ts"
 
 SELF-HEALING:
 - afterEach: Capture screenshot + error JSON + video segment on failure
@@ -63,9 +70,9 @@ SUCCESS CRITERIA:
 ✅ All animations smooth (60fps)
 
 OUTPUT:
-1. Complete playwright.config.ts with video recording
-2. Full e2e/stress-test.spec.ts (all 7 levels)
-3. helpers/test-utils.ts
+1. Complete apps/web/playwright.config.ts with video recording
+2. Full apps/web/e2e/stress-test.spec.ts (all 7 levels)
+3. apps/web/e2e/helpers/test-utils.ts
 4. package.json updates
 5. test-results/videos/ux-journeys/ (3 videos)
 6. test-results/responsive/ (16 screenshots)

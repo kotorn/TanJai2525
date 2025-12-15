@@ -1,6 +1,5 @@
 'use client';
 
-import { formatDistanceToNow } from 'date-fns';
 import { CheckCircle, Clock, ChefHat } from 'lucide-react';
 import { updateOrderStatus } from '../actions';
 import { useState } from 'react';
@@ -10,6 +9,13 @@ type OrderProps = {
     order: any;
     tenantId: string;
 };
+
+function timeAgo(date: Date) {
+    const diff = (new Date().getTime() - new Date(date).getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return `${Math.floor(diff / 3600)}h ago`;
+}
 
 export default function OrderTicket({ order, tenantId }: OrderProps) {
     const [isUpdating, setIsUpdating] = useState(false);
@@ -26,11 +32,15 @@ export default function OrderTicket({ order, tenantId }: OrderProps) {
         if (!next) return;
 
         setIsUpdating(true);
-        const res = await updateOrderStatus(tenantId, order.id, next);
-        setIsUpdating(false);
-
-        if (res.error) {
-            toast.error('Failed to update: ' + res.error);
+        try {
+            const res = await updateOrderStatus(tenantId, order.id, next);
+            if (!res.success) {
+                 toast.error('Failed to update status');
+            }
+        } catch (e) {
+            toast.error('Failed to update');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -44,26 +54,28 @@ export default function OrderTicket({ order, tenantId }: OrderProps) {
     };
 
     return (
-        <div className={`border-l-4 rounded shadow-sm p-4 ${getStatusColor(order.status)} bg-white min-w-[300px]`}>
-            <div className="flex justify-between items-start mb-2">
+        <div className={`border-l-4 rounded-xl shadow-sm p-4 ${getStatusColor(order.status)} bg-white w-full sm:w-auto sm:min-w-[300px]`}>
+            <div className="flex justify-between items-start mb-3">
                 <div>
-                    <h3 className="font-bold text-lg">Table {order.table_number}</h3>
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+                    <h3 className="font-bold text-xl leading-tight">Table {order.table_number}</h3>
+                    <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                        <Clock className="w-4 h-4" />
+                        {timeAgo(order.created_at)}
                     </span>
                 </div>
-                <span className="px-2 py-1 rounded text-xs uppercase font-bold tracking-wider bg-white/50 border">
+                <span className="px-3 py-1.5 rounded-lg text-xs uppercase font-bold tracking-wider bg-white/50 border min-h-[2rem] flex items-center">
                     {order.status}
                 </span>
             </div>
 
-            <div className="space-y-2 mb-4">
+            <div className="space-y-3 mb-6">
                 {order.order_items?.map((item: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="font-bold w-6 text-center bg-gray-200 rounded">{item.quantity}</span>
-                            <span>{item.menu_items?.name || 'Unknown Item'}</span>
+                    <div key={idx} className="flex justify-between items-start text-base">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <span className="font-bold w-8 h-8 flex items-center justify-center bg-gray-200 rounded-lg shrink-0">{item.quantity}</span>
+                            <span className="line-clamp-2 leading-relaxed pt-0.5 break-words">
+                                {item.menu_items?.name || 'Unknown Item'}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -73,12 +85,12 @@ export default function OrderTicket({ order, tenantId }: OrderProps) {
                 <button
                     onClick={handleAdvance}
                     disabled={isUpdating}
-                    className="w-full py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 disabled:opacity-50 flex justify-center items-center gap-2"
+                    className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 flex justify-center items-center gap-2 active:scale-95 transition-transform touch-manipulation"
                 >
                     {isUpdating ? '...' : (
                         <>
-                            {order.status === 'pending' && <ChefHat className="w-4 h-4" />}
-                            {order.status === 'preparing' && <CheckCircle className="w-4 h-4" />}
+                            {order.status === 'pending' && <ChefHat className="w-5 h-5" />}
+                            {order.status === 'preparing' && <CheckCircle className="w-5 h-5" />}
                             Mark as {nextStatusMap[order.status]}
                         </>
                     )}

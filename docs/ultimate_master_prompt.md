@@ -1,10 +1,12 @@
 # 🎯 TANJAI POS: ULTIMATE STRESS TEST ORCHESTRATOR
+**(ชุดคำสั่งทดสอบระบบขั้นสูงสุด)**
+
 **Target Platform:** Antigravity + Gemini 3 Pro  
 **Execution Mode:** Autonomous Agent Orchestration with Self-Healing
 
 ---
 
-## 📋 SYSTEM ROLE
+## 📋 SYSTEM ROLE (บทบาทระบบ)
 
 You are the **"Tanjai Stress Test Commander"**, managing two specialized agents:
 
@@ -27,10 +29,12 @@ You are the **"Tanjai Stress Test Commander"**, managing two specialized agents:
 ---
 
 ## 🎬 MISSION: SIMULATE "HELL MODE" RESTAURANT OPERATIONS
+**(ภารกิจ: จำลองสถานการณ์ร้านแตก)**
 
 **Objective:** Break the Tanjai POS system through realistic chaos scenarios, then auto-fix all bugs until the system survives.
+เป้าหมาย: ทดสอบระบบจนพังด้วยสถานการณ์วุ่นวายสมจริง แล้วแก้บั๊กอัตโนมัติจนกว่าระบบจะรอด
 
-### 📍 BASE SCENARIO SETUP
+### 📍 BASE SCENARIO SETUP (ข้อมูลตั้งต้น)
 
 **Restaurant Profile:**
 - Name: "ร้านอาหารอีสานแซ่บนัว" (Zaap Nua E-San)
@@ -50,8 +54,10 @@ You are the **"Tanjai Stress Test Commander"**, managing two specialized agents:
 ---
 
 ## 🔥 STRESS TEST SCENARIOS (PROGRESSIVE DIFFICULTY)
+**(ระดับความยากในการทดสอบ)**
 
 ### ⚡ LEVEL 1: CONCURRENT RUSH (3 Customers, Perfect Timing)
+**(ระดับ 1: ลูกค้ารุมพร้อมกัน 3 โต๊ะ)**
 **What to Test:**
 - 3 customers scan QR codes (Tables 1, 2, 3) simultaneously
 - All add items within 30 seconds
@@ -64,6 +70,7 @@ You are the **"Tanjai Stress Test Commander"**, managing two specialized agents:
 ---
 
 ### ⚡ LEVEL 2: INCREMENTAL ORDERING (สั่งเบิ้ล)
+**(ระดับ 2: สั่งเพิ่มทีหลัง)**
 **Scenario:**
 ```
 Table 1 Customer Timeline:
@@ -74,31 +81,14 @@ T+8:00  -> Request payment (ALL items on SAME bill)
 ```
 
 **Critical Test:**
-- Cart persistence across multiple scans
-- Bill consolidation (not 3 separate orders)
-- Kitchen displays items as they arrive (not wait for complete order)
-
-**Implementation Code Pattern:**
-```typescript
-// Customer scans QR -> Adds Drink -> Waits 2 min -> Scans AGAIN -> Adds Food
-const table1Customer = await context.newPage();
-await table1Customer.goto(tableUrls[0]);
-await addItemToCart(table1Customer, 'น้ำส้ม');
-await submitOrder(table1Customer); // ORDER #1
-
-await page.waitForTimeout(120000); // Wait 2 minutes
-
-await table1Customer.goto(tableUrls[0]); // Re-scan QR
-await addItemToCart(table1Customer, 'ส้มตำ');
-await addItemToCart(table1Customer, 'ไก่ย่าง');
-await submitOrder(table1Customer); // ORDER #2 (same table)
-
-// VERIFY: Cashier page shows MERGED bill for Table 1
-```
+- Cart persistence across multiple scans (จำตะกร้าสินค้าได้แม้สแกนใหม่)
+- Bill consolidation (รวมบิลเดียว ไม่แยกหลายใบ)
+- Kitchen displays items as they arrive (ครัวเห็นรายการทันทีที่สั่ง)
 
 ---
 
 ### ⚡ LEVEL 3: MULTI-DEVICE SAME TABLE (แฟนสั่งคนละมือถือ)
+**(ระดับ 3: โต๊ะเดียว สั่งหลายเครื่อง)**
 **Scenario:**
 ```
 Table 2 has 2 people:
@@ -108,29 +98,13 @@ Both submit at T+0:30 (within 30 seconds)
 ```
 
 **Critical Test:**
-- System merges into SINGLE table order
+- System merges into SINGLE table order (รวมเป็นออเดอร์เดียวของโต๊ะ)
 - Kitchen shows "Table 2: 4 items"
-- Cashier shows ONE bill for Table 2
-
-**Implementation:**
-```typescript
-const personA = await browser.newContext({ /* mobile */ });
-const personB = await browser.newContext({ /* mobile */ });
-
-await personA.goto(tableUrls[1]); // Both scan Table 2
-await personB.goto(tableUrls[1]);
-
-await Promise.all([
-  addAndSubmit(personA, ['ส้มตำ', 'ข้าวเหนียว']),
-  addAndSubmit(personB, ['ไก่ย่าง', 'น้ำส้ม'])
-]);
-
-// VERIFY: Kitchen has 1 order card for Table 2 with 4 items
-```
 
 ---
 
 ### ⚡ LEVEL 4: CANCELLATION / MODIFICATION (เปลี่ยนใจ)
+**(ระดับ 4: ยกเลิกรายการอาหาร)**
 **Scenario:**
 ```
 Table 3 Customer:
@@ -142,28 +116,13 @@ Table 3 Customer:
 ```
 
 **Critical Test:**
-- Kitchen can modify order AFTER submission
-- Database updates correctly (not orphaned items)
-- Payment amount matches updated order
-
-**Implementation:**
-```typescript
-await submitOrder(customerPage, ['ไก่ย่าง', 'ไก่ย่าง']);
-
-// Switch to Kitchen page
-await kitchenPage.goto(`/${slug}/kds`);
-const orderCard = kitchenPage.locator('[data-table="3"]');
-
-// Find item and click "Remove" button
-await orderCard.locator('button[data-action="remove-item"]').first().click();
-
-// VERIFY: Item count reduced
-await expect(orderCard.getByText('ไก่ย่าง × 1')).toBeVisible();
-```
+- Kitchen can modify order AFTER submission (ครัวแก้รายการได้หลังส่ง)
+- Database updates correctly (ฐานข้อมูลอัปเดตถูกต้อง)
 
 ---
 
 ### ⚡ LEVEL 5: STOCKOUT RACE CONDITION (ของหมดพร้อมกัน)
+**(ระดับ 5: แย่งกดสั่งตอนของหมด)**
 **Scenario:**
 ```
 Restaurant has: ไก่ย่าง (Stock: 2 portions)
@@ -179,30 +138,13 @@ Expected:
 ```
 
 **Critical Test:**
-- Inventory reservation system (atomic DB transactions)
-- Second customer sees clear error message
-- Kitchen doesn't receive invalid order
-
-**Implementation:**
-```typescript
-// Admin marks item unavailable
-await adminPage.goto(`/${slug}/admin/menu`);
-await adminPage.getByTestId('item-ไก่ย่าง').getByRole('button', { name: 'Mark Out' }).click();
-
-// Customers try to order simultaneously
-const [result1, result2] = await Promise.allSettled([
-  submitOrder(customer1, ['ไก่ย่าง']),
-  submitOrder(customer2, ['ไก่ย่าง'])
-]);
-
-// VERIFY: One succeeds, one fails
-expect(result1.status).toBe('fulfilled');
-expect(result2.status).toBe('rejected');
-```
+- Inventory reservation system (ระบบจองสต็อกแม่นยำ)
+- Second customer sees clear error message (ลูกค้าคนที่ 2 ต้องเห็นข้อความแจ้งเตือน)
 
 ---
 
 ### ⚡ LEVEL 6: CHAOS MODE (Random Customer Behavior Loop)
+**(ระดับ 6: โหมดโกลาหล)**
 **Scenario:** Simulate 10 minutes of chaotic restaurant operations
 ```
 Loop for 10 iterations:
@@ -214,39 +156,6 @@ Loop for 10 iterations:
     * 20%: Add more items (incremental)
     * 10%: Cancel order
     * 10%: Leave without ordering (abandoned cart)
-```
-
-**Implementation:**
-```typescript
-for (let i = 0; i < 10; i++) {
-  const randomTable = Math.floor(Math.random() * 4) + 1;
-  const randomAction = Math.random();
-  
-  const customer = await browser.newContext();
-  const page = await customer.newPage();
-  await page.goto(tableUrls[randomTable - 1]);
-  
-  // Add random items
-  const itemCount = Math.floor(Math.random() * 5) + 1;
-  for (let j = 0; j < itemCount; j++) {
-    await addRandomItem(page);
-  }
-  
-  if (randomAction < 0.6) {
-    await submitOrder(page); // Normal
-  } else if (randomAction < 0.8) {
-    await page.waitForTimeout(30000);
-    await addRandomItem(page); // Incremental
-    await submitOrder(page);
-  } else if (randomAction < 0.9) {
-    await page.goto('/'); // Abandon cart
-  } else {
-    // Cancel order (requires kitchen interaction)
-  }
-  
-  await customer.close();
-  await page.waitForTimeout(Math.random() * 50000 + 10000); // 10-60s delay
-}
 ```
 
 ---
@@ -296,7 +205,7 @@ When a test fails, capture:
 
 ---
 
-## 📊 SUCCESS CRITERIA
+## 📊 SUCCESS CRITERIA (เกณฑ์ความสำเร็จ)
 
 Test suite passes when:
 
@@ -328,7 +237,7 @@ Test suite passes when:
 
 ---
 
-## 🎬 EXECUTION COMMAND
+## 🎬 EXECUTION COMMAND (คำสั่งรัน)
 
 ### For Antigravity + Gemini 3 Pro:
 
@@ -337,13 +246,13 @@ Test suite passes when:
  * ANTIGRAVITY ORCHESTRATION PROMPT
  * 
  * Generate and execute the following:
- * 1. playwright.config.ts with:
+ * 1. apps/web/playwright.config.ts with:
  *    - headed: true
  *    - slowMo: 1000
  *    - screenshot: 'only-on-failure'
  *    - trace: 'on-first-retry'
  * 
- * 2. e2e/stress-test.spec.ts with:
+ * 2. apps/web/e2e/stress-test.spec.ts with:
  *    - All 6 stress test levels
  *    - Error capture hooks (afterEach)
  *    - Retry logic with exponential backoff
@@ -386,12 +295,12 @@ Test suite passes when:
 
 ---
 
-## 📦 OUTPUT DELIVERABLES
+## 📦 OUTPUT DELIVERABLES (สิ่งที่ต้องส่งมอบ)
 
 **Code Files:**
-1. **playwright.config.ts** - Full configuration with video/screenshot settings
-2. **e2e/stress-test.spec.ts** - Complete test suite (all 7 levels)
-3. **helpers/test-utils.ts** - Reusable helper functions
+1. **apps/web/playwright.config.ts** - Full configuration with video/screenshot settings
+2. **apps/web/e2e/stress-test.spec.ts** - Complete test suite (all 7 levels)
+3. **apps/web/e2e/helpers/test-utils.ts** - Reusable helper functions
 4. **package.json** - Updated with axe-core/playwright dependency
 
 **Test Results:**

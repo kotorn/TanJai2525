@@ -1,6 +1,6 @@
-# 🚀 คู่มือการใช้งาน Antigravity + Gemini 3 Pro
+# 🚀 คู่มือการใช้งาน Antigravity + Gemini 3 Pro (Antigravity Execution Guide)
 
-## 📋 ขั้นตอนการเริ่มต้น
+## 📋 ขั้นตอนการเริ่มต้น (Getting Started)
 
 ### 1️⃣ เปิด Antigravity Editor
 ```
@@ -87,7 +87,7 @@ Monitor in visible browser:
 - Save error details to JSON
 
 PART 3: AUTO-DEBUG LOOP
-IF test fails:
+NO: IF test fails:
   1. Analyze error log + screenshot
   2. Identify root cause:
      - Locator failure? -> Use getByRole/getByTestId
@@ -115,15 +115,15 @@ DELIVERABLES:
 NOW GENERATE THE CODE AND START EXECUTION.
 ```
 
-### 3️⃣ ให้ Antigravity สร้างโค้ด
+### 3️⃣ ให้ Antigravity สร้างโค้ด (Let Antigravity generate code)
 
 Antigravity (Gemini 3 Pro) จะ:
-1. ✅ สร้างไฟล์ `playwright.config.ts`
-2. ✅ สร้างไฟล์ `e2e/stress-test.spec.ts` (ทั้ง 6 levels)
-3. ✅ สร้างไฟล์ `helpers/test-utils.ts`
+1. ✅ สร้างไฟล์ `apps/web/playwright.config.ts`
+2. ✅ สร้างไฟล์ `apps/web/e2e/stress-test.spec.ts` (ทั้ง 6 levels)
+3. ✅ สร้างไฟล์ `apps/web/e2e/helpers/test-utils.ts`
 4. ✅ แสดงคำสั่ง Terminal ที่ต้องรัน
 
-### 4️⃣ รันเทสผ่าน Browser
+### 4️⃣ รันเทสผ่าน Browser (Run tests in browser)
 
 ```bash
 # เปิด Terminal แรก - Start Next.js
@@ -133,7 +133,7 @@ turbo run dev
 npx playwright test apps/web/e2e/stress-test.spec.ts --headed -c apps/web/playwright.config.ts
 ```
 
-**คุณจะเห็น:**
+**คุณจะเห็น (You will see):**
 - 🌐 Browser เปิดขึ้นมา (visible)
 - ⏱️ ทุก action ช้าลง 1 วินาที (สังเกตได้ง่าย)
 - 📝 Console log แสดงทุกขั้นตอน
@@ -188,11 +188,11 @@ await page.getByRole('button', { name: /submit|confirm|สั่งอาหา�
 // - Case-insensitive match handles Thai/English variations
 ```
 
-### 6️⃣ แก้ไขโค้ดและรันใหม่
+### 6️⃣ แก้ไขโค้ดและรันใหม่ (Fix and Rerun)
 
 ```bash
 # แก้ไขไฟล์ตามที่ Antigravity บอก
-nano e2e/stress-test.spec.ts
+nano apps/web/e2e/stress-test.spec.ts
 
 # ลบผลลัพธ์เก่า
 rm -rf test-results
@@ -201,7 +201,7 @@ rm -rf test-results
 npx playwright test apps/web/e2e/stress-test.spec.ts --headed -c apps/web/playwright.config.ts
 ```
 
-### 7️⃣ วนซ้ำจนกว่าจะ Pass ทั้งหมด
+### 7️⃣ วนซ้ำจนกว่าจะ Pass ทั้งหมด (Loop until Pass)
 
 ```
 Run Test -> Fail -> Copy Error -> Paste to Antigravity -> Get Fix -> Apply -> Repeat
@@ -215,7 +215,7 @@ Run Test -> Fail -> Copy Error -> Paste to Antigravity -> Get Fix -> Apply -> Re
 
 ---
 
-## 🎯 ตัวอย่างผลลัพธ์ที่คาดหวัง
+## 🎯 ตัวอย่างผลลัพธ์ที่คาดหวัง (Expected Results)
 
 ### ✅ เมื่อทุกอย่าง Pass
 
@@ -272,7 +272,7 @@ Run Test -> Fail -> Copy Error -> Paste to Antigravity -> Get Fix -> Apply -> Re
 
 ```bash
 # เปิด HTML Report (มี embedded videos)
-npx playwright show-report
+npx playwright show-report apps/web/playwright-report
 
 # ดู Journey Videos แยก
 open test-results/videos/ux-journeys/owner-onboarding.webm
@@ -301,7 +301,7 @@ open test-results/responsive/
 
 ---
 
-## 🆘 การแก้ปัญหาที่พบบ่อย
+## 🆘 การแก้ปัญหาที่พบบ่อย (Common Troubleshooting)
 
 ### ❌ ปัญหา: "Port 3000 already in use"
 ```bash
@@ -312,13 +312,13 @@ lsof -ti:3000
 kill -9 $(lsof -ti:3000)
 
 # Start dev server ใหม่
-npm run dev
+turbo run dev
 ```
 
 ### ❌ ปัญหา: "Supabase connection failed"
 ```bash
 # ตรวจสอบ .env.local
-cat .env.local
+cat apps/web/.env.local
 
 # ต้องมี 3 keys นี้:
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
@@ -334,7 +334,7 @@ npx playwright install chromium
 ### ❌ ปัญหา: "Test timeout"
 เพิ่ม timeout ใน config:
 ```typescript
-// playwright.config.ts
+// apps/web/playwright.config.ts
 timeout: 180 * 1000, // 3 minutes
 ```
 
@@ -358,7 +358,7 @@ timeout: 180 * 1000, // 3 minutes
 
 ---
 
-## 🎯 Expected Timeline
+## 🎯 Expected Timeline (ระยะเวลาที่คาดหวัง)
 
 | Phase | Duration | Activity |
 |-------|----------|----------|
@@ -429,7 +429,7 @@ playwright-report/
 
 ---
 
-## 📹 พิเศษ: วิธีแชร์ผลลัพธ์
+## 📹 พิเศษ: วิธีแชร์ผลลัพธ์ (How to share results)
 
 หลังจากรันเสร็จ คุณสามารถแชร์ผลลัพธ์ได้:
 
@@ -444,12 +444,12 @@ zip -r tanjai-test-results.zip test-results/ ux-snapshots/ playwright-report/
 # - หรือ internal file server
 
 # แชร์ HTML Report (ไม่ต้องรัน server)
-cd playwright-report
+cd apps/web/playwright-report
 python3 -m http.server 8080
 # เปิด: http://localhost:8080
 
 # หรือ deploy ไป Vercel/Netlify
-vercel deploy playwright-report/ --prod
+vercel deploy Apps/web/playwright-report/ --prod
 ```
 
 **ใช้กรณี:**
