@@ -2,44 +2,95 @@ import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
 export default defineConfig({
-    testDir: './e2e',
-    fullyParallel: true,
-    forbidOnly: !!process.env.CI,
-    retries: 2,
-    workers: undefined,
-    reporter: [['list'], ['html', { outputFolder: 'test-report' }]],
-    use: {
-        baseURL: 'http://localhost:3000',
-        trace: 'on-first-retry',
-        screenshot: 'only-on-failure',
-        video: {
-            mode: 'on', 
-            size: { width: 1920, height: 1080 }
+  testDir: './tests',
+  fullyParallel: true,
+  retries: 2, // Essential for distinguishing flakiness from bugs
+  workers: 4, 
+  reporter: [
+    ['html', { outputFolder: 'test-report' }], 
+    ['list'],
+    ['json', { outputFile: 'test-results/pathology-reports/summary.json' }] // Structured pathology report
+  ],
+  outputDir: 'test-results/autopsy', // Detailed crash dumps go here
+  
+  use: {
+    baseURL: 'http://localhost:3000', // CHECK PORT BEFORE RUNNING
+    trace: 'retain-on-failure',        // Forensic evidence only when needed
+    video: 'on',                       // RECORD EVERYTHING. We need to see the "Red Dot".
+    screenshot: 'on',
+    actionTimeout: 10000, 
+    navigationTimeout: 15000,
+  },
+
+  webServer: {
+    command: 'npx turbo run dev --filter=web',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+    cwd: path.resolve(__dirname, '../../'),
+  },
+
+  projects: [
+    // 1. 🟢 Healthy Modern (Control Group)
+    {
+      name: 'Healthy Modern (Chrome)',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+      },
+    },
+
+    // 2. 🧟 The Legacy Patient (Anonymous OS / XP Embedded)
+    // Vulnerable to drive-by downloads, unpatched exploits, and rendering failures.
+    {
+      name: 'Legacy Patient (XP Embedded)',
+      use: {
+        browserName: 'firefox', // Closest modern relative to Gecko/52
+        userAgent: 'Mozilla/5.0 (Windows NT 5.1; rv:52.9) Gecko/20100101 Firefox/52.9 (Windows XP Embedded)',
+        viewport: { width: 1024, height: 768 },
+        ignoreHTTPSErrors: true, // Simulate lack of modern TLS
+        // Context options to simulate hardened/broken environment
+        contextOptions: {
+          permissions: [], // No permissions
+          javaScriptEnabled: true,
         },
-        headless: false,
         launchOptions: {
-            slowMo: 1000,
-        },
+            firefoxUserPrefs: {
+                'webgl.disabled': true, // Simulate driver failure
+                'security.mixed_content.block_active_content': false, 
+            }
+        }
+      },
     },
-    webServer: {
-        command: 'npx turbo run dev --filter=web',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000,
-        cwd: path.resolve(__dirname, '../../'),
+
+    // 3. 🦠 The Infected Mobile (Legacy Android / AOSP)
+    // Low-end hardware, race conditions, touch events.
+    {
+      name: 'Infected Mobile (Legacy Android)',
+      use: {
+        browserName: 'chromium',
+        channel: 'chrome', // Use actual Chrome if available for better mobile emulation
+        ...devices['Pixel 5'], // Base hardware profile
+        userAgent: 'Mozilla/5.0 (Linux; Android 7.1.2; AOSP) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
+        hasTouch: true,
+        isMobile: true,
+        // Simulate "Ischemic Network" (Slow 3G + Jitter) - this applies to the context
+        // Note: Playwright doesn't easily support jitter natively in config, 
+        // will rely on CDPSession in fixtures or just use harsh throttling here.
+        // We can simulate Network Arrhythmia via fixture, but baseline throttling here:
+        // Sadly 'offline' is boolean in 'use'. 
+        // Detailed network emulation happens better in the test/fixture via CDPSession.
+      },
     },
-    projects: [
-        {
-            name: 'Admin Desktop',
-            use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
-        },
-        {
-            name: 'Customer Mobile',
-            use: { ...devices['iPhone 14'] },
-        },
-        {
-            name: 'Kitchen Tablet',
-            use: { ...devices['iPad Pro 11'], viewport: { width: 1194, height: 834 } }, // Using iPad Pro as proxy for kitchen tablet
-        },
-    ],
+
+    // 4. 🍎 Standard Mobile Safari (Control)
+    {
+        name: 'Mobile Safari',
+        use: {
+            ...devices['iPhone 12'],
+            hasTouch: true,
+            isMobile: true,
+        }
+    }
+  ],
 });

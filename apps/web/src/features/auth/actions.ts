@@ -22,7 +22,16 @@ export async function provisionTenant(shopName: string, userId: string, email: s
     
     // Use Mock DB (Dynamic Import to avoid top-level side effects if tricky, but static is fine)
     const { db } = await import('@/lib/mock-db');
-    db.createTenant(shopName, slug);
+    const newTenant = db.createTenant(shopName, slug);
+    console.log('Created Tenant:', newTenant);
+
+    // SEED MENU for Testing
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Cappuccino', price: 65, category: 'Coffee' });
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Matcha Latte', price: 75, category: 'Tea' });
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Croissant', price: 80, category: 'Bakery' });
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Som Tum', price: 60, category: 'Food' });
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Limited Deal', price: 10, category: 'Promo', stock: 1 });
+    db.createMenuItem({ tenantId: newTenant.id, name: 'Sold Out Item', price: 0, category: 'Promo', stock: 0 });
 
     return { success: true, slug: slug };
 }

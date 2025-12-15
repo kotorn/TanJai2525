@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-    "start": "next start",
+        "start": "next start",
         "lint": "next lint",
         "test:ux": "npx playwright test e2e/stress-test.spec.ts --grep 'Level 7'"
     },

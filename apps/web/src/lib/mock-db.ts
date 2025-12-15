@@ -18,13 +18,26 @@ export const MockDB = {
     },
 
     createMenuItem: (item: any) => {
-        const newItem = { ...item, id: 'item-' + Math.random() };
+        const newItem = { 
+            ...item, 
+            id: 'item-' + Math.random(),
+            stock: item.stock !== undefined ? item.stock : 100 // Default 100
+        };
         MockDB.menuItems.push(newItem);
         return newItem;
     },
 
     getMenuItems: (tenantId: string) => {
-        return MockDB.menuItems; // Filter by tenantId if we stored it, or return all for simulation
+        return MockDB.menuItems;
+    },
+
+    updateStock: (itemId: string, qty: number) => {
+        const item = MockDB.menuItems.find(i => i.id === itemId);
+        if (item) {
+            item.stock = Math.max(0, item.stock - qty);
+            return item.stock;
+        }
+        return 0;
     },
 
     createOrder: (order: any) => {

@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 [Mobile Chrome] โ€บ tests\level1-gravity.spec.ts:5:7 โ€บ LEVEL 1: Gravity Check (Sanity) โ€บ Mobile Chrome Sanity: Login & Menu Interaction (2.2s)
+
+  1 passed (5.1s)

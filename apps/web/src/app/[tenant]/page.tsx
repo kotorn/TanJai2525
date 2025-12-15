@@ -22,6 +22,7 @@ async function getMenuItems(tenantSlug: string) {
 }
 
 import AddToCartBtn from '@/features/ordering/components/add-to-cart-btn';
+import MenuGrid from '@/features/ordering/components/menu-grid';
 
 export default async function MenuPage({ params }: { params: { tenant: string } }) {
     const { tenant: tenantSlug } = await params;
@@ -44,24 +45,7 @@ export default async function MenuPage({ params }: { params: { tenant: string } 
 
             {/* Menu Grid */}
             <main className="p-4 max-w-md mx-auto space-y-4">
-                {menu.map((item) => (
-                    <div key={item.id} className="bg-white rounded-lg shadow p-4 flex gap-4 relative">
-                        <div className="w-20 h-20 bg-gray-200 rounded-md flex-shrink-0" /> {/* Placeholder for image */}
-                        <div className="flex-1 pb-4">
-                            <h3 className="font-semibold text-lg">{item.name}</h3>
-                            <p className="text-gray-500 text-sm">Category: {item.category}</p>
-                            <div className="mt-2 text-orange-600 font-bold">฿{item.price}</div>
-                        </div>
-                        {/* Client Component Button */}
-                        <AddToCartBtn item={item} />
-                    </div>
-                ))}
-
-                {menu.length === 0 && (
-                    <div className="text-center text-gray-400 mt-10">
-                        No menu items available.
-                    </div>
-                )}
+                <MenuGrid items={menu} />
             </main>
         </div>
     );
