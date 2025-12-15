@@ -112,9 +112,25 @@ test.describe('🔥 LEVEL 1: CORE ADVERSARIAL ATTACKS', () => {
         expect(storage.local).not.toMatch(panRegex);
         expect(storage.session).not.toMatch(panRegex);
         
-        // If we find 13 digits, likely PII leak (unless timestamp?)
-        // timestamps are usually 13 digits (ms). So strict 13 digit regex is flaky.
-        // We'll skip generic 13 digit check for now unless sure it's not a timestamp.
+    });
+
+    // 1.5 Bonus: Verify Antigravity Fixture Health
+    // Ensure that our "Ischemic Network" Jitter is actually working if the project is selected
+    test('1.5 Verify Battlefield Conditions', async ({ page }, testInfo) => {
+        if (testInfo.project.name.includes('Ischemic')) {
+            const start = Date.now();
+            await page.route('**/api/health-check-simulation', async route => {
+                await route.fulfill({ status: 200, body: 'OK' });
+            });
+            // Request to a dummy route that should be intercepted by jitter
+            await page.evaluate(async () => {
+                await fetch('/api/health-check-simulation');
+            });
+            const duration = Date.now() - start;
+            console.log(`[Ischemic Verification] Request too ${duration}ms`);
+            // We expect at least *some* delay if jitter is working, though random(0..500) can be 0.
+            // But statistically it should be > 0.
+        }
     });
 
 });

@@ -1,85 +1,101 @@
 'use client';
 
-import { useState } from 'react';
-import { addMenuItem } from '@/features/admin/actions';
-import { toast } from 'sonner';
+import { getMenuData, deleteMenuItem, MenuItem, Category } from "@/features/menu/actions";
+import { MenuDataTable } from "@/features/menu/components/MenuDataTable";
+import { MenuItemModal } from "@/features/menu/components/MenuItemModal";
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function AdminMenuPage({ params }: { params: { tenant: string } }) {
-    // Normally we would verify auth here via middleware or check session
-    const [name, setName] = useState('');
-    const [price, setPrice] = useState('');
-    const [category, setCategory] = useState('Main');
-    const [isLoading, setIsLoading] = useState(false);
+    // We need to fetch data. In client comp, we effect it or use SWR. 
+    // Or we can simple call the server action in useEffect since it returns data.
+    
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [items, setItems] = useState<MenuItem[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // In a real app we'd fetch the tenantId properly.
-    // For now we rely on the middleware injection or params lookup.
-    // But wait, params.tenant is the SLUG. We need the ID for the DB insert.
-    // We should probably handle ID resolution in the Server Action or fetch it here.
-    // To keep it simple for the E2E script, let's assume the Server Action resolves it 
-    // OR we pass the SLUG to the action and it resolves it.
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
-    // Let's modify the action to accept Slug for easier usage, or resolve it here.
-    // Actually, for the E2E, we can just resolve it in the action if we change the signature.
-    // But strictly, we should probably pass the ID. 
-    // Let's assume there is a layout that provides context, but we are just making a page.
-    // Let's just pass the Slug to the action and let it resolve. 
-    // *Self-Correction*: I'll update the action to resolve slug -> id to be robust.
+    const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-
-        const res = await addMenuItem(params.tenant, name, parseFloat(price), category);
-
-        if (res.success) {
-            toast.success('Menu item added');
-            setName('');
-            setPrice('');
-        } else {
-            toast.error('Failed: ' + res.error);
+    const loadData = useCallback(async () => {
+        try {
+            const data = await getMenuData(params.tenant);
+            setCategories(data.categories);
+            setItems(data.items);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to load menu data");
+        } finally {
+            setLoading(false);
         }
-        setIsLoading(false);
+    }, [params.tenant]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleCreate = () => {
+        setEditingItem(null);
+        setIsModalOpen(true);
     };
 
+    const handleEdit = (item: MenuItem) => {
+        setEditingItem(item);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (item: MenuItem) => {
+        if (!confirm(`Delete "${item.name}"?`)) return;
+        
+        try {
+            const res = await deleteMenuItem(item.id);
+            if (res.success) {
+                toast.success("Item deleted");
+                loadData();
+                router.refresh();
+            } else {
+                toast.error("Failed to delete");
+            }
+        } catch (error) {
+            toast.error("Error deleting item");
+        }
+    };
+
+    if (loading) return <div className="p-8">Loading menu...</div>;
+
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">Menu Management</h1>
+        <div className="p-6 h-full flex flex-col">
+            <header className="mb-6 flex justify-between items-center">
+                <div>
+                     <h1 className="text-2xl font-bold text-gray-900">Menu Management</h1>
+                     <p className="text-sm text-gray-500">Manage your restaurant menu items</p>
+                </div>
+            </header>
 
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow max-w-md space-y-4">
-                <div>
-                    <label className="block text-sm font-bold mb-1">Item Name</label>
-                    <input
-                        value={name} onChange={e => setName(e.target.value)}
-                        className="w-full border p-2 rounded" placeholder="e.g. Som Tum" required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold mb-1">Price (THB)</label>
-                    <input
-                        type="number" value={price} onChange={e => setPrice(e.target.value)}
-                        className="w-full border p-2 rounded" placeholder="50" required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold mb-1">Category</label>
-                    <select
-                        value={category} onChange={e => setCategory(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    >
-                        <option>Main</option>
-                        <option>Appetizer</option>
-                        <option>Drink</option>
-                        <option>Dessert</option>
-                    </select>
-                </div>
+            <div className="flex-1 bg-white rounded-lg border shadow-sm p-4 overflow-hidden flex flex-col">
+                <MenuDataTable 
+                    data={items}
+                    categories={categories}
+                    onCreate={handleCreate}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+            </div>
 
-                <button
-                    type="submit" disabled={isLoading}
-                    className="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700"
-                >
-                    {isLoading ? 'Adding...' : 'Add Item'}
-                </button>
-            </form>
+            <MenuItemModal
+                open={isModalOpen}
+                onOpenChange={setIsModalOpen}
+                tenantSlug={params.tenant}
+                categories={categories}
+                itemToEdit={editingItem}
+                onSuccess={() => {
+                    loadData();
+                    router.refresh();
+                }}
+            />
         </div>
     );
 }

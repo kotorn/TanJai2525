@@ -11,3 +11,11 @@
 body {
   color: rgb(var(--foreground-rgb));
 }
+
+@layer base {
+  :root {
+    --primary: 24 100% 60%; /* #FF6B35 approx converted to HSL for tailwind if needed, or just hex */
+    /* Shadcn usually uses HSL or similar variables. Let's check tailwind config or just use hex in class if not defined */
+    /* Re-reading globals.css, it was empty except for basics. I should add the layer base. */
+  }
+}

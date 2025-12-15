@@ -1,45 +1,14 @@
 'use server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { createClient } from '@/lib/supabase/server';
-import { isMockMode } from '@/lib/supabase/helpers';
+import { revalidatePath } from 'next/cache';
 
-// In-memory mock store for KDS orders (persists during server runtime)
-const mockOrdersStore: any[] = [
-    {
-        id: "kds-1",
-        order_number: "TJ-0001",
-        table_number: "5",
-        status: 'pending', // Pending
-        created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(), // 2 mins ago
-        special_instructions: "No spicy",
-        order_items: [
-            { id: "oi-1", quantity: 2, name: "Pad Thai", notes: "Extra lime" },
-            { id: "oi-2", quantity: 1, name: "Iced Tea" }
-        ]
-    },
-    {
-        id: "kds-2",
-        order_number: "TJ-0002",
-        table_number: "12",
-        status: 'preparing', // Preparing
-        created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(), // 12 mins ago (Red alert!)
-        special_instructions: null,
-        order_items: [
-            { id: "oi-3", quantity: 1, name: "Green Curry" }
-        ]
-    }
-];
-
-export async function fetchKitchenOrders() {
-    if (isMockMode()) {
-        // Return mock orders, filtering out 'done' status (they should be hidden)
-        return mockOrdersStore.filter(o => o.status !== 'done');
-    }
-
+export async function fetchKitchenOrders(restaurantId: string) {
     const supabase = await createClient();
     
     // Fetch orders with status pending or preparing
-    // order items, and menu details (optional, but items usually have snapshot name)
     const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -49,9 +18,14 @@ export async function fetchKitchenOrders() {
                 quantity,
                 name,
                 notes,
-                modifiers
+                modifiers,
+                menu_items (
+                    name,
+                    image_url
+                )
             )
         `)
+        .eq('restaurant_id', restaurantId) // Filter by restaurant
         .in('status', ['pending', 'preparing'])
         .order('created_at', { ascending: true });
 
@@ -64,16 +38,6 @@ export async function fetchKitchenOrders() {
 }
 
 export async function updateKitchenOrderStatus(orderId: string, newStatus: string) {
-    if (isMockMode()) {
-        // Update mock store
-        const order = mockOrdersStore.find(o => o.id === orderId);
-        if (order) {
-            order.status = newStatus;
-            console.log(`[Mock KDS] Updated order ${orderId} to ${newStatus}`);
-        }
-        return { success: true };
-    }
-
     const supabase = await createClient();
     const { error } = await supabase
         .from('orders')
@@ -84,6 +48,9 @@ export async function updateKitchenOrderStatus(orderId: string, newStatus: strin
         console.error("Update KDS Error:", error);
         return { success: false, error: error.message };
     }
-
+    
+    // We don't strictly need revalidatePath if using realtime, 
+    // but it helps if the user refreshes or for static regeneration.
+    revalidatePath('/dashboard/kitchen'); 
     return { success: true };
 }

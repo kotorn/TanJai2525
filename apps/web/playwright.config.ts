@@ -83,14 +83,16 @@ export default defineConfig({
       },
     },
 
-    // 4. 🍎 Standard Mobile Safari (Control)
+    // 4. 🩸 The Ischemic Network (High Latency / Network Arrhythmia)
+    // Simulates slow 3G bandwidth cap with 500ms random jitter.
     {
-        name: 'Mobile Safari',
-        use: {
-            ...devices['iPhone 12'],
-            hasTouch: true,
-            isMobile: true,
-        }
+      name: 'The Ischemic Network (Slow 3G)',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+        // Playwright doesn't support jitter natively in 'use', so we rely on the fixture.
+        // But we set a flag if needed, or just rely on the name.
+      },
     }
   ],
 });

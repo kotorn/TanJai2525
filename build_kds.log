@@ -1,0 +1,18 @@
+
+> tanjai-pos-monorepo@0.0.0 build
+> turbo run build
+
+turbo_json_parse_error
+
+  x failed to parse turbo json
+
+Error: turbo_json_parse_error
+
+  x Found an unknown key `tasks`.
+   ,-[2:1]
+ 2 |     "$schema": "https://turbo.build/schema.json",
+ 3 |     "tasks": {
+   :     ^^^^^^^
+ 4 |         "build": {
+   `----
+

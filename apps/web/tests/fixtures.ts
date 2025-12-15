@@ -26,6 +26,7 @@ type PayloadInjector = {
 type ChaosLogic = {
   simulateOfflineBomb: (orderCount: number) => Promise<void>;
   latencySpike: (routePattern: string, delayMs: number) => Promise<void>;
+  induceNetworkJitter: (routePattern: string, maxDelayMs?: number) => Promise<void>;
   induceClockSkew: (secondsOffset: number) => Promise<void>;
 };
 
@@ -131,7 +132,7 @@ export const test = base.extend<AntigravityFixtures>({
   },
 
   // 🧘 Chaos Logic (The Stress Test/Defibrillator)
-  chaosLogic: async ({ page }, use) => {
+  chaosLogic: async ({ page }, use, testInfo) => {
       const chaos: ChaosLogic = {
           async simulateOfflineBomb(count) {
               console.log(`[Chaos] Planting Offline Bomb with ${count} items...`);
@@ -148,6 +149,15 @@ export const test = base.extend<AntigravityFixtures>({
               console.log(`[Chaos] Injecting ${delayMs}ms latency into ${routePattern}`);
               await page.route(routePattern, async (route) => {
                   await new Promise(f => setTimeout(f, delayMs));
+                  await route.continue();
+              });
+          },
+          // 🩸 V12 Addition: Ischemic Network Jitter
+          async induceNetworkJitter(routePattern, maxDelayMs = 500) {
+              console.log(`[Chaos] Injecting random jitter (0-${maxDelayMs}ms) into ${routePattern}`);
+              await page.route(routePattern, async (route) => {
+                  const jitter = Math.floor(Math.random() * maxDelayMs);
+                  await new Promise(f => setTimeout(f, jitter));
                   await route.continue();
               });
           },
@@ -175,6 +185,14 @@ export const test = base.extend<AntigravityFixtures>({
               }, seconds);
           }
       };
+      
+      // Auto-apply Ischemic Network if project name matches
+      if (testInfo.project.name.includes('Ischemic')) {
+           console.log('[Fixture] Automatically applying Global Network Arrhythmia for Ischemic Patient...');
+           // Apply jitter to ALL routes for this project
+           await chaos.induceNetworkJitter('**/*', 500);
+      }
+
       await use(chaos);
   },
 
