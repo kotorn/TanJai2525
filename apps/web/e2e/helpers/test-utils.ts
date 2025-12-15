@@ -1,52 +1,70 @@
-import { Page, expect } from '@playwright/test';
-
-export async function loginAndSetup(ownerPage: Page, tenantSlug: string) {
-    // Login Bypass
-    await ownerPage.goto('/login');
-    await ownerPage.getByRole('button', { name: '[DEV] Simulate Owner Login' }).click();
-    await expect(ownerPage).toHaveURL(/\/onboarding/);
-
-    // Onboarding
-    await ownerPage.getByPlaceholder('Ex. Som Tum Der').fill('Zaap Nua E-San');
-    if (await ownerPage.getByRole('button', { name: 'Thai' }).isVisible()) {
-        await ownerPage.getByRole('button', { name: 'Thai' }).click();
-    }
-    await ownerPage.getByText('Create Shop').click();
-    await expect(ownerPage).toHaveURL(new RegExp(`/${tenantSlug}`));
-}
-
-export async function addMenuItem(ownerPage: Page, slug: string, name: string, price: string) {
-    await ownerPage.goto(`/${slug}/admin/menu`);
-    // Check if exists first to avoid duplicates in restart
-    if (await ownerPage.getByText(name).count() === 0) {
-        await ownerPage.getByPlaceholder('e.g. Som Tum').fill(name);
-        await ownerPage.getByPlaceholder('50').fill(price);
-        await ownerPage.getByRole('button', { name: 'Add Item' }).click();
-        await expect(ownerPage.getByText('Menu item added')).toBeVisible();
-    }
-}
-
-export async function generateQRCodes(ownerPage: Page, slug: string, count: number) {
-    await ownerPage.goto(`/${slug}/admin/dashboard`);
-    await ownerPage.locator('input[type="number"]').fill(count.toString());
-    await ownerPage.getByRole('button', { name: 'Generate Links' }).click();
-    await expect(ownerPage.locator('text=open Table 1')).toBeVisible();
-}
+import { Page, expect, TestInfo } from '@playwright/test';
+import { STRESS_TEST_DATA } from '../../src/lib/mock-data';
+import fs from 'fs';
+import path from 'path';
 
 export async function addItemToCart(page: Page, itemName: string) {
-    // Retry logic for locating items in a chaotic list
-    await expect(page.getByText(itemName).first()).toBeVisible({ timeout: 5000 });
-    await page.getByText(itemName).first().click();
-    await page.getByRole('button', { name: '+' }).first().click();
-    // Close modal if it stays open (optional, depends on UI)
-    // await page.keyboard.press('Escape'); 
+    // Determine selector: simplified for now, assuming standard layout
+    // In a real app, we'd use data-testid
+    const itemLocator = page.locator(`text=${itemName}`).first();
+    await expect(itemLocator).toBeVisible();
+    
+    // Click to open modal or add directly
+    // Assuming clicking the item card opens a modal or adds to cart
+    await itemLocator.click();
+
+    // Check if a modal opened (Add to Cart button)
+    const addToCartBtn = page.locator('button:has-text("Add to Cart")');
+    if (await addToCartBtn.isVisible()) {
+        await addToCartBtn.click();
+    }
 }
 
 export async function submitOrder(page: Page) {
-    await page.locator('a[href*="/cart"]').click();
-    if (await page.getByText('Guest Checkout').isVisible()) {
-        await page.getByText('Guest Checkout').click();
+    const cartBtn = page.locator('button:has-text("Process Order")'); // Or cart icon
+    if (await cartBtn.isVisible()) {
+        await cartBtn.click();
     }
-    await page.getByRole('button', { name: /Confirm|Submit/i }).click();
-    await expect(page.getByText(/Order Status|Order Confirmed/i)).toBeVisible();
+    
+    // Confirm order
+    const confirmBtn = page.locator('button:has-text("Confirm")');
+    if (await confirmBtn.isVisible()) {
+        await confirmBtn.click();
+    }
+
+    // Wait for success message
+    await expect(page.locator('text=Order Placed')).toBeVisible({ timeout: 5000 });
+}
+
+export async function captureUIState(page: Page, stateName: string) {
+    const dir = 'ux-snapshots';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    
+    await page.screenshot({ path: `${dir}/${stateName}.png`, fullPage: true });
+    console.log(`📸 UI State Captured: ${stateName}`);
+}
+
+export async function recordJourney(page: Page, name: string, callback: () => Promise<void>) {
+    console.log(`🎥 Starting Journey: ${name}`);
+    await callback();
+    console.log(`🏁 Completed Journey: ${name}`);
+    // Video is saved automatically by context, we just ensure the test finishes
+}
+
+export async function injectMockData(page: Page) {
+    // Helper to ensure mock data is loaded if we needed to inject it via console
+    // Currently relying on backend or static mock-data file usage
+}
+
+export async function markItemOutOfStock(page: Page, itemName: string) {
+    // Navigate to admin/menu
+    await page.goto('/admin/menu');
+    await page.locator(`text=${itemName}`).click();
+    await page.locator('input[name="stock"]').fill('0');
+    await page.locator('button:has-text("Save")').click();
+}
+
+export async function navigateToKitchen(page: Page) {
+    await page.goto('/kitchen');
+    await expect(page.locator('h1:has-text("Kitchen Display System")').or(page.locator('text=Kitchen'))).toBeVisible();
 }

@@ -1,0 +1,362 @@
+[
+  {
+    "slug": "noodle-shop",
+    "name_th": "ร้านก๋วยเตี๋ยว (Noodle Shop)",
+    "categories": [
+      {
+        "name": "ก๋วยเตี๋ยว (Noodles)",
+        "items": [
+          {
+            "name": "ก๋วยเตี๋ยวเรือหมู (Boat Noodles - Pork)",
+            "price": 50,
+            "option_groups": [
+              {
+                "name": "เลือกเส้น (Noodle Type)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "เส้นเล็ก (Small Rice Noodles)", "price_mod": 0 },
+                  { "name": "เส้นใหญ่ (Wide Rice Noodles)", "price_mod": 0 },
+                  { "name": "เส้นหมี่ (Vermicelli)", "price_mod": 0 },
+                  { "name": "บะหมี่ (Egg Noodles)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "เลือกน้ำซุป (Soup Type)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "น้ำตก (Nam Tok - Spicy Blood Soup)", "price_mod": 0 },
+                  { "name": "น้ำใส (Nam Sai - Clear Soup)", "price_mod": 0 },
+                  { "name": "ต้มยำ (Tom Yum)", "price_mod": 0 },
+                  { "name": "แห้ง (Dry)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "ผัก (Vegetables)",
+                "min_select": 0,
+                "max_select": null,
+                "selection_type": "multiple",
+                "options": [
+                  { "name": "ไม่ใส่ถั่วงอก (No Bean Sprouts)", "price_mod": 0 },
+                  { "name": "ไม่ใส่ผักโรย (No Garnish)", "price_mod": 0 }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "เกาเหลาหมู (Pork Soup Only)",
+            "price": 60,
+            "option_groups": [
+               {
+                "name": "เลือกน้ำซุป (Soup Type)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "น้ำตก (Nam Tok)", "price_mod": 0 },
+                  { "name": "น้ำใส (Nam Sai)", "price_mod": 0 },
+                  { "name": "ต้มยำ (Tom Yum)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "เพิ่มเติม (Add-ons)",
+                "min_select": 0,
+                "max_select": null,
+                "selection_type": "multiple",
+                "options": [
+                  { "name": "ข้าวเปล่า (Rice)", "price_mod": 10 },
+                  { "name": "กากหมู (Crackling)", "price_mod": 20 }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ของทานเล่น (Appetizers)",
+        "items": [
+          {
+            "name": "ลูกชิ้นปิ้ง (Grilled Meatballs)",
+            "price": 10,
+            "option_groups": []
+          },
+          {
+            "name": "เกี๊ยวทอด (Fried Wontons)",
+            "price": 20,
+            "option_groups": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "made-to-order",
+    "name_th": "ร้านอาหารตามสั่ง (Made-to-order)",
+    "categories": [
+      {
+        "name": "จานเดียว (A La Carte)",
+        "items": [
+          {
+            "name": "ผัดกะเพรา (Pad Kra Pao)",
+            "price": 50,
+            "option_groups": [
+              {
+                "name": "เลือกเนื้อสัตว์ (Meat Selection)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "หมูสับ (Minced Pork)", "price_mod": 0 },
+                  { "name": "ไก่ (Chicken)", "price_mod": 0 },
+                  { "name": "หมูกรอบ (Crispy Pork)", "price_mod": 10 },
+                  { "name": "ทะเล (Seafood)", "price_mod": 20 }
+                ]
+              },
+              {
+                "name": "ระดับความเผ็ด (Spiciness)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ไม่เผ็ด (Non-Spicy)", "price_mod": 0 },
+                  { "name": "เผ็ดน้อย (Mild)", "price_mod": 0 },
+                  { "name": "เผ็ดกลาง (Medium)", "price_mod": 0 },
+                  { "name": "เผ็ดมาก (Spicy)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "เพิ่มไข่ (Add Egg)",
+                "min_select": 0,
+                "max_select": null,
+                "selection_type": "multiple",
+                "options": [
+                  { "name": "ไข่ดาว (Fried Egg)", "price_mod": 10 },
+                  { "name": "ไข่เจียว (Omelet)", "price_mod": 15 },
+                  { "name": "ไข่ดาวไม่สุก (Fried Egg - Runny)", "price_mod": 10 }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "ข้าวผัด (Fried Rice)",
+            "price": 50,
+            "option_groups": [
+              {
+                "name": "เลือกเนื้อสัตว์ (Meat Selection)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "หมู (Pork)", "price_mod": 0 },
+                  { "name": "ไก่ (Chicken)", "price_mod": 0 },
+                  { "name": "ทะเล (Seafood)", "price_mod": 20 }
+                ]
+              },
+              {
+                 "name": "เพิ่มไข่ (Add Egg)",
+                 "min_select": 0,
+                 "max_select": null,
+                 "selection_type": "multiple",
+                 "options": [
+                   { "name": "ไข่ดาว (Fried Egg)", "price_mod": 10 }
+                 ]
+               }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "som-tum-yum",
+    "name_th": "ร้านส้มตำ/ยำ (Som Tum & Yum)",
+    "categories": [
+      {
+        "name": "ส้มตำ (Som Tum)",
+        "items": [
+          {
+            "name": "ตำไทย (Tum Thai)",
+            "price": 50,
+            "option_groups": [
+               {
+                "name": "ระดับความเผ็ด (Spiciness)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ไม่ใส่พริก (No Chili)", "price_mod": 0 },
+                  { "name": "พริก 2 เม็ด (2 Chilies)", "price_mod": 0 },
+                  { "name": "พริก 5 เม็ด (5 Chilies)", "price_mod": 0 },
+                  { "name": "พริก 10 เม็ด (10 Chilies)", "price_mod": 0 }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "ตำปูปลาร้า (Tum Pu Pla Ra)",
+            "price": 50,
+            "option_groups": [
+              {
+                "name": "ระดับความเผ็ด (Spiciness)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "เผ็ดน้อย (Mild)", "price_mod": 0 },
+                  { "name": "เผ็ดกลาง (Medium)", "price_mod": 0 },
+                  { "name": "เผ็ดมาก (Spicy)", "price_mod": 0 },
+                  { "name": "เผ็ดนรก (Very Spicy)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "ปลาร้า (Fermented Fish Sauce)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ใส่ปลาร้า (Yes)", "price_mod": 0 },
+                  { "name": "ไม่ใส่ปลาร้า (No)", "price_mod": 0 },
+                  { "name": "แยกน้ำปลาร้า (Side)", "price_mod": 0 }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ยำ (Spicy Salad)",
+        "items": [
+          {
+            "name": "ยำกุ้งสด/สุก (Spicy Shrimp Salad)",
+            "price": 120,
+            "option_groups": [
+              {
+                "name": "การทำกุ้ง (Cooking Preference)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "กุ้งสด (Raw Shrimp)", "price_mod": 0 },
+                  { "name": "กุ้งสุก (Cooked Shrimp)", "price_mod": 0 },
+                  { "name": "สด + สุก (Mixed)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "ใส่ปลาร้าหรือไม่ (Pla Ra)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ใส่ (Yes)", "price_mod": 0 },
+                  { "name": "ไม่ใส่ (No)", "price_mod": 0 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cafe",
+    "name_th": "ร้านกาแฟ/คาเฟ่ (Coffee & Cafe)",
+    "categories": [
+      {
+        "name": "กาแฟ (Coffee)",
+        "items": [
+          {
+            "name": "ลาเต้ (Latte)",
+            "price": 60,
+            "option_groups": [
+              {
+                "name": "ความหวาน (Sweetness)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "หวาน 100% (Normal)", "price_mod": 0 },
+                  { "name": "หวาน 50% (Less)", "price_mod": 0 },
+                  { "name": "หวาน 25% (Little)", "price_mod": 0 },
+                  { "name": "หวาน 0% (No Sugar)", "price_mod": 0 }
+                ]
+              },
+              {
+                "name": "เลือกนม (Milk Type)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "นมวัว (Cow Milk)", "price_mod": 0 },
+                  { "name": "นมถั่วเหลือง (Soy Milk)", "price_mod": 10 },
+                  { "name": "นมข้าวโอ๊ต (Oat Milk)", "price_mod": 20 }
+                ]
+              },
+              {
+                "name": "แบบ (Serving)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ร้อน (Hot)", "price_mod": 0 },
+                  { "name": "เย็น (Iced)", "price_mod": 5 },
+                  { "name": "ปั่น (Frappe)", "price_mod": 10 }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "อเมริกาโน่ (Americano)",
+            "price": 55,
+             "option_groups": [
+              {
+                "name": "ความหวาน (Sweetness)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                   { "name": "หวาน 100% (Normal)", "price_mod": 0 },
+                   { "name": "หวาน 50% (Less)", "price_mod": 0 },
+                   { "name": "หวาน 0% (No Sugar)", "price_mod": 0 }
+                ]
+              },
+               {
+                "name": "แบบ (Serving)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "ร้อน (Hot)", "price_mod": 0 },
+                  { "name": "เย็น (Iced)", "price_mod": 5 }
+                ]
+              }
+             ]
+          }
+        ]
+      },
+      {
+        "name": "เบเกอรี่ (Bakery)",
+        "items": [
+          {
+            "name": "ครัวซองต์ (Croissant)",
+            "price": 70,
+            "option_groups": [
+              {
+                "name": "อุ่นร้อน (Heat Up)",
+                "min_select": 1,
+                "max_select": 1,
+                "selection_type": "single",
+                "options": [
+                  { "name": "อุ่น (Yes)", "price_mod": 0 },
+                  { "name": "ไม่อุ่น (No)", "price_mod": 0 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

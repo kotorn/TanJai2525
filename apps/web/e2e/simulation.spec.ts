@@ -1,6 +1,7 @@
 import { test, expect, BrowserContext, Page } from '@playwright/test';
+import { humanClick, humanType, mobileTap, injectCursorVisuals } from './helpers/input-simulator';
 
-test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
+test.describe('Tanjai POS: Resilient Rush Hour Simulation (Human Mode)', () => {
     // Shared State
     let ownerContext: BrowserContext;
     let ownerPage: Page;
@@ -19,6 +20,7 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
         console.log('Scene 1: Owner Setup (Admin Context)');
         ownerContext = await browser.newContext();
         ownerPage = await ownerContext.newPage();
+        await injectCursorVisuals(ownerPage);
     });
 
     test('Execute Full Resilient Scenario', async ({ browser }) => {
@@ -29,14 +31,12 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
         await test.step('Admin: Register and Configure Shop', async () => {
             // 1. Login Bypass
             await ownerPage.goto('/login');
-            await ownerPage.getByRole('button', { name: '[DEV] Simulate Owner Login' }).click();
+            await humanClick(ownerPage, 'button:has-text("[DEV] Simulate Owner Login")');
             await expect(ownerPage).toHaveURL(/\/onboarding/);
 
             // 2. Onboarding
-            // Using resilient locators matches
-            await ownerPage.getByPlaceholder('Ex. Som Tum Der').fill('Zaap E-San');
-            // Assuming default radio is selected or we just click Create
-            await ownerPage.getByText('Create Shop').click();
+            await humanType(ownerPage, '[placeholder="Ex. Som Tum Der"]', 'Zaap E-San');
+            await humanClick(ownerPage, 'text=Create Shop');
 
             // Verify Dashboard
             await expect(ownerPage).toHaveURL(new RegExp(`/${tenantSlug}`));
@@ -46,9 +46,9 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
             await ownerPage.goto(`/${tenantSlug}/admin/menu`);
 
             const addMsg = async (name: string, price: string) => {
-                await ownerPage.getByPlaceholder('e.g. Som Tum').fill(name);
-                await ownerPage.getByPlaceholder('50').fill(price);
-                await ownerPage.getByRole('button', { name: 'Add Item' }).click();
+                await humanType(ownerPage, '[placeholder="e.g. Som Tum"]', name);
+                await humanType(ownerPage, '[placeholder="50"]', price);
+                await humanClick(ownerPage, 'button:has-text("Add Item")');
                 await expect(ownerPage.getByText('Menu item added')).toBeVisible();
             };
 
@@ -60,18 +60,13 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
         await test.step('Admin: Generate and Export QR Codes', async () => {
             await ownerPage.goto(`/${tenantSlug}/admin/dashboard`);
 
-            await ownerPage.locator('input[type="number"]').fill('4');
-            await ownerPage.getByRole('button', { name: 'Generate Links' }).click();
+            await humanType(ownerPage, 'input[type="number"]', '4');
+            await humanClick(ownerPage, 'button:has-text("Generate Links")');
 
             // Wait for generation
             await expect(ownerPage.locator('text=open Table 1')).toBeVisible();
 
-            // Save URLs to state (Simulating "Save to JSON")
-            // We reconstruct them based on known logic for robustness, 
-            // but in a real scraper we would read the href attributes.
-            // Using process.env.BASE_URL is safer if configured, else localhost.
             const baseUrl = 'http://localhost:3000';
-
             simulationState.tableLinks = [
                 `${baseUrl}/${tenantSlug}?tableId=1`,
                 `${baseUrl}/${tenantSlug}?tableId=2`,
@@ -89,8 +84,9 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
 
             // Launch 3 iPhone Contexts
             for (let i = 0; i < 3; i++) {
-                const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+                const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
                 const page = await context.newPage();
+                await injectCursorVisuals(page);
                 customers.push({ context, page, id: `Customer-${i + 1}` });
             }
 
@@ -98,23 +94,30 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
             await Promise.all(customers.map((c, i) => c.page.goto(simulationState.tableLinks[i])));
 
             // Concurrent "Add to Cart" Action
-            // Wrapped in try/catch for Debugger Requirement
             try {
                 const customerActions = customers.map(async (c) => {
                     const p = c.page;
                     // Add Som Tum
-                    await p.getByText('Som Tum Thai').first().click();
-                    await p.getByRole('button', { name: '+' }).first().click();
+                    // Using mobileTap for touch simulation
+                    const somTum = p.getByText('Som Tum Thai').first();
+                    await expect(somTum).toBeVisible();
+                    // Using selector string for our helper - getting selector from locator is tricky without reliable IDs
+                    // Fallback to simpler locating for this demo or use locator directly if helper overload supported
+                    // Since specific helper takes string 'selector', we use text= strategy
+                    
+                    await mobileTap(p, 'text=Som Tum Thai');
+                    await mobileTap(p, 'button:has-text("+") >> nth=0'); // First plus button? risky selector but standard in test
+                    
                     // Add Chicken
-                    await p.getByText('Grilled Chicken').first().click();
-                    await p.getByRole('button', { name: '+' }).first().click();
+                    await mobileTap(p, 'text=Grilled Chicken');
+                    await mobileTap(p, 'button:has-text("+") >> nth=0');
 
                     // Go to Cart
-                    await p.locator('a[href*="/cart"]').click();
+                    await mobileTap(p, 'a[href*="/cart"]');
 
                     // Select Guest Checkout if visible
                     if (await p.getByText('Guest Checkout').isVisible()) {
-                        await p.getByText('Guest Checkout').click();
+                        await mobileTap(p, 'text=Guest Checkout');
                     }
                 });
 
@@ -123,7 +126,7 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
                 // CRITICAL: Concurrent "Order" Press
                 console.log('Executing Concurrent Order...');
                 await Promise.all(customers.map(c =>
-                    c.page.getByRole('button', { name: 'Confirm Order' }).click()
+                    mobileTap(c.page, 'button:has-text("Confirm Order")')
                 ));
 
                 // Verify all success
@@ -137,7 +140,7 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
                 for (const c of customers) {
                     await c.page.screenshot({ path: `error-ordering-${c.id}.png` });
                 }
-                throw error; // Re-throw to trigger Playwright trace
+                throw error;
             }
         });
 
@@ -151,12 +154,19 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
             await expect(ownerPage.locator('.order-ticket')).toHaveCount(3);
 
             // Mark Done
-            const prepButtons = await ownerPage.locator('button:has-text("Preparing")').all();
-            for (const btn of prepButtons) await btn.click();
+            // Note: Loops with async await inside for human inputs
+            const prepButtonsCount = await ownerPage.locator('button:has-text("Preparing")').count();
+            for (let i = 0; i < prepButtonsCount; i++) {
+                 // Always click the first one as they disappear/change state? Using nth(0) is safer if list shrinks
+                 // Or just grab one
+                 await humanClick(ownerPage, 'button:has-text("Preparing") >> nth=0');
+            }
             await ownerPage.waitForTimeout(1000);
 
-            const doneButtons = await ownerPage.locator('button:has-text("Done")').all();
-            for (const btn of doneButtons) await btn.click();
+            const doneButtonsCount = await ownerPage.locator('button:has-text("Done")').count();
+            for (let i = 0; i < doneButtonsCount; i++) {
+                await humanClick(ownerPage, 'button:has-text("Done") >> nth=0');
+            }
 
             await expect(ownerPage.locator('.order-ticket')).toHaveCount(0);
         });
@@ -171,7 +181,7 @@ test.describe('Tanjai POS: Resilient Rush Hour Simulation', () => {
             // Pay all
             for (let i = 0; i < 3; i++) {
                 // Click the first button repeatedly as the list shrinks
-                await ownerPage.getByRole('button', { name: /Cash Payment/ }).first().click();
+                await humanClick(ownerPage, 'button:has-text("Cash Payment") >> nth=0');
                 await ownerPage.waitForTimeout(500);
             }
 

@@ -1,21 +1,25 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 export default defineConfig({
     testDir: './e2e',
-    fullyParallel: true, // Allow parallel for Level 1
+    fullyParallel: true,
     forbidOnly: !!process.env.CI,
-    retries: 2, // Retry twice on failure
-    workers: undefined, // Let Playwright limit based on CPU or override in CLI
-    reporter: [['list'], ['html', { outputFolder: 'test-report' }]], // HTML Report
+    retries: 2,
+    workers: undefined,
+    reporter: [['list'], ['html', { outputFolder: 'test-report' }]],
     use: {
         baseURL: 'http://localhost:3000',
-        trace: 'on-first-retry', // Trace settings
+        trace: 'on-first-retry',
         screenshot: 'only-on-failure',
-        viewport: { width: 390, height: 844 }, // Mobile first default
+        video: {
+            mode: 'on', 
+            size: { width: 1920, height: 1080 }
+        },
         headless: false,
         launchOptions: {
-            slowMo: 100,
-        }
+            slowMo: 1000,
+        },
     },
     webServer: {
         command: 'npx next dev -p 3000',
@@ -25,8 +29,16 @@ export default defineConfig({
     },
     projects: [
         {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
+            name: 'Admin Desktop',
+            use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
+        },
+        {
+            name: 'Customer Mobile',
+            use: { ...devices['iPhone 14'] },
+        },
+        {
+            name: 'Kitchen Tablet',
+            use: { ...devices['iPad Pro 11'], viewport: { width: 1194, height: 834 } }, // Using iPad Pro as proxy for kitchen tablet
         },
     ],
 });
