@@ -290,3 +290,94 @@ export async function updateMenuItem(id: string, data: Partial<MenuItem>) {
     revalidatePath('/dashboard/menu');
     return { success: true };
 }
+
+// Option Groups Actions
+
+export type OptionGroup = {
+    id: string;
+    restaurant_id: string;
+    name: string;
+    selection_type: 'single' | 'multiple';
+    min_selection: number;
+    max_selection: number | null;
+    created_at: string;
+    options?: Option[];
+}
+
+export type Option = {
+    id: string;
+    group_id: string;
+    name: string;
+    price: number;
+    is_available: boolean;
+    sort_order: number;
+}
+
+const OptionGroupSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    selection_type: z.enum(['single', 'multiple']),
+    min_selection: z.coerce.number().min(0).default(0),
+    max_selection: z.coerce.number().optional().nullable(),
+});
+
+export async function getOptionGroups() {
+    const supabase = await createClient();
+    const restaurant_id = await getRestaurantId(supabase);
+
+    if (!restaurant_id) return [];
+
+    if (isMockMode()) {
+        // Mock data
+        return [
+            { id: "og-1", restaurant_id, name: "Spiciness", selection_type: "single", min_selection: 1, max_selection: 1, options: [
+                { id: "opt-1", group_id: "og-1", name: "Mild", price: 0, is_available: true, sort_order: 1 },
+                { id: "opt-2", group_id: "og-1", name: "Medium", price: 0, is_available: true, sort_order: 2 },
+                { id: "opt-3", group_id: "og-1", name: "Spicy", price: 0, is_available: true, sort_order: 3 },
+            ] }
+        ] as OptionGroup[];
+    }
+
+    const { data: groups, error } = await supabase
+        .from('option_groups')
+        .select(`
+            *,
+            options (
+                *
+            )
+        `)
+        .eq('restaurant_id', restaurant_id)
+        .order('id'); // Should order by created_at but using ID for now
+
+    if (error) {
+        console.error("Error fetching option groups", error);
+        return [];
+    }
+
+    // Sort options manually if needed or via query
+    return (groups as OptionGroup[]) || [];
+}
+
+export async function createOptionGroup(data: z.infer<typeof OptionGroupSchema>) {
+    const supabase = await createClient();
+    const result = OptionGroupSchema.safeParse(data);
+
+    if (!result.success) {
+        return { error: "Invalid data", details: result.error.flatten() };
+    }
+
+    const restaurant_id = await getRestaurantId(supabase);
+    if (!restaurant_id) return { error: "No restaurant found" };
+
+    if (isMockMode()) return { success: true };
+
+    const { error } = await supabase
+        .from('option_groups')
+        .insert({
+            ...result.data,
+            restaurant_id
+        });
+
+    if (error) return { error: error.message };
+    revalidatePath('/dashboard/menu');
+    return { success: true };
+}

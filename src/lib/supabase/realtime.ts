@@ -4,51 +4,37 @@ import { useEffect } from "react";
 import { createClient } from "./client";
 import { useRouter } from "next/navigation";
 
-type SubscriptionOptions = {
-    event: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
-    callback: (payload: any) => void;
-    schema?: string;
-    table?: string; // Optional if derived from channel or just generic
-    filter?: string;
-};
-
-function isMockMode() {
-    // Client-side check
-    if (typeof window !== "undefined") {
-         // We can't easily access process.env.NEXT_PUBLIC... conditionally if it wasn't statically replaced at build time
-         // But we can check the URL or just rely on a consistent env var.
-         const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-         return !url || url.includes("your-project-url");
-    }
-    return false;
+// Generic payload type for better safety
+type RealtimePayload<T> = {
+    new: T;
+    old: T;
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+    // ... other Supabase fields
 }
 
-export function useRealtimeSubscription(
+type SubscriptionOptions<T> = {
+    event: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+    schema?: string;
+    table?: string;
+    filter?: string;
+    callback: (payload: any) => void; 
+};
+
+export function useRealtimeSubscription<T = any>(
     table: string,
-    options: SubscriptionOptions
+    options: SubscriptionOptions<T>
 ) {
     const router = useRouter();
 
     useEffect(() => {
-        if (isMockMode()) {
-            console.log(`[Mock Realtime] Subscribed to ${table} (${options.event})`);
-            // Mock polling or random events?
-            // For KDS, we want to simulate "New Order" appearing.
-            // Let's just do nothing actively, but maybe log.
-            // The polling in useQuery will handle data fetching.
-            // This hook is for "Instant" updates.
-            // We could simulate a random event every 30s?
-            return;
-        }
-
         const supabase = createClient();
         
         const channel = supabase
-            .channel(`public:${table}`)
+            .channel(`public:${table}:${options.event}`)
             .on(
-                'postgres_changes' as any,
+                'postgres_changes',
                 {
-                    event: options.event,
+                    event: options.event as any,
                     schema: options.schema || 'public',
                     table: table,
                     filter: options.filter
@@ -62,5 +48,17 @@ export function useRealtimeSubscription(
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [table, options.event, options.filter]); // Removed callback from dep array to avoid re-subscribing often unless wrapped in useCallback
+    }, [table, options.event, options.filter]); // Removed callback from dep array
+}
+
+// Specialized Hook for Orders (KDS)
+export function useOrdersSubscription(restaurantId: string, onOrderUpdate: () => void) {
+    useRealtimeSubscription('orders', {
+        event: '*',
+        filter: `restaurant_id=eq.${restaurantId}`,
+        callback: (payload) => {
+            console.log("Order Update:", payload);
+            onOrderUpdate();
+        }
+    });
 }

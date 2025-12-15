@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { updateKitchenOrderStatus } from '@/features/kitchen/actions';
@@ -13,11 +13,25 @@ interface OrderCardProps {
 
 export function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [waitTime, setWaitTime] = useState(0);
 
-  // Calculate wait time in minutes
-  const waitTime = Math.floor(
-    (Date.now() - new Date(order.created_at).getTime()) / 60000
-  );
+  useEffect(() => {
+    // Calculate initial wait time
+    const calculateWaitTime = () => {
+        const created = new Date(order.created_at).getTime();
+        const now = Date.now();
+        return Math.max(0, Math.floor((now - created) / 60000));
+    };
+    
+    setWaitTime(calculateWaitTime());
+
+    // Optional: Update every minute
+    const interval = setInterval(() => {
+        setWaitTime(calculateWaitTime());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [order.created_at]);
 
   // Color coding based on wait time
   const getColorClass = () => {
