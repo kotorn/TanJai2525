@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getRestaurantId, isMockMode } from '@/lib/supabase/helpers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -61,31 +62,6 @@ let mockItems: MenuItem[] = [
     { id: "item-2", restaurant_id: "mock-rest-1", category_id: "cat-1", name: "Tom Yum Kung", price: 180, description: "Spicy prawn soup", image_url: null, is_available: true, created_at: new Date().toISOString() },
 ];
 
-function isMockMode() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return !url || url.includes("your-project-url");
-}
-
-async function getRestaurantId(supabase: SupabaseClient) {
-    if (isMockMode()) return "mock-rest-1";
-
-    // 1. Check if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    // 2. Fetch the restaurant associated with the user
-    // Assuming RLS allows the user to see their own restaurants.
-    // If no restaurant exists, we can't create menu items.
-    const { data } = await supabase
-        .from('restaurants')
-        .select('id')
-        .limit(1)
-        .single();
-    
-    if (data) return data.id;
-
-    return null;
-}
 
 export async function getMenuData() {
     const supabase = await createClient();

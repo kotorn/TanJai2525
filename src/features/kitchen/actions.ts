@@ -1,14 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-
-// Actually, let's redefine locally to be safe or export/import properly. 
-// Assuming checking ENV is safe.
-
-function checkMockMode() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return !url || url.includes("your-project-url");
-}
+import { isMockMode } from '@/lib/supabase/helpers';
 
 // In-memory mock store for KDS orders (persists during server runtime)
 const mockOrdersStore: any[] = [
@@ -38,7 +31,7 @@ const mockOrdersStore: any[] = [
 ];
 
 export async function fetchKitchenOrders() {
-    if (checkMockMode()) {
+    if (isMockMode()) {
         // Return mock orders, filtering out 'done' status (they should be hidden)
         return mockOrdersStore.filter(o => o.status !== 'done');
     }
@@ -71,7 +64,7 @@ export async function fetchKitchenOrders() {
 }
 
 export async function updateKitchenOrderStatus(orderId: string, newStatus: string) {
-    if (checkMockMode()) {
+    if (isMockMode()) {
         // Update mock store
         const order = mockOrdersStore.find(o => o.id === orderId);
         if (order) {

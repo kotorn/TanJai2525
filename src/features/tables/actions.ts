@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getRestaurantId } from '@/lib/supabase/helpers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { Table } from '@/types/database.types'
@@ -12,13 +13,6 @@ const TableSchema = z.object({
 })
 
 // Reuse our helper from menu actions (ideally move to a shared lib)
-async function getRestaurantId(supabase: any) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data } = await supabase.from('restaurants').select('id').limit(1).single();
-    if (data) return data.id;
-    return null;
-}
 
 export async function getTables() {
     const supabase = await createClient();

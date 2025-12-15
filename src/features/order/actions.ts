@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { isMockMode } from '@/lib/supabase/helpers';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,10 +15,6 @@ const MOCK_TABLE_ID = "mock-table-id"; // Non-UUID for visibility, or UUID if sc
 const MOCK_TABLE_UUID = "00000000-0000-0000-0000-000000000001";
 const MOCK_RESTAURANT_UUID = "00000000-0000-0000-0000-000000000002";
 
-function isMockMode() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return !url || url.includes("your-project-url");
-}
 
 export async function getSession(tableId: string) {
     if (isMockMode()) {

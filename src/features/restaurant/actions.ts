@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { isMockMode } from '@/lib/supabase/helpers'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -148,11 +149,7 @@ export async function verifyOtp(phoneNumber: string, otp: string) {
 }
 
 export async function registerRestaurant(data: RestaurantProfile & { phoneNumber: string }) {
-    // Check for Mock Mode
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const isMock = !supabaseUrl || supabaseUrl.includes("your-project-url");
-
-    if (isMock) {
+    if (isMockMode()) {
         console.warn("[Mock Mode] Registering restaurant:", data.name);
         await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
         return { success: true, restaurantId: `mock-restaurant-${Date.now()}` };
