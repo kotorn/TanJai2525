@@ -31,22 +31,11 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
             await ownerPage.getByRole('button', { name: '[DEV] Simulate Owner Login' }).click();
 
             // Wait for redirection to Onboarding or Dashboard
-            // Since our Dev Login redirects to /onboarding?mock_auth=true
             await expect(ownerPage).toHaveURL(/\/onboarding/);
 
             // Fill Onboarding
             await ownerPage.getByPlaceholder('Ex. Som Tum Der').fill('Zaap E-San');
             // Select Cuisine (assuming dropdown or radio)
-            // Using generic simulated fill for now as UI might vary
-            // await ownerPage.getByRole('button', { name: 'Create Shop' }).click();
-
-            // NOTE: Since 'provisionTenant' is a Server Action and we bypassed Auth, 
-            // We might face issues if the Action validates Supabase Session strictly.
-            // However, for this Simulation, we assume the Dev Environment allows it 
-            // OR the previous steps set up the necessary state.
-
-            // For robustness in this script, let's assume we land on /[tenant] after "Creating"
-            // or we navigate there manually if the button action is mocked.
             await ownerPage.getByText('Create Shop').click();
 
             // Wait for Dashboard (Tenant Home)
@@ -68,7 +57,7 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
 
             await addMsg('Som Tum Thai', '50', 'Main');
             await addMsg('Grilled Chicken', '80', 'Main');
-            await addMsg('Sticky Rice', '10', 'Appetizer'); // Just using appetizer for speed
+            await addMsg('Sticky Rice', '10', 'Appetizer');
         });
 
         // ==========================================
@@ -83,8 +72,6 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
 
             // Extract Links
             await expect(ownerPage.locator('text=open Table 1')).toBeVisible();
-            // We can just construct them manually since we know the logic, 
-            // but grabbing from UI confirms they exist.
             tableLinks = [
                 `${process.env.BASE_URL || 'http://localhost:3000'}/${tenantSlug}?tableId=1`,
                 `${process.env.BASE_URL || 'http://localhost:3000'}/${tenantSlug}?tableId=2`,
@@ -114,10 +101,8 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
 
             // Add Items (Guest Flow)
             const addItems = async (page: Page, user: string) => {
-                await page.getByText('Som Tum Thai').first().click(); // Open Modal? or Direct Add
-                // Assuming "Add to Cart" button exists on card or modal
+                await page.getByText('Som Tum Thai').first().click();
                 await page.getByRole('button', { name: '+' }).first().click();
-                // Close modal if needed
 
                 await page.getByText('Grilled Chicken').first().click();
                 await page.getByRole('button', { name: '+' }).first().click();
@@ -160,13 +145,12 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
             await expect(ownerPage.locator('.order-ticket')).toHaveCount(3);
 
             // Advance Status: Pending -> Preparing -> Ready
-            // We click the "Right Arrow" or "Next Status" button
             const buttons = await ownerPage.locator('button:has-text("Preparing")').all();
             for (const btn of buttons) {
                 await btn.click(); // Move to Preparing
             }
 
-            await ownerPage.waitForTimeout(1000); // Visual effect
+            await ownerPage.waitForTimeout(1000);
 
             const doneButtons = await ownerPage.locator('button:has-text("Done")').all();
             for (const btn of doneButtons) {
@@ -180,24 +164,26 @@ test.describe('Tanjai POS End-to-End Simulation', () => {
         // ==========================================
         // 6. Owner: Payment (Cashier)
         // ==========================================
-        // (Assuming we haven't built Cashier UI yet in this session, checking Task List...)
-        // We do NOT have a dedicated Cashier UI in the previous prompts, only "Slip Verification".
-        // However, the User Scenario asks for "Process Cash Payment". 
-        // If the UI is missing, this step will fail.
-        // For the purpose of the Simulation Script Deliverable, I will comment this out or stub it
-        // and notify the user that Cashier UI is the next prerequisite.
-        // OR I can quickly check the Menu/Cart logic.
-
-        // Wait, the user prompt asked me to "Process Cash Payment" in Actor 4.
-        // If I haven't built it, I should probably fail or skip.
-        // Let's assume for this specific simulation I will just verify the orders are "Done" in KDS.
-        // Or if I really want to be "Senior", I would have built a simple "Bill" page.
-        // But I am time constrained.
-
-        /* 
         await test.step('Owner: Cashier Payment', async () => {
-             // Future Implementation
+            // Navigate to Cashier
+            await ownerPage.goto(`/${tenantSlug}/admin/cashier`);
+
+            // Wait for orders to load (slowMo helps visualization)
+            await expect(ownerPage.locator('h1')).toHaveText('Cashier / Bill Payment');
+
+            // Check count. Should match 3 unpaid orders.
+            await expect(ownerPage.getByRole('button', { name: /Cash Payment/ })).toHaveCount(3);
+
+            // Pay for Table 1, 2, 3
+            // Using locators.first() into loop because the list re-renders/shrinks on update
+            for (let i = 0; i < 3; i++) {
+                await ownerPage.getByRole('button', { name: /Cash Payment/ }).first().click();
+                // Wait toast/update
+                await ownerPage.waitForTimeout(500);
+            }
+
+            // Verify Empty
+            await expect(ownerPage.getByText('All tables are clear!')).toBeVisible();
         });
-        */
     });
 });
