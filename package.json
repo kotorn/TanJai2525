@@ -11,12 +11,18 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "test:e2e": "playwright test -c apps/web/playwright.config.ts"
+    "test:e2e": "playwright test -c apps/web/playwright.config.ts",
+    "simulate": "npx playwright test apps/web/e2e/simulation.spec.ts --headed -c apps/web/playwright.config.ts",
+    "stress": "npx playwright test apps/web/e2e/stress-test.spec.ts --headed --workers=1 -c apps/web/playwright.config.ts"
   },
   "devDependencies": {
-    "turbo": "^1.11.0",
+    "@playwright/test": "^1.57.0",
     "prettier": "^3.1.0",
+    "turbo": "^1.11.0",
     "typescript": "^5.3.0"
   },
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@10.0.0",
+  "dependencies": {
+    "sonner": "^2.0.7"
+  }
 }
