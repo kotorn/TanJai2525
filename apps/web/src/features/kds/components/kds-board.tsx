@@ -1,23 +1,31 @@
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'; // Or standard createClient
 import { useEffect, useState } from 'react';
 import OrderTicket from './order-ticket';
-import { WifiOff, Wifi } from 'lucide-react';
+import { WifiOff, Wifi, Globe } from 'lucide-react';
 
 // For the demo without auth-helpers installed yet, we use standard
 import { createClient } from '@supabase/supabase-js';
 
+export type SupportedLanguage = 'en' | 'my' | 'km' | 'la';
+
 export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: any[], tenantId: string }) {
     const [orders, setOrders] = useState(initialOrders);
     const [isConnected, setIsConnected] = useState(true);
+    const [displayLanguage, setDisplayLanguage] = useState<SupportedLanguage>('en');
 
     useEffect(() => {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            console.warn("KDS: Supabase credentials missing. Running in offline/demo mode.");
+            setIsConnected(false);
+            return;
+        }
+
         // Client-side supabase
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Subscribe to INSERT and UPDATE on 'orders' table
         // Filter by tenant_id would be ideal but realtime row level security might filter it automatically 
@@ -61,17 +69,59 @@ export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: a
 
     return (
         <div>
-            <div className="bg-gray-800 text-white p-4 flex justify-between items-center mb-6">
-                <h1 className="text-xl font-bold">Kitchen Display System</h1>
-                <div className="flex items-center gap-2 text-sm">
-                    {isConnected ? <Wifi className="text-green-400 w-4 h-4" /> : <WifiOff className="text-red-400 w-4 h-4" />}
-                    {isConnected ? 'Live' : 'Disconnected'}
+            <div className="bg-gray-800 text-white p-4 flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-xl font-bold">Kitchen Display System</h1>
+                     <div className="flex items-center bg-gray-700 rounded-lg p-1">
+                        <button 
+                            onClick={() => setDisplayLanguage('en')}
+                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'en' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            EN
+                        </button>
+                        <button 
+                            onClick={() => setDisplayLanguage('my')}
+                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'my' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            MY
+                        </button>
+                        <button 
+                            onClick={() => setDisplayLanguage('km')}
+                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'km' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            KM
+                        </button>
+                        <button 
+                            onClick={() => setDisplayLanguage('la')}
+                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'la' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            LA
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                     <span className="text-xs text-gray-400 font-mono hidden sm:inline-block">
+                        {displayLanguage === 'en' && 'English'}
+                        {displayLanguage === 'my' && 'မြန်မာ (Myanmar)'}
+                        {displayLanguage === 'km' && 'ខ្មែរ (Khmer)'}
+                        {displayLanguage === 'la' && 'ລາວ (Lao)'}
+                    </span>
+                    <div className="flex items-center gap-2 text-sm">
+                        {isConnected ? <Wifi className="text-green-400 w-4 h-4" /> : <WifiOff className="text-red-400 w-4 h-4" />}
+                        {isConnected ? 'Live' : 'Disconnected'}
+                    </div>
                 </div>
             </div>
 
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                 {activeOrders.map(order => (
-                    <OrderTicket key={order.id} order={order} tenantId={tenantId} />
+                    <OrderTicket 
+                        key={order.id} 
+                        order={order} 
+                        tenantId={tenantId} 
+                        displayLanguage={displayLanguage}
+                    />
                 ))}
 
                 {activeOrders.length === 0 && (

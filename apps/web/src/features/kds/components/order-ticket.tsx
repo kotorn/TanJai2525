@@ -5,9 +5,12 @@ import { updateOrderStatus } from '../actions';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+type SupportedLanguage = 'en' | 'my' | 'km' | 'la';
+
 type OrderProps = {
     order: any;
     tenantId: string;
+    displayLanguage: SupportedLanguage;
 };
 
 function timeAgo(date: Date) {
@@ -17,7 +20,51 @@ function timeAgo(date: Date) {
     return `${Math.floor(diff / 3600)}h ago`;
 }
 
-export default function OrderTicket({ order, tenantId }: OrderProps) {
+// Simple client-side translation dictionary for KDS demo
+const kdsDictionary: Record<string, Record<string, string>> = {
+    'my': { // Myanmar
+        'fried rice': 'ထမင်းကြော်',
+        'chicken': 'ကြက်သား',
+        'pad thai': 'ပတ်ထိုင်း',
+        'burger': 'ဘာဂါ',
+        'coke': 'ကိုကာကိုလာ',
+        'water': 'ရေ',
+    },
+    'km': { // Khmer
+        'fried rice': 'បាយ​ឆា',
+        'chicken': 'សាច់មាន់',
+        'pad thai': 'ផាត់ថៃ',
+        'burger': 'ប៊ឺហ្គឺ',
+        'coke': 'កូកា',
+        'water': 'ទឹក',
+    },
+    'la': { // Lao
+        'fried rice': 'ເຂົ້າຜັດ',
+        'chicken': 'ໄກ່',
+        'pad thai': 'ຜັດໄທ',
+        'burger': 'ເບີເກີ',
+        'coke': 'ໂຄກ',
+        'water': 'ນ້ໍາ',
+    }
+};
+
+function translateItem(name: string, lang: SupportedLanguage) {
+    if (lang === 'en') return name;
+    
+    // Check exact match (lowercase)
+    const lowerName = name.toLowerCase();
+    const dict = kdsDictionary[lang];
+    if (dict && dict[lowerName]) {
+        return dict[lowerName];
+    }
+    
+    // Partial Match Strategy (Basic)
+    if (lowerName.includes('fried rice')) return dict['fried rice'] + (lowerName.replace('fried rice', '')); 
+    
+    return name; // Fallback
+}
+
+export default function OrderTicket({ order, tenantId, displayLanguage }: OrderProps) {
     const [isUpdating, setIsUpdating] = useState(false);
 
     // Simple status machine: pending -> preparing -> ready -> completed
@@ -73,9 +120,16 @@ export default function OrderTicket({ order, tenantId }: OrderProps) {
                     <div key={idx} className="flex justify-between items-start text-base">
                         <div className="flex items-start gap-3 flex-1 min-w-0">
                             <span className="font-bold w-8 h-8 flex items-center justify-center bg-gray-200 rounded-lg shrink-0">{item.quantity}</span>
-                            <span className="line-clamp-2 leading-relaxed pt-0.5 break-words">
-                                {item.menu_items?.name || 'Unknown Item'}
-                            </span>
+                            <div className="flex flex-col">
+                                <span className="line-clamp-2 leading-relaxed pt-0.5 break-words font-medium">
+                                    {translateItem(item.menu_items?.name || 'Unknown Item', displayLanguage)}
+                                </span>
+                                {displayLanguage !== 'en' && (
+                                    <span className="text-xs text-gray-400">
+                                        {item.menu_items?.name} 
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 ))}
