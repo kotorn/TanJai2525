@@ -1,13 +1,26 @@
 'use server';
 
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { db } from '@/lib/mock-db';
 import { z } from 'zod';
+
+// Zod Schemas
+const MenuItemSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    price: z.coerce.number().min(0, "Price must be positive"),
+    category_id: z.string().optional(), // Optional if using text category fallback
+    category: z.string().optional(), // Text fallback
+    description: z.string().optional(),
+    image_url: z.string().optional().nullable(),
+    is_available: z.boolean().default(true),
+    stock: z.coerce.number().default(0),
+});
 
 export type MenuItem = {
     id: string;
-    tenant_id: string; // Using tenant_id instead of restaurant_id for consistency with mock-db
-    category: string; // MockDB uses simple string category provided in UI, we can keep it or enhance
+    tenant_id: string;
+    category_id?: string; 
+    category?: string;
     name: string;
     price: number;
     description: string | null;
@@ -19,42 +32,77 @@ export type MenuItem = {
 export type Category = {
     id: string;
     name: string;
+    sort_order: number;
 }
 
-const MenuItemSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    price: z.coerce.number().min(0, "Price must be positive"),
-    category: z.string().min(1, "Category is required"),
-    description: z.string().optional(),
-    image_url: z.string().optional().nullable(),
-    is_available: z.boolean().default(true),
-});
-
 export async function getMenuData(tenantSlug: string) {
-    // In mock-db, items are global or need helper to filter. 
-    // db.getMenuItems(tenantId) returns all items currently in the simple mock implementation.
-    // In a real app we would filter by tenant.
-    
-    const items = db.getMenuItems(tenantSlug); 
-    
-    // Extract unique categories from items for the sidebar
-    // If no items, provide default categories
-    const categoryNames = Array.from(new Set(items.map((i: any) => i.category || 'Uncategorized')));
-    const categories: Category[] = categoryNames.map((name, index) => ({
-        id: `cat-${index}`, // Simple mock ID
-        name: name as string
-    }));
+    const supabase = createClient();
 
-    if (categories.length === 0) {
-        categories.push({ id: 'cat-main', name: 'Main' });
-        categories.push({ id: 'cat-appetizer', name: 'Appetizer' });
-        categories.push({ id: 'cat-drink', name: 'Drink' });
+    // 1. Get Tenant ID from Slug
+    const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('slug', tenantSlug)
+        .single();
+    
+    if (tenantError || !tenant) {
+        console.error('Tenant not found:', tenantError);
+        return { categories: [], items: [] };
+    }
+
+    // 2. Fetch Categories
+    // We try to fetch from 'menu_categories'. If it fails (table missing), we return empty.
+    let categories: Category[] = [];
+    const { data: catData, error: catError } = await supabase
+        .from('menu_categories')
+        .select('*')
+        .eq('tenant_id', tenant.id) // Assuming we fixed the column name or it matches
+        .order('sort_order', { ascending: true });
+        
+    if (!catError && catData) {
+        categories = catData as Category[];
+    } else {
+        console.warn('Could not fetch categories (table might be missing or using restaurant_id):', catError?.message);
+    }
+
+    // 3. Fetch Items
+    const { data: items, error: itemsError } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('tenant_id', tenant.id)
+        .order('name', { ascending: true });
+
+    if (itemsError) {
+        console.error('Error fetching items:', itemsError);
     }
 
     return {
-        categories,
-        items: items as MenuItem[]
+        categories: categories,
+        items: (items || []) as MenuItem[]
     };
+}
+
+export async function createCategory(tenantSlug: string, name: string) {
+     const supabase = createClient();
+     
+    // Get Tenant
+    const { data: tenant } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('slug', tenantSlug)
+        .single();
+
+    if (!tenant) return { error: "Tenant not found" };
+
+    const { error } = await supabase.from('menu_categories').insert({
+        tenant_id: tenant.id,
+        name: name,
+        sort_order: 0
+    });
+
+    if (error) return { error: error.message };
+    revalidatePath(`/${tenantSlug}/admin/menu`);
+    return { success: true };
 }
 
 export async function createMenuItem(tenantSlug: string, data: z.infer<typeof MenuItemSchema>) {
@@ -64,50 +112,53 @@ export async function createMenuItem(tenantSlug: string, data: z.infer<typeof Me
         return { error: "Invalid data", details: result.error.flatten() };
     }
 
-    db.createMenuItem({
-        tenant_id: tenantSlug,
-        ...result.data,
-        stock: 100 // Default stock
+    const supabase = createClient();
+    
+    // Get Tenant ID
+    const { data: tenant } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('slug', tenantSlug)
+        .single();
+
+    if (!tenant) return { error: "Tenant not found" };
+
+    const { error } = await supabase.from('menu_items').insert({
+        tenant_id: tenant.id,
+        ...result.data
     });
+
+    if (error) {
+        return { error: error.message };
+    }
 
     revalidatePath(`/${tenantSlug}/admin/menu`);
     return { success: true };
 }
 
 export async function updateMenuItem(id: string, data: Partial<MenuItem>) {
-    // Mock DB update logic
-    // We need to implement update in MockDB or do it manually here since db.updateOrder exists but updateMenuItem might not
-    // Checking mock-db.ts content from previous read:
-    // It has createMenuItem, getMenuItems, updateStock, createOrder... NO updateMenuItem generic.
-    // We need to extend it or hack it. Since it's in-memory, we can reference the array directly if exported?
-    // The export is `export const MockDB = { ... params: [] }`. 
-    // And `export const db = ...`. 
-    // We can iterate db.menuItems if accessible.
-    
-    const items = db.menuItems;
-    const itemIndex = items.findIndex((i: any) => i.id === id);
-    
-    if (itemIndex === -1) return { error: "Item not found" };
+    const supabase = createClient();
 
-    const updatedItem = { ...items[itemIndex], ...data };
-    items[itemIndex] = updatedItem;
+    const { error } = await supabase
+        .from('menu_items')
+        .update(data)
+        .eq('id', id);
 
-    // revalidatePath is harder without tenant slug context if not passed, 
-    // but usually we are on the page so revalidatePath('/') or current url works.
-    // We will assume usage in the admin page.
-    // Actually we need tenantSlug to revalidate correctly.
-    // Ideally we pass it or path.
-    // Let's rely on simple refresh or revalidatePath global? 
-    // Just return success. Client router.refresh() handles it.
-    
+    if (error) return { error: error.message };
+
+    revalidatePath('/'); 
     return { success: true };
 }
 
 export async function deleteMenuItem(id: string) {
-    const index = db.menuItems.findIndex((i: any) => i.id === id);
-    if (index !== -1) {
-        db.menuItems.splice(index, 1);
-        return { success: true };
-    }
-    return { error: "Item not found" };
+    const supabase = createClient();
+
+    const { error } = await supabase
+        .from('menu_items')
+        .delete()
+        .eq('id', id);
+        
+    if (error) return { error: error.message };
+    
+    return { success: true };
 }

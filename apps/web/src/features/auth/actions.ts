@@ -1,37 +1,66 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
 
-// Service Role is REQUIRED here because we need to INSERT into 'tenants' 
-// and 'users' for an authenticated user who doesn't have a role yet (and thus might be blocked by RLS).
-// Or we rely on the specific RLS "Authenticated users can create tenant" we added.
-// However, creating the 'public.users' record might need elevation if we strictly limit self-creation.
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-// const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-export async function provisionTenant(shopName: string, userId: string, email: string) {
-    console.log('[Mock] Provisioning Tenant:', shopName);
+export async function provisionTenant(
+    shopName: string, 
+    userId: string, 
+    email: string,
+    metadata?: { cuisine?: string; location?: string }
+) {
+    console.log('[Action] Provisioning Tenant:', { shopName, userId });
     
-    // Simulate delay
-    await new Promise(r => setTimeout(r, 1000));
+    try {
+        const supabaseAdmin = createAdminClient();
+        
+        // 1. Generate Slug
+        const slug = shopName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 10000);
 
-    // Mock Slug
-    const slug = shopName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
-    
-    // Use Mock DB (Dynamic Import to avoid top-level side effects if tricky, but static is fine)
-    const { db } = await import('@/lib/mock-db');
-    const newTenant = db.createTenant(shopName, slug);
-    console.log('Created Tenant:', newTenant);
+        // 2. Insert Tenant (Using Admin to ensure no RLS hiccups, although Authenticated is allowed)
+        const { data: tenant, error: tenantError } = await supabaseAdmin
+            .from('tenants')
+            .insert({
+                name: shopName,
+                slug: slug,
+            })
+            .select()
+            .single();
 
-    // SEED MENU for Testing
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Cappuccino', price: 65, category: 'Coffee' });
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Matcha Latte', price: 75, category: 'Tea' });
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Croissant', price: 80, category: 'Bakery' });
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Som Tum', price: 60, category: 'Food' });
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Limited Deal', price: 10, category: 'Promo', stock: 1 });
-    db.createMenuItem({ tenantId: newTenant.id, name: 'Sold Out Item', price: 0, category: 'Promo', stock: 0 });
+        if (tenantError) throw new Error('Failed to create tenant: ' + tenantError.message);
 
-    return { success: true, slug: slug };
+        // 3. Link User to Tenant (Update public.users)
+        // We use Admin here to UPSERT to ensure the profile exists with the correct Tenant ID & Role
+        const { error: userError } = await supabaseAdmin
+            .from('users')
+            .upsert({
+                id: userId,
+                email: email,
+                tenant_id: tenant.id,
+                role: 'owner',
+                full_name: shopName + ' Owner', // Default name
+                // cuisine/location could go into a 'metadata' jsonb column if users table has it, 
+                // but schema didn't show it. We'll skip for now or add if schema permits.
+            })
+            .select();
+
+        if (userError) throw new Error('Failed to link user: ' + userError.message);
+
+        // 4. Seed Default Menu (Optional, using Admin)
+        const { error: menuError } = await supabaseAdmin
+            .from('menu_items')
+            .insert([
+                { tenant_id: tenant.id, name: 'Hot Coffee', price: 60, category: 'Coffee', is_available: true },
+                { tenant_id: tenant.id, name: 'Iced Tea', price: 50, category: 'Tea', is_available: true },
+            ]);
+
+        // 5. Revalidate
+        revalidatePath('/');
+        
+        return { success: true, slug: tenant.slug };
+    } catch (error: any) {
+        console.error('Provisioning Error:', error);
+        return { success: false, error: error.message };
+    }
 }

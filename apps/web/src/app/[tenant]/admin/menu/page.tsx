@@ -3,19 +3,18 @@
 import { getMenuData, deleteMenuItem, MenuItem, Category } from "@/features/menu/actions";
 import { MenuDataTable } from "@/features/menu/components/MenuDataTable";
 import { MenuItemModal } from "@/features/menu/components/MenuItemModal";
+import { CategoryModal } from "@/features/menu/components/CategoryModal";
 import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export default function AdminMenuPage({ params }: { params: { tenant: string } }) {
-    // We need to fetch data. In client comp, we effect it or use SWR. 
-    // Or we can simple call the server action in useEffect since it returns data.
-    
     const [categories, setCategories] = useState<Category[]>([]);
     const [items, setItems] = useState<MenuItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
     const router = useRouter();
@@ -40,6 +39,10 @@ export default function AdminMenuPage({ params }: { params: { tenant: string } }
     const handleCreate = () => {
         setEditingItem(null);
         setIsModalOpen(true);
+    };
+
+    const handleCreateCategory = () => {
+        setIsCategoryModalOpen(true);
     };
 
     const handleEdit = (item: MenuItem) => {
@@ -80,6 +83,7 @@ export default function AdminMenuPage({ params }: { params: { tenant: string } }
                     data={items}
                     categories={categories}
                     onCreate={handleCreate}
+                    onCreateCategory={handleCreateCategory}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />
@@ -91,6 +95,16 @@ export default function AdminMenuPage({ params }: { params: { tenant: string } }
                 tenantSlug={params.tenant}
                 categories={categories}
                 itemToEdit={editingItem}
+                onSuccess={() => {
+                    loadData();
+                    router.refresh();
+                }}
+            />
+
+            <CategoryModal
+                open={isCategoryModalOpen}
+                onOpenChange={setIsCategoryModalOpen}
+                tenantSlug={params.tenant}
                 onSuccess={() => {
                     loadData();
                     router.refresh();

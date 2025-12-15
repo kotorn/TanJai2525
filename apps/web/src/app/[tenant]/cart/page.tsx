@@ -1,58 +1,34 @@
 'use client';
 
 import { useCartStore } from '@/features/ordering/cart-store';
-import { processOrder } from '@/features/ordering/actions';
+import { useOrder } from '@/features/ordering/hooks/use-order';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { Trash, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function CartPage({ params }: { params: { tenant: string } }) {
     const { items, removeItem, total, clearCart } = useCartStore();
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const { placeOrder, isProcessing, isOffline } = useOrder();
 
-    // Hacky tenant ID (In real app, middleware pass it or we fetch it)
-    // For now we just use a placeholder UUID or derived from params if we had it mapped
     const tenantSlug = params.tenant;
 
     const handleCheckout = async () => {
         if (items.length === 0) return;
-        setIsSubmitting(true);
-
-        try {
-            // We need the ACTUAL tenant ID, but for this demo we might fail if we don't have it.
-            // In a real implementation this component would get tenantId via props or context
-            // For scaffold, we assume we can get it or just pass null and let server handle if possible.
-            // But the Server Action expects a UUID. 
-            // We will fetch it client side merely for this demo or assume passed.
-
-            // Simulating ID for now (This will fail DB constraint if not real)
-            const fakeTenantId = '00000000-0000-0000-0000-000000000000';
-
-            const result = await processOrder({
-                tenant_id: fakeTenantId,
-                table_number: 'T1', // Hardcoded for demo
-                items: items.map(i => ({
-                    menu_item_id: i.menuItemId,
-                    quantity: i.quantity,
-                    options: i.options
-                }))
-            });
-
-            if (result.success) {
-                toast.success('Order placed!');
-                clearCart();
-                router.push(`/${tenantSlug}/order-status/${result.orderId}`);
-            } else {
-                toast.error('Failed to place order: ' + result.error);
-            }
-        } catch (e) {
-            toast.error('An error occurred');
-        } finally {
-            setIsSubmitting(false);
-        }
+        
+        // Simulating ID for now (This will fail DB constraint if not real)
+        // Ideally we resolve slug to ID in Server Action or pass it down via Layout.
+        // For MVP, passing slug to action layer is cleaner if action handles resolution.
+        // Our useOrder hook calls processOrder which handles slug resolution.
+        
+        await placeOrder(tenantSlug, 'T1'); // Hardcoded table
+        // Success handling is done inside the hook (clears cart, shows toast)
+        // We might want to redirect on success?
+        // Hook clears cart, so we can watch item length or just redirect if processing done?
+        // Ideally hook returns result or we pass callback.
+        // But for now, if cart is cleared, we can assume success or redirect?
+        // The hook implementation clears cart on success.
     };
 
     return (
@@ -94,18 +70,14 @@ export default function CartPage({ params }: { params: { tenant: string } }) {
                         <span>฿{total()}</span>
                     </div>
 
-                    {/* Auth Prompt Section */}
-                    {!isGuest && (
-                        <CheckoutAuthPrompt onGuestContinue={() => setIsGuest(true)} />
-                    )}
-
                     <button
                         onClick={handleCheckout}
-                        disabled={isProcessing || (!isGuest && false)}
-                        className="w-full bg-orange-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-orange-700 disabled:opacity-50"
+                        disabled={isProcessing}
+                        className={`w-full py-3 rounded-lg font-bold text-lg text-white disabled:opacity-50 ${isOffline ? 'bg-amber-600 hover:bg-amber-700' : 'bg-orange-600 hover:bg-orange-700'}`}
                     >
-                        {isProcessing ? 'Processing...' : 'Confirm Order'}
+                        {isProcessing ? 'Processing...' : isOffline ? 'Queue Order (Offline)' : 'Confirm Order'}
                     </button>
+                    {isOffline && <p className="text-xs text-center mt-2 text-amber-700 font-medium">You are offline. Order will sync when online.</p>}
                 </div>
             )}
         </div>

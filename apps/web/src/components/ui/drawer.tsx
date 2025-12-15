@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils"
 
 function Drawer({
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & { children?: React.ReactNode }) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />
 }
 
 function DrawerTrigger({
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger> & { children?: React.ReactNode }) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />
 }
 
@@ -25,7 +25,7 @@ function DrawerPortal({
 
 function DrawerClose({
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Close> & { children?: React.ReactNode }) {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />
 }
 
@@ -49,7 +49,7 @@ function DrawerContent({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & { children?: React.ReactNode }) {
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />

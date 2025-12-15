@@ -43,6 +43,7 @@ interface MenuDataTableProps {
   onEdit: (item: MenuItem) => void
   onDelete: (item: MenuItem) => void
   onCreate: () => void
+  onCreateCategory: () => void
 }
 
 export function MenuDataTable({
@@ -50,7 +51,8 @@ export function MenuDataTable({
   categories,
   onEdit,
   onDelete,
-  onCreate
+  onCreate,
+  onCreateCategory
 }: MenuDataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -187,6 +189,9 @@ export function MenuDataTable({
           className="max-w-sm"
         />
         <div className="flex items-center gap-2">
+            <Button onClick={onCreateCategory} variant="outline" className="mr-2">
+                <Plus className="mr-2 h-4 w-4" /> Add Category
+            </Button>
             <Button onClick={onCreate} className="bg-orange-600 hover:bg-orange-700 text-white">
                 <Plus className="mr-2 h-4 w-4" /> Add Item
             </Button>

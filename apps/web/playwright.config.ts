@@ -40,7 +40,23 @@ export default defineConfig({
       },
     },
 
-    // 2. 🧟 The Legacy Patient (Anonymous OS / XP Embedded)
+    // 2. 📱 Standard Mobile (Pixel 5)
+    {
+      name: 'Mobile Chrome (Pixel 5)',
+      use: {
+        ...devices['Pixel 5'],
+      },
+    },
+
+    // 3. 🍎 Standard Mobile (iPhone 12)
+    {
+      name: 'Mobile Safari (iPhone 12)',
+      use: {
+        ...devices['iPhone 12'],
+      },
+    },
+
+    // 4. 🧟 The Legacy Patient (Anonymous OS / XP Embedded)
     // Vulnerable to drive-by downloads, unpatched exploits, and rendering failures.
     {
       name: 'Legacy Patient (XP Embedded)',
@@ -63,7 +79,7 @@ export default defineConfig({
       },
     },
 
-    // 3. 🦠 The Infected Mobile (Legacy Android / AOSP)
+    // 5. 🦠 The Infected Mobile (Legacy Android / AOSP)
     // Low-end hardware, race conditions, touch events.
     {
       name: 'Infected Mobile (Legacy Android)',
@@ -78,7 +94,7 @@ export default defineConfig({
       },
     },
 
-    // 4. 🩸 The Ischemic Network (High Latency / Network Arrhythmia)
+    // 6. 🩸 The Ischemic Network (High Latency / Network Arrhythmia)
     // Simulates slow 3G bandwidth cap with 500ms random jitter.
     {
       name: 'The Ischemic Network (Slow 3G)',

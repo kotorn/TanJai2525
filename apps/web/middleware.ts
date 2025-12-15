@@ -1,61 +1,102 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const url = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
-  const response = NextResponse.next();
-  
-  // 1. Refresh Session (Required for Supabase Auth in Middleware)
-  const supabase = createMiddlewareClient({ req: request, res: response });
-  const { data: { session } } = await supabase.auth.getSession();
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
-  // 2. Auth Guards
-  const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/auth');
-  const isOnboarding = url.pathname.startsWith('/onboarding');
-  
-  // If user is not logged in and trying to access protected routes (not login/auth/static)
-  // [DEV] explicit bypass for simulation
-  const isMockAuth = url.searchParams.get('mock_auth') === 'true';
+  // 1. Create Supabase Client
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          )
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
 
-  if (!session && !isAuthRoute && !url.pathname.includes('.') && !isMockAuth) {
-      // Redirect to Login
-      return NextResponse.redirect(new URL('/login', request.url));
+  // 2. Refresh Session
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // 3. Auth Guards
+  const url = request.nextUrl
+  const isAuthRoute = url.pathname.startsWith('/login')
+  const isOnboarding = url.pathname.startsWith('/onboarding')
+  
+  // Exclude some paths from auth check
+  const isPublicPath = 
+    url.pathname.startsWith('/_next') || 
+    url.pathname.startsWith('/api') || 
+    url.pathname.includes('.') || 
+    url.pathname === '/' // Maybe landing page is public?
+
+  if (!user && !isAuthRoute && !isPublicPath) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-  
-  // If user IS logged in, checks if they are trying to access Login page
-  if (session && isAuthRoute) {
-      return NextResponse.redirect(new URL('/dashboard', request.url)); // or root
+
+  if (user && isAuthRoute) {
+     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // 3. Multi-Tenancy Logic (Existing)
-  const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'tanjai.app'; 
-  let currentHost = hostname.replace(`.${ ROOT_DOMAIN }`, '');
+  // 4. Multi-Tenancy Logic
+  const hostname = request.headers.get('host') || ''
+  const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'tanjai.app'
   
+  let currentHost = hostname.replace(`.${ROOT_DOMAIN}`, '')
   if (hostname.includes('localhost')) {
-    currentHost = hostname.split('.')[0];
-    if (currentHost === 'localhost') currentHost = '';
+     const parts = hostname.split('.')
+     if (parts[0] !== 'localhost') {
+        currentHost = parts[0]
+     } else {
+        currentHost = ''
+     }
   }
 
-  if (currentHost) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-tenant-slug', currentHost);
+  // Rewrite for Subdomains
+  if (currentHost && currentHost !== 'www') {
+    // If accessing tenant.tanjai.app, rewrite to /tenant/...
+    // BUT we need to be careful not to double rewrite or loop.
+    // The previous logic was: rewrite to `/${currentHost}${url.pathname}`
     
-    // Rewrite to tenant path
+    // We must pass the tenant slug to headers for easy access
+    response.headers.set('x-tenant-slug', currentHost)
+    
     return NextResponse.rewrite(
-      new URL(`/${currentHost}${url.pathname}`, request.url),
-      {
-        request: { headers: requestHeaders },
-      }
-    );
+        new URL(`/${currentHost}${url.pathname}`, request.url),
+        response
+    )
   }
 
-  return response;
+  return response
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-};
+}
