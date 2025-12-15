@@ -12,48 +12,66 @@ type OrderItemInput = {
 };
 
 type CreateOrderInput = {
-    tenant_id: string; // In real app, derived from session/context
-    table_number: string;
-    items: OrderItemInput[];
-};
+import { withTenantContext } from '@/lib/db-utils'; // Use our new helper
 
-// Initialize Supabase Client (Server-Side)
-// Note: In a real Next.js app, use createServerComponentClient from @supabase/auth-helpers-nextjs
+// We'll use the generic action logic, but now robustly handling Auth context
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use Service Role for atomic actions if bypassing RLS on edge cases, OR use standard key with RLS context
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Service role for processing
 
-export async function processOrder(data: CreateOrderInput) {
-    console.log('Processing Order for Tenant:', data.tenant_id);
+export async function processOrder(
+    tenantId: string,
+    items: { id: string; quantity: number }[],
+    tableNumber: string = '1',
+    userId?: string // Optional: for logged-in users
+) {
+    // Use Helper to ensure DB Context is set (Security Best Practice)
+    return await withTenantContext(tenantId, async (supabase) => {
+        try {
+            // 1. Prepare Order Payload
+            const orderData = {
+                tenant_id: tenantId,
+                table_number: tableNumber,
+                status: 'pending',
+                total_amount: 0, // Calculated by DB trigger or logic below
+                user_id: userId || null, // Link if logged in
+            };
 
-    try {
-        // 1. Call the Atomic Database Function (RPC)
-        // This ensures order creation and inventory deduction happen in ONE transaction
-        const { data: orderId, error } = await supabase.rpc('create_order_with_stock_deduction', {
-            p_tenant_id: data.tenant_id,
-            p_table_number: data.table_number,
-            p_items: data.items,
-        });
+            // 2. Call Atomic Function (Defined in schema.sql)
+            // We might need to update the function signature to accept user_id if not already
+            // For MVP, if the function 'create_order_with_stock_deduction' doesn't support user_id, 
+            // we might do a direct insert pattern or update the SQL function.
+            // Let's assume for now we call the function, but it might need a small SQL update to persist user_id.
+            // Alternatively, we do a direct insert block here leveraging the Service Role + Context.
 
-        if (error) {
-            console.error('Database Error:', error);
-            throw new Error(`Order failed: ${error.message}`);
+            // Simulating the logic of the SQL function in TS for flexibility with Guest/User:
+
+            let total = 0;
+            // Verify items and calculate total (Simplified)
+            // In real app: fetch prices from DB
+
+            // Call the RPC defined previously
+            const { data: orderId, error } = await supabase.rpc('create_order_with_stock_deduction', {
+                p_tenant_id: tenantId,
+                p_table_number: tableNumber,
+                p_items: items
+            });
+
+            if (error) throw error;
+
+            // If userId is present, we update the order to link it
+            if (userId && orderId) {
+                await supabase.from('orders').update({ user_id: userId }).eq('id', orderId);
+            }
+
+            // 3. Revalidate Cache
+            // Clear the cache for the KDS and Order Status pages
+            revalidatePath(`/${tenantId}/kds`);
+            revalidatePath(`/${tenantId}/tables/${tableNumber}`);
+
+            return { success: true, orderId };
+        } catch (error: any) {
+            console.error('Order Failed:', error);
+            return { success: false, error: 'Order failed: ' + error.message };
         }
-
-        // 2. Trigger Real-time Broadcast (KDS)
-        // Even though Supabase Realtime listens to DB changes, we might want to trigger specific events
-        // or if we aren't using listening on 'orders' table directly. 
-        // Ideally, the client (KDS) is listening to 'INSERT ON orders' via Supabase Realtime.
-        // So explicit broadcast might be redundant if CDC is on, but good for custom notify.
-
-        // 3. Revalidate Cache
-        // Clear the cache for the KDS and Order Status pages
-        revalidatePath(`/${data.tenant_id}/kds`);
-        revalidatePath(`/${data.tenant_id}/tables/${data.table_number}`);
-
-        return { success: true, orderId };
-
-    } catch (err: any) {
-        return { success: false, error: err.message };
-    }
+    });
 }

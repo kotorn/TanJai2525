@@ -88,17 +88,23 @@ export default function CartPage({ params }: { params: { tenant: string } }) {
             </div>
 
             {items.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t">
-                    <div className="max-w-md mx-auto flex justify-between items-center mb-4">
-                        <span className="text-gray-600">Total</span>
-                        <span className="text-2xl font-bold text-orange-600">฿{total()}</span>
+                <div className="mt-8 border-t pt-4">
+                    <div className="flex justify-between text-xl font-bold mb-4">
+                        <span>Total:</span>
+                        <span>฿{total()}</span>
                     </div>
+
+                    {/* Auth Prompt Section */}
+                    {!isGuest && (
+                        <CheckoutAuthPrompt onGuestContinue={() => setIsGuest(true)} />
+                    )}
+
                     <button
                         onClick={handleCheckout}
-                        disabled={isSubmitting}
-                        className="w-full bg-orange-600 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-orange-700 disabled:opacity-50"
+                        disabled={isProcessing || (!isGuest && false)}
+                        className="w-full bg-orange-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-orange-700 disabled:opacity-50"
                     >
-                        {isSubmitting ? 'Processing...' : 'Confirm Order'}
+                        {isProcessing ? 'Processing...' : 'Confirm Order'}
                     </button>
                 </div>
             )}
