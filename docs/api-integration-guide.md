@@ -5,7 +5,7 @@ This guide defines standards for creating internal API routes and integrating wi
 
 ## 1. Internal API Routes (Next.js App Router)
 
-Located in `app/api/...`.
+Located in `apps/web/app/api/...`.
 
 ### Standards
 - **RESTful Design**: Use standard HTTP methods (`GET`, `POST`, `PATCH`, `DELETE`).

@@ -36,7 +36,7 @@ We aim for a balanced testing pyramid:
 
 ### Running E2E Locally
 ```bash
-npx playwright test
+npx playwright test -c apps/web/playwright.config.ts
 ```
 
 ## 4. Manual QA Checklist

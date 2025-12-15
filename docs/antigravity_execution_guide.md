@@ -17,7 +17,7 @@
 
 Context:
 - Project: Tanjai POS (Thai Street Food Point of Sale)
-- Tech Stack: Next.js 15, Supabase, Playwright
+- Tech Stack: Next.js 14, Supabase, Playwright
 - Location: http://localhost:3000
 - Database: Already seeded with schema
 
@@ -26,14 +26,14 @@ Your Mission (3-Part Agent Orchestration):
 PART 1: GENERATE TEST CODE
 Create a complete Playwright test suite in TypeScript:
 
-File 1: playwright.config.ts
+File 1: apps/web/playwright.config.ts
 - headed: true (visible browser)
 - slowMo: 1000 (1 second delay per action)
 - screenshot: 'only-on-failure'
 - trace: 'on-first-retry'
 - projects: ['Admin', 'Customer Mobile', 'Kitchen Tablet']
 
-File 2: e2e/stress-test.spec.ts
+File 2: apps/web/e2e/stress-test.spec.ts
 Implement these 6 stress test scenarios:
 
 LEVEL 1: Concurrent Rush
@@ -70,7 +70,7 @@ LEVEL 6: Chaos Loop (10 Iterations)
 - Random delays (10-60 seconds)
 - Verify: No data corruption
 
-File 3: helpers/test-utils.ts
+File 3: apps/web/e2e/helpers/test-utils.ts
 Create reusable functions:
 - addItemToCart(page, itemName)
 - submitOrder(page)
@@ -79,7 +79,7 @@ Create reusable functions:
 - markItemOutOfStock(page, itemName)
 
 PART 2: RUN & OBSERVE
-Execute: npx playwright test e2e/stress-test.spec.ts --headed
+Execute: npx playwright test apps/web/e2e/stress-test.spec.ts --headed -c apps/web/playwright.config.ts
 
 Monitor in visible browser:
 - Log each step to console
@@ -127,10 +127,10 @@ Antigravity (Gemini 3 Pro) จะ:
 
 ```bash
 # เปิด Terminal แรก - Start Next.js
-npm run dev
+turbo run dev
 
 # เปิด Terminal ที่สอง - Run Playwright
-npx playwright test e2e/stress-test.spec.ts --headed
+npx playwright test apps/web/e2e/stress-test.spec.ts --headed -c apps/web/playwright.config.ts
 ```
 
 **คุณจะเห็น:**
@@ -198,7 +198,7 @@ nano e2e/stress-test.spec.ts
 rm -rf test-results
 
 # รันใหม่
-npx playwright test e2e/stress-test.spec.ts --headed
+npx playwright test apps/web/e2e/stress-test.spec.ts --headed -c apps/web/playwright.config.ts
 ```
 
 ### 7️⃣ วนซ้ำจนกว่าจะ Pass ทั้งหมด

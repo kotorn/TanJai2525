@@ -30,8 +30,12 @@ Configure the following variables in Vercel Project Settings > Environment Varia
 ### Build Verification
 The build command runs the following before deployment succeeds:
 ```bash
-npm run build
+turbo run build
 ```
+
+> [!NOTE]
+> In Vercel Project Settings, ensure the **Root Directory** is set to `apps/web` if you are deploying the web app individually, or properly configure the Monorepo settings.
+
 Ensure `next.config.ts` handles build errors strictly (e.g., TypeScript or ESLint errors will fail the build if not ignored, which is good practice).
 
 ## 4. Post-Deployment Verification
