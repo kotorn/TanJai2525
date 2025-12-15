@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: './e2e',
   fullyParallel: true,
   retries: 2, // Essential for distinguishing flakiness from bugs
   workers: 4, 
@@ -22,6 +22,7 @@ export default defineConfig({
     navigationTimeout: 15000,
   },
 
+  // Webserver commented out - expecting dev server to already be running on port 3000
 //   webServer: {
 //     command: 'npx turbo run dev --filter=web',
 //     url: 'http://localhost:3000',
