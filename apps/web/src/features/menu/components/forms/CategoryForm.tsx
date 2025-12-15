@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@tanjai/ui";
+import { Button } from "@tanjai/ui";
 import {
   Form,
   FormControl,
@@ -18,8 +18,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from "@tanjai/ui";
+import { Input } from "@tanjai/ui";
 import { Database } from '@/lib/database.types';
 import { useEffect } from 'react';
 

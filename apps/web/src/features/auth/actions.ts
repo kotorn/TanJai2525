@@ -10,7 +10,7 @@ export async function provisionTenant(
     email: string,
     metadata?: { cuisine?: string; location?: string }
 ) {
-    console.log('[Action] Provisioning Tenant:', { shopName, userId });
+    // // // console.log('[Action] Provisioning Tenant:', { shopName, userId });
     
     try {
         const supabaseAdmin = createAdminClient();

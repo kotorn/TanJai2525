@@ -10,10 +10,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@tanjai/ui";
+import { Button } from "@tanjai/ui";
+import { Input } from "@tanjai/ui";
+import { Label } from "@tanjai/ui";
 import { createCategory } from "@/features/menu/actions";
 import { toast } from "sonner";
 

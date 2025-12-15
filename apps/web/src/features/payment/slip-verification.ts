@@ -19,7 +19,7 @@ class EasySlipProvider implements SlipProvider {
     async verify(slipImage: string): Promise<SlipVerificationResult> {
         // Call EasySlip API
         // const res = await fetch('https://developer.easyslip.com/api/v1/verify', ...)
-        console.log('Verifying with EasySlip...');
+        // // // console.log('Verifying with EasySlip...');
         throw new Error('EasySlip timeout'); // Simulating failure for fallback demo
     }
 }
@@ -29,7 +29,7 @@ class SlipOKProvider implements SlipProvider {
     name = 'SlipOK';
     async verify(slipImage: string): Promise<SlipVerificationResult> {
         // Call SlipOK API
-        console.log('Verifying with SlipOK...');
+        // // // console.log('Verifying with SlipOK...');
         return {
             isValid: true,
             amount: 500,
@@ -45,7 +45,7 @@ class GPT4OCRProvider implements SlipProvider {
     name = 'GPT-4 Vision';
     async verify(slipImage: string): Promise<SlipVerificationResult> {
         // Call OpenAI API
-        console.log('Verifying with GPT-4...');
+        // // // console.log('Verifying with GPT-4...');
         return {
             isValid: true,
             amount: 500,
@@ -76,7 +76,7 @@ export class SlipVerificationService {
             try {
                 const result = await provider.verify(slipImage);
                 if (result.isValid) {
-                    console.log(`Slip verified successfully by ${provider.name}`);
+                    // // // console.log(`Slip verified successfully by ${provider.name}`);
                     return result;
                 }
             } catch (error) {

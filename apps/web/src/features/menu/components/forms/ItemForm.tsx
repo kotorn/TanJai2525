@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@tanjai/ui";
+import { Button } from "@tanjai/ui";
 import {
   Form,
   FormControl,
@@ -19,13 +19,13 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@tanjai/ui";
+import { Input } from "@tanjai/ui";
+import { Textarea } from "@tanjai/ui";
+import { Checkbox } from "@tanjai/ui";
 import { Database } from '@/lib/database.types';
 import { useEffect, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@tanjai/ui";
 
 type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 type Category = Database['public']['Tables']['menu_categories']['Row'];

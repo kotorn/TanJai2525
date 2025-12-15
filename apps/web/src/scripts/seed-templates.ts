@@ -66,7 +66,7 @@ interface RestaurantTemplate {
 // --- Seeding Logic ---
 
 async function seedRestaurant(restaurantId: string, template: RestaurantTemplate) {
-  console.log(`Starting seed for restaurant ${restaurantId} with template ${template.slug}...`);
+  // // // console.log(`Starting seed for restaurant ${restaurantId} with template ${template.slug}...`);
 
   // Cache for OptionGroups to deduplicate by name
   // key: groupName, value: groupId
@@ -77,7 +77,7 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
 
   // 1. Insert Categories
   for (const [catIndex, category] of template.categories.entries()) {
-    console.log(`Processing Category: ${category.name}`);
+    // // // console.log(`Processing Category: ${category.name}`);
     
     const { data: catData, error: catError } = await supabase
       .from('menu_categories')
@@ -98,7 +98,7 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
 
     // 2. Insert Menu Items
     for (const item of category.items) {
-      console.log(`  Processing Item: ${item.name}`);
+      // // // console.log(`  Processing Item: ${item.name}`);
       
       const { data: itemData, error: itemError } = await supabase
         .from('menu_items')
@@ -136,9 +136,9 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
           
           if (existingGroup) {
              groupId = existingGroup.id;
-             console.log(`    Reusing existing Option Group: ${group.name}`);
+             // // // console.log(`    Reusing existing Option Group: ${group.name}`);
           } else {
-             console.log(`    Creating new Option Group: ${group.name}`);
+             // // // console.log(`    Creating new Option Group: ${group.name}`);
              const { data: newGroup, error: groupError } = await supabase
                .from('option_groups')
                .insert({
@@ -175,7 +175,7 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
           }
           optionGroupCache.set(group.name, groupId);
         } else {
-             console.log(`    Reusing cached Option Group: ${group.name}`);
+             // // // console.log(`    Reusing cached Option Group: ${group.name}`);
         }
 
         // 5. Link Item to Option Group
@@ -194,7 +194,7 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
       }
     }
   }
-  console.log('Seed completed successfully!');
+  // // // console.log('Seed completed successfully!');
 }
 
 // --- Main Execution ---
@@ -203,7 +203,7 @@ async function main() {
   const args = process.argv.slice(2);
   const helpIndex = args.indexOf('--help');
   if (helpIndex >= 0 || args.length < 2) {
-    console.log(`
+    // // // console.log(`
 Usage: npx tsx apps/web/src/scripts/seed-templates.ts <restaurant_id> <template_slug>
 
 Available Templates:
@@ -233,7 +233,7 @@ Example:
   const selectedTemplate = templates.find(t => t.slug === templateSlug);
   if (!selectedTemplate) {
      console.error(`Template "${templateSlug}" not found.`);
-     console.log(`Available slugs: ${templates.map(t => t.slug).join(', ')}`);
+     // // // console.log(`Available slugs: ${templates.map(t => t.slug).join(', ')}`);
      process.exit(1);
   }
 

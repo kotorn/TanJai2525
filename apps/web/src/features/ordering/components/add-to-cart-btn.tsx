@@ -21,7 +21,7 @@ export default function AddToCartBtn({ item }: { item: any }) {
             options: {}
         });
         // In a real app we'd need a Toaster provider
-        console.log('Added to cart', item.name);
+        // // // console.log('Added to cart', item.name);
         // toast.success(`Added ${item.name}`); 
     };
 

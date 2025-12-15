@@ -11,11 +11,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@tanjai/ui";
+import { Button } from "@tanjai/ui";
+import { Input } from "@tanjai/ui";
+import { Label } from "@tanjai/ui";
+import { Textarea } from "@tanjai/ui";
 import { createMenuItem, updateMenuItem, Category, MenuItem } from "@/features/menu/actions";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";

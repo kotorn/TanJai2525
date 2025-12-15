@@ -1,10 +1,10 @@
 'use client';
 
 import { useCartStore } from '../cart-store';
-import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
+import { Button } from "@tanjai/ui";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerFooter, DrawerClose } from "@tanjai/ui";
 import { ShoppingBasket, Minus, Plus, Trash2 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from "@tanjai/ui";
 import { useState } from 'react';
 // import { submitOrder } from '../actions';
 import { toast } from 'sonner';

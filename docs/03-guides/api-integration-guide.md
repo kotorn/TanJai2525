@@ -50,6 +50,15 @@ Located in `apps/web/app/api/...`.
 - Do not make breaking changes to stable API versions. (ห้ามเปลี่ยนแปลงที่ส่งผลกระทบต่อเวอร์ชันเสถียร)
 - If a breaker is needed, introduce a new version path (e.g., `/api/v2/...`). (ถ้าจำเป็นต้องเปลี่ยน ให้สร้างเวอร์ชันใหม่)
 
-## 4. Documentation (เอกสาร)
-- Use OpenAPI/Swagger if public API surface grows.
-- Keep this guide updated with new endpoints. (อัปเดตคู่มือนี้เสมอเมื่อมี API ใหม่)
+## 5. Current Endpoints (จุดเชื่อมต่อปัจจุบัน)
+
+### Orders
+- `POST /api/babel-order`: Handle voice/text orders from Babel AI.
+
+### Webhooks
+- `POST /api/webhooks/line`: Handle LINE Messaging API events.
+- `POST /api/webhooks/stripe`: Handle Stripe payment events.
+
+### Auth
+- `GET /auth/callback`: Supabase Auth callback handler.
+

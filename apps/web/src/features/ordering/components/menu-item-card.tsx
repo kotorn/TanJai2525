@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from "@tanjai/ui";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@tanjai/ui";
 import { useCartStore } from '../cart-store';
 import { Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';

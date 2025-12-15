@@ -7,9 +7,9 @@ import { CategoryList } from './CategoryList';
 import { MenuItemGrid } from './MenuItemGrid';
 import { CategoryForm } from './forms/CategoryForm';
 import { ItemForm } from './forms/ItemForm';
-import { useToast } from '@/components/ui/use-toast'; 
+import { useToast } from "@tanjai/ui"; 
 import { Loader2 } from 'lucide-react';
-import { Toaster } from '@/components/ui/toaster'; 
+import { Toaster } from "@tanjai/ui"; 
 
 type Category = Database['public']['Tables']['menu_categories']['Row'];
 type MenuItem = Database['public']['Tables']['menu_items']['Row'];

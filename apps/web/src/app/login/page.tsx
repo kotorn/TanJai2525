@@ -3,7 +3,7 @@
 import { signInWithLine } from '@/features/auth/line-liff-handler';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from "@tanjai/ui";
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);

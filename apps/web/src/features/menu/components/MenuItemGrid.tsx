@@ -2,14 +2,14 @@
 
 import { Edit, Trash, MoreVertical, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from "@tanjai/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+} from "@tanjai/ui";
+import { Card, CardContent, CardFooter } from "@tanjai/ui";
 import { Database } from '@/lib/database.types';
 
 type MenuItem = Database['public']['Tables']['menu_items']['Row'];

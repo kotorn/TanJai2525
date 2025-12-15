@@ -41,7 +41,7 @@ export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: a
                     filter: `tenant_id=eq.${tenantId}`,
                 },
                 async (payload) => {
-                    console.log('Realtime update:', payload);
+                    // // // console.log('Realtime update:', payload);
                     if (payload.eventType === 'INSERT') {
                         // For a real app we need to fetch the relations (items) too
                         // Simplified: Just reload the page or fetch single order

@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { Plus, MoreVertical, Edit, Trash } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@tanjai/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@tanjai/ui";
 import { cn } from '@/lib/utils';
 import { Database } from '@/lib/database.types';
 

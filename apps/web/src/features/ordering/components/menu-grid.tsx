@@ -1,7 +1,7 @@
 'use client';
 
 import { MenuItem, MenuItemCard } from './menu-item-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@tanjai/ui";
 
 export type Category = {
   id: string;
