@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Noto_Sans_Thai } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from 'sonner';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const notoSansThai = Noto_Sans_Thai({
+    subsets: ['thai', 'latin'],
+    variable: '--font-thai',
+    weight: ['300', '400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
     title: 'Tanjai POS',
@@ -19,7 +24,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased`}>
                 {children}
                 <Toaster position="top-center" />
                 <Script
