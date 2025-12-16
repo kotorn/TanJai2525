@@ -1,11 +1,17 @@
 'use server';
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 
+function createSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+
 export async function fetchKitchenOrders(tenantId: string) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = createSupabaseClient();
     
     // Fetch orders with status pending or preparing
     const { data, error } = await supabase
@@ -37,7 +43,7 @@ export async function fetchKitchenOrders(tenantId: string) {
 }
 
 export async function updateOrderStatus(tenantId: string, orderId: string, newStatus: string) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = createSupabaseClient();
 
     const { error } = await supabase
         .from('orders')

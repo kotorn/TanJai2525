@@ -1,12 +1,15 @@
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 import { signInWithLine } from '@/features/auth/line-liff-handler';
 
 export default function CheckoutAuthPrompt({ onGuestContinue }: { onGuestContinue: () => void }) {
     const [user, setUser] = useState<any>(null);
-    const supabase = createClientComponentClient();
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));

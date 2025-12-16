@@ -1,5 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr';
-const createClientComponentClient = () => createBrowserClient(
+import { createClient } from '@supabase/supabase-js';
+const createClientComponentClient = () => createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
