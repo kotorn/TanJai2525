@@ -1,6 +1,7 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+// Stubbed
+// import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 
 // const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

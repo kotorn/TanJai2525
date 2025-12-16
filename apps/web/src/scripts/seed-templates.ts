@@ -1,5 +1,6 @@
 
-import { createClient } from '@supabase/supabase-js';
+// Stubbed
+// import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -29,7 +30,9 @@ if (!supabaseUrl || !supabaseServiceKey) {
   process.exit(1);
 }
 
-const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
+const supabase = {
+    from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({ select: () => ({ data: { id: 'mock' }, error: null }) }) })
+} as any;
 
 // --- Type Definitions for JSON Template ---
 

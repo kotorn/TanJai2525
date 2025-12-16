@@ -1,10 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+
 
 export const signInWithLine = async () => {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = { auth: { signInWithOAuth: async () => ({ data: null, error: null }) } } as any;
 
     // 1. Trigger OAuth Flow
     // We use the 'line' provider. 

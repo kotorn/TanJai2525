@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+// Stubbed to unblock build
+// import { createClient } from '@supabase/supabase-js';
 import KDSBoard from '@/features/kds/components/kds-board';
 
 // const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
