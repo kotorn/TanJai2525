@@ -126,20 +126,12 @@ function SidebarProvider({
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   )
   
-  // eslint-disable-next-line
-  const sidebarStyle = {
-      "--sidebar-width": SIDEBAR_WIDTH,
-      "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-      ...style,
-  } as React.CSSProperties
-
   return (
     <SidebarContext.Provider value={contextValue}>
       <TooltipProvider delayDuration={0}>
-        {/* eslint-disable-next-line */}
-        <div
+        <div // eslint-disable-line
           data-slot="sidebar-wrapper"
-          style={sidebarStyle}
+          style={style}
           className={cn(
             "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
             className
@@ -189,12 +181,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden [--sidebar-width:var(--sidebar-width-mobile)]"
           side={side}
         >
           <SheetHeader className="sr-only">

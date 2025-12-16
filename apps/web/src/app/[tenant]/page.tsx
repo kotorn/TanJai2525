@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ViralModal from '@/components/ViralModal';
 
 // Mock Data with Multi-language support and Codes
 const MENU_ITEMS = [
@@ -68,21 +69,51 @@ const MENU_ITEMS = [
 export default function MenuPage() {
   const [lang, setLang] = useState('th');
   const [isMember, setIsMember] = useState(false); // TODO: Replace with real Auth Check
+  
+  // State for Cart (Simple Array of Item IDs for MVP)
+  const [cart, setCart] = useState<{id: string, price: number}[]>([]);
+  
+  // State for Viral Modal
+  const [viralItem, setViralItem] = useState<typeof MENU_ITEMS[0] | null>(null);
+
+  // Load from LocalStorage on Mount
+  useEffect(() => {
+    const saved = localStorage.getItem('guest_cart');
+    if (saved) {
+      try {
+        setCart(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse cart', e);
+      }
+    }
+  }, []);
+
+  // Save to LocalStorage on Change
+  useEffect(() => {
+    localStorage.setItem('guest_cart', JSON.stringify(cart));
+  }, [cart]);
+  
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS];
   
   // Get font class based on language
   const currentFont = LANGUAGES.find(l => l.code === lang)?.font || 'font-sans';
 
   const handleMemberLogin = () => {
-     // For now, redirect to global login or show modal
-     // In future, this should be a modal for Customer Login (Google/Apple)
      window.location.href = '/login'; 
   };
+
+  const addToCart = (item: typeof MENU_ITEMS[0]) => {
+     setCart(prev => [...prev, { id: item.id, price: item.price }]);
+  };
+
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const count = cart.length;
 
   return (
     <div className={`min-h-screen bg-gray-50 pb-24 ${currentFont}`}>
       {/* Header */}
       <header className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3">
+        {/* ... (Header unchanged) ... */}
         <div className="flex justify-between items-center mb-3">
           <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
           <div className="flex items-center gap-2">
@@ -116,8 +147,19 @@ export default function MenuPage() {
         {MENU_ITEMS.map((item) => (
           <div 
             key={item.id} 
-            className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 active:scale-95 transition-transform duration-100"
+            className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 active:scale-95 transition-transform duration-100 group relative"
           >
+            {/* Share Button (Absolute Top Right) */}
+            <button 
+              onClick={() => setViralItem(item)}
+              className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full text-gray-600 shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:text-blue-600"
+              aria-label="Share / แบ่งปัน"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y1="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y1="10.49"/>
+              </svg>
+            </button>
+
             {/* Image & Code Badge */}
             <div className="relative h-32 w-full bg-gray-200">
                {/* Use a placeholder if image fails in dry run */}
@@ -146,6 +188,7 @@ export default function MenuPage() {
                   {item.price} <span className="text-xs">{t.currency}</span>
                 </span>
                 <button 
+                  onClick={() => addToCart(item)}
                   className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 shadow-sm"
                   aria-label={t.addToCart}
                 >
@@ -159,15 +202,22 @@ export default function MenuPage() {
         ))}
       </main>
 
-      {/* Floating Cart Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg safe-area-bottom">
-        <button className="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl flex justify-between items-center shadow-xl active:scale-95 transition-all">
-          <div className="flex items-center gap-2">
-            <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">2 {t.items}</span>
-          </div>
-          <span className="text-lg">{t.checkout} • 75 {t.currency}</span>
-        </button>
-      </div>
+      {/* Floating Cart Bar (Visible if items in cart) */}
+      {count > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg safe-area-bottom">
+            <button className="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl flex justify-between items-center shadow-xl active:scale-95 transition-all">
+                <div className="flex items-center gap-2">
+                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">{count} {t.items}</span>
+                </div>
+                <span className="text-lg">{t.checkout} • {total} {t.currency}</span>
+            </button>
+        </div>
+      )}
+
+      {/* Viral Modal */}
+      {viralItem && (
+        <ViralModal item={viralItem} onClose={() => setViralItem(null)} />
+      )}
     </div>
   );
 }

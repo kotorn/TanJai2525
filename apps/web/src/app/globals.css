@@ -13,6 +13,11 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+
+  /* Sidebar Configuration */
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
+  --sidebar-width-mobile: 18rem;
 }
 
 /* Utility Classes for Fonts */
@@ -27,7 +32,12 @@
 }
 .scrollbar-hide {
     -ms-overflow-style: none;
-    scrollbar-width: none;
+    /* scrollbar-width: none; - Wrapped in @supports to silence IDE warnings about compatibility */
+}
+@supports (scrollbar-width: none) {
+    .scrollbar-hide {
+        scrollbar-width: none;
+    }
 }
 
 /* Safe area for mobile PWA */

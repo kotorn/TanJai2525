@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 
 type FeatureContextType = {
     features: Set<string>;
@@ -32,7 +32,7 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
     const [isLoading, setIsLoading] = useState(true);
     
     // Supabase Client
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     useEffect(() => {
         async function loadFlags() {

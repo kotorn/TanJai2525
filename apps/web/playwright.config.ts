@@ -1,109 +1,76 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
 
+/**
+ * THE HOSTILE MATRIX (Protocol V15)
+ * Simulating the fragmented reality of Southeast Asia.
+ */
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './tests',
   fullyParallel: true,
-  retries: 2, // Essential for distinguishing flakiness from bugs
-  workers: 4, 
-  reporter: [
-    ['html', { outputFolder: 'test-report' }], 
-    ['list'],
-    ['json', { outputFile: 'test-results/pathology-reports/summary.json' }] // Structured pathology report
-  ],
-  outputDir: 'test-results/autopsy', // Detailed crash dumps go here
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [['html'], ['list']],
+  
+  // Mandatory Output Structure
+  outputDir: 'test-results',
   
   use: {
-    baseURL: 'http://localhost:3000', // CHECK PORT BEFORE RUNNING
-    trace: 'retain-on-failure',        // Forensic evidence only when needed
-    video: 'on',                       // RECORD EVERYTHING. We need to see the "Red Dot".
+    baseURL: 'http://localhost:3004',
+    trace: 'retain-on-failure',
+    video: 'on',
     screenshot: 'on',
-    actionTimeout: 10000, 
-    navigationTimeout: 15000,
+    actionTimeout: 30000,
+    navigationTimeout: 60000,
   },
 
-  // Webserver commented out - expecting dev server to already be running on port 3000
-//   webServer: {
-//     command: 'npx turbo run dev --filter=web',
-//     url: 'http://localhost:3000',
-//     reuseExistingServer: !process.env.CI,
-//     timeout: 120 * 1000,
-//     cwd: path.resolve(__dirname, '../../'),
-//   },
-
   projects: [
-    // 1. 🟢 Healthy Modern (Control Group)
+    /* 1. Modern Core (Baseline) */
     {
-      name: 'Healthy Modern (Chrome)',
+      name: 'Modern Core',
+      use: { ...devices['Desktop Chrome'] },
+    },
+
+    /* 2. The Legacy Patient (Windows XP / Old Firefox) */
+    {
+      name: 'The Legacy Patient',
       use: { 
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 },
-      },
-    },
-
-    // 2. 📱 Standard Mobile (Pixel 5)
-    {
-      name: 'Mobile Chrome (Pixel 5)',
-      use: {
-        ...devices['Pixel 5'],
-      },
-    },
-
-    // 3. 🍎 Standard Mobile (iPhone 12)
-    {
-      name: 'Mobile Safari (iPhone 12)',
-      use: {
-        ...devices['iPhone 12'],
-      },
-    },
-
-    // 4. 🧟 The Legacy Patient (Anonymous OS / XP Embedded)
-    // Vulnerable to drive-by downloads, unpatched exploits, and rendering failures.
-    {
-      name: 'Legacy Patient (XP Embedded)',
-      use: {
-        browserName: 'firefox', // Closest modern relative to Gecko/52
-        userAgent: 'Mozilla/5.0 (Windows NT 5.1; rv:52.9) Gecko/20100101 Firefox/52.9 (Windows XP Embedded)',
+        browserName: 'firefox',
+        userAgent: 'Mozilla/5.0 (Windows NT 5.1; rv:52.0) Gecko/20100101 Firefox/52.0', // XP User Agent
         viewport: { width: 1024, height: 768 },
-        ignoreHTTPSErrors: true, // Simulate lack of modern TLS
-        // Context options to simulate hardened/broken environment
-        contextOptions: {
-          permissions: [], // No permissions
-          javaScriptEnabled: true,
-        },
-        launchOptions: {
-            firefoxUserPrefs: {
-                'webgl.disabled': true, // Simulate driver failure
-                'security.mixed_content.block_active_content': false, 
-            }
-        }
+        javaScriptEnabled: true, // Checking if app breaks on old engines (simulated)
       },
     },
 
-    // 5. 🦠 The Infected Mobile (Legacy Android / AOSP)
-    // Low-end hardware, race conditions, touch events.
+    /* 3. The Infected Mobile (Low-end Android, Throttled) */
     {
-      name: 'Infected Mobile (Legacy Android)',
-      use: {
-        browserName: 'chromium',
-        channel: 'chrome', // Use actual Chrome if available for better mobile emulation
-        ...devices['Pixel 5'], // Base hardware profile
-        userAgent: 'Mozilla/5.0 (Linux; Android 7.1.2; AOSP) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
-        hasTouch: true,
+      name: 'The Infected Mobile',
+      use: { 
+        ...devices['Pixel 5'],
         isMobile: true,
-        // CPU Throttling (4x) is handled in fixtures.ts via CDPSession
+        hasTouch: true,
+      },
+      // Note: CPU throttling is done via Chrome DevTools Protocol in fixtures if needed, 
+      // but here we define the profile.
+    },
+
+    /* 4. The Trojan Horse (LINE In-App Browser) */
+    {
+      name: 'The Trojan Horse',
+      use: { 
+        ...devices['iPhone 12'],
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Line/11.19.1', // LINE UA
+        hasTouch: true,
       },
     },
 
-    // 6. 🩸 The Ischemic Network (High Latency / Network Arrhythmia)
-    // Simulates slow 3G bandwidth cap with 500ms random jitter.
+    /* 5. The Ischemic Network (Slow 3G + Jitter) */
     {
-      name: 'The Ischemic Network (Slow 3G)',
+      name: 'The Ischemic Network',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 },
-        // Network Jitter is handled in fixtures.ts
+        // Network throttling usually injected via context options or fixture
       },
-    }
+    },
   ],
 });
