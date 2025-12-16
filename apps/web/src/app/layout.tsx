@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     manifest: '/manifest.json',
 };
 
+import { FeatureFlagProvider } from '@/features/flags/FeatureFlagProvider';
+
 export default function RootLayout({
     children,
 }: {
@@ -25,8 +27,10 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased`}>
-                {children}
-                <Toaster position="top-center" />
+                <FeatureFlagProvider>
+                    {children}
+                    <Toaster position="top-center" />
+                </FeatureFlagProvider>
                 <Script
                     id="register-sw"
                     strategy="afterInteractive"
