@@ -67,10 +67,17 @@ const MENU_ITEMS = [
 
 export default function MenuPage() {
   const [lang, setLang] = useState('th');
+  const [isMember, setIsMember] = useState(false); // TODO: Replace with real Auth Check
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS];
   
   // Get font class based on language
   const currentFont = LANGUAGES.find(l => l.code === lang)?.font || 'font-sans';
+
+  const handleMemberLogin = () => {
+     // For now, redirect to global login or show modal
+     // In future, this should be a modal for Customer Login (Google/Apple)
+     window.location.href = '/login'; 
+  };
 
   return (
     <div className={`min-h-screen bg-gray-50 pb-24 ${currentFont}`}>
@@ -78,8 +85,25 @@ export default function MenuPage() {
       <header className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3">
         <div className="flex justify-between items-center mb-3">
           <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-          <div className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-            DevMode: Localhost
+          <div className="flex items-center gap-2">
+             {!isMember ? (
+                <button 
+                  onClick={handleMemberLogin}
+                  className="text-xs font-bold bg-gray-900 text-white px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm active:scale-95 transition-transform"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Login
+                </button>
+             ) : (
+                <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100">
+                  Member
+                </span>
+             )}
+             <div className="text-[10px] font-mono bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">
+               Guest Mode
+             </div>
           </div>
         </div>
         
