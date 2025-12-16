@@ -11,24 +11,56 @@ export default function VoiceOrder() {
   const [targetLang, setTargetLang] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Simulated Voice Recognition (Web Speech API is flaky in some envs, so we simulate or use if avail)
+  // Real Web Speech API with fallback
   const toggleListening = () => {
     if (isListening) {
       setIsListening(false);
-      // Simulate "hearing" something if text is empty
-      if (!inputText) setInputText('Fried Rice with Chicken');
+      // Stop recognition logic if managed globally, but here we just toggle state for UI
+      window.speechRecognitionInstance?.stop();
       toast.success('Voice capture stopped');
       return;
     }
 
-    setIsListening(true);
-    toast.info('Listening... (Speak now)');
-    
-    // Simulate speech-to-text delay
-    setTimeout(() => {
-        if (isListening) return; // If stopped early
-        // We leave it listening until user toggles off in this manual simulation
-    }, 2000);
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error('Browser does not support Voice Recognition. Using simulation.');
+      setIsListening(true);
+      setTimeout(() => {
+         setInputText('ข้าวมันไก่ผสม (Simulated)');
+         setIsListening(false);
+      }, 2000);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'th-TH'; // Default to Thai for street food
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info('Listening... (Speak Thai)');
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInputText(transcript);
+      toast.success(`Heard: "${transcript}"`);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech error', event.error);
+      setIsListening(false);
+      toast.error(`Error: ${event.error}`);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    (window as any).speechRecognitionInstance = recognition;
+    recognition.start();
   };
 
   const handleTranslate = async () => {

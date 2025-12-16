@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Simulating the fragmented reality of Southeast Asia.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -16,7 +16,7 @@ export default defineConfig({
   outputDir: 'test-results',
   
   use: {
-    baseURL: 'http://localhost:3004',
+    baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
     video: 'on',
     screenshot: 'on',

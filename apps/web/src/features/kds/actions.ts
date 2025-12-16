@@ -1,16 +1,8 @@
-// Stubbed to unblock build
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 function createSupabaseClient() {
-  return {
-    from: () => ({ 
-        select: () => ({ data: [], error: null }), 
-        insert: () => ({}), 
-        update: () => ({ eq: () => ({ error: null }) }), 
-        eq: () => ({}), 
-        in: () => ({ order: () => ({ data: [], error: null }) }) 
-    })
-  } as any
+  return createClient();
 }
 
 export async function fetchKitchenOrders(tenantId: string) {

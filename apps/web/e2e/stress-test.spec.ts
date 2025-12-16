@@ -21,9 +21,9 @@ test.describe('Tanjai POS Stress Test Suite', () => {
 
         await test.step('3 Customers Open Menu', async () => {
              await Promise.all([
-                page1.goto('/'),
-                page2.goto('/'),
-                page3.goto('/'),
+                page1.goto('/tanjai'),
+                page2.goto('/tanjai'),
+                page3.goto('/tanjai'),
             ]);
             console.log('Level 1: All 3 customers on menu');
         });
@@ -52,7 +52,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
         // Verify Kitchen
         await test.step('Verify Kitchen Receives All', async () => {
             const kitchenPage = await browser.newPage();
-            await kitchenPage.goto('/kitchen');
+            await kitchenPage.goto('/tanjai/kds');
             await expect(kitchenPage.locator('text=ส้มตำไทย')).toBeVisible({ timeout: 10000 });
             await expect(kitchenPage.locator('text=ไก่ย่าง')).toBeVisible();
             await expect(kitchenPage.locator('text=น้ำส้ม')).toBeVisible();
@@ -63,7 +63,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
     // LEVEL 2: INCREMENTAL ORDER
     test('Level 2: Incremental Order (Sung Mue)', async ({ page }) => {
         test.setTimeout(60000); // Extended timeout
-        await page.goto('/');
+        await page.goto('/tanjai');
         await addItemToCart(page, 'น้ำส้ม');
         await submitOrder(page);
         console.log('Level 2: First order placed');
@@ -88,8 +88,8 @@ test.describe('Tanjai POS Stress Test Suite', () => {
 
         // Simulate joining same table session (via URL param or similar logic)
         await Promise.all([
-            pageA.goto('/?table=2'),
-            pageB.goto('/?table=2'),
+            pageA.goto('/tanjai?table=2'),
+            pageB.goto('/tanjai?table=2'),
         ]);
 
         await Promise.all([
@@ -107,7 +107,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
 
     // LEVEL 4: CANCELLATION
     test('Level 4: Cancellation Flow', async ({ page, browser }) => {
-        await page.goto('/');
+        await page.goto('/tanjai');
         await addItemToCart(page, 'ไก่ย่าง');
         await addItemToCart(page, 'ข้าวเหนียว');
         await submitOrder(page);
@@ -115,7 +115,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
         // Kitchen Staff Action
         const kitchenCtx = await browser.newContext();
         const kitchenPage = await kitchenCtx.newPage();
-        await kitchenPage.goto('/kitchen');
+        await kitchenPage.goto('/tanjai/kds');
         
         // Find order and cancel item (Click "Mark Out" or "Cancel" on item)
         // Assuming interactive KDS
@@ -133,7 +133,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
 
         const p1 = await browser.newPage();
         const p2 = await browser.newPage();
-        await Promise.all([p1.goto('/'), p2.goto('/')]);
+        await Promise.all([p1.goto('/tanjai'), p2.goto('/tanjai')]);
 
         // Both add "Limited Item"
         // await addItemToCart(p1, 'Limited Special');
@@ -144,7 +144,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
 
     // LEVEL 6: CHAOS LOOP
     test('Level 6: Chaos Loop', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/tanjai');
         const actions = ['add', 'scroll', 'navigate', 'idle'];
         
         for(let i=0; i<5; i++) {
@@ -152,7 +152,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
             console.log(`Level 6 Iteration ${i}: ${action}`);
             if(action === 'add') await addItemToCart(page, 'ข้าวเหนียว');
             if(action === 'scroll') await page.mouse.wheel(0, 500);
-            if(action === 'navigate') await page.goto('/?reload=true');
+            if(action === 'navigate') await page.goto('/tanjai?reload=true');
             await page.waitForTimeout(500);
         }
     });
@@ -167,7 +167,7 @@ test.describe('Tanjai POS Stress Test Suite', () => {
             await page.getByText('Simulate Owner Login').click();
             await page.waitForURL('**/onboarding**');
             await captureUIState(page, 'onboarding-screen');
-            await page.goto('/');
+            await page.goto('/tanjai');
             await captureUIState(page, 'menu-screen');
         });
 

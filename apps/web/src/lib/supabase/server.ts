@@ -1,8 +1,8 @@
-// Stubbed to unblock build
-export function createClient() {
-  console.warn('Supabase client is stubbed');
-  return {
-    from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({}), update: () => ({}), eq: () => ({}), single: () => ({ data: null }), in: () => ({}), order: () => ({}) }),
-    auth: { getSession: () => ({ data: { session: null } }), signInWithOAuth: () => ({}), exchangeCodeForSession: () => ({ data: { session: null }, error: null }) }
-  } as any
-}
+import { createClient as createSupabaseJsClient } from './adapter';
+import { createMockClient } from './mock-client';
+import { Database } from '../database.types';
+
+export const createClient = () => {
+    // For QA without Docker: Force Mock
+    return createMockClient();
+};

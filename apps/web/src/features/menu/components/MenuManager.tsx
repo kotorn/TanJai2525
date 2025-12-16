@@ -7,18 +7,16 @@ import { CategoryList } from './CategoryList';
 import { MenuItemGrid } from './MenuItemGrid';
 import { CategoryForm } from './forms/CategoryForm';
 import { ItemForm } from './forms/ItemForm';
-import { useToast } from "@tanjai/ui"; 
-import { Loader2 } from 'lucide-react';
-import { Toaster } from "@tanjai/ui"; 
+import { Button, Toaster } from "@tanjai/ui";
+import { Loader2 } from 'lucide-react'; 
 
 type Category = Database['public']['Tables']['menu_categories']['Row'];
 type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 
+import { createClient } from '@/lib/supabase/client';
+
 export function MenuManager() {
-  // Stubbed to unblock build
-  const supabase = {
-    from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({}), update: () => ({}), eq: () => ({}), single: () => ({ data: null }) })
-  } as any;
+  const supabase = createClient();
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);

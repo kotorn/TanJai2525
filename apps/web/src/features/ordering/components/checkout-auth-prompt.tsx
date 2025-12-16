@@ -4,9 +4,11 @@
 import { useEffect, useState } from 'react';
 import { signInWithLine } from '@/features/auth/line-liff-handler';
 
+import { createClient } from '@/lib/supabase/client';
+
 export default function CheckoutAuthPrompt({ onGuestContinue }: { onGuestContinue: () => void }) {
     const [user, setUser] = useState<any>(null);
-    const supabase = { auth: { getSession: async () => ({ data: { session: null } }) } } as any;
+    const supabase = createClient();
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));

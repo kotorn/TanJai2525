@@ -4,20 +4,25 @@ import fs from 'fs';
 import path from 'path';
 
 export async function addItemToCart(page: Page, itemName: string) {
-    // Determine selector: simplified for now, assuming standard layout
-    // In a real app, we'd use data-testid
-    const itemLocator = page.locator(`text=${itemName}`).first();
-    await expect(itemLocator).toBeVisible();
+    // 1. Find the card containing the item name
+    // The structure is: div > div(img) + div(content > h3(name) + div(price+btn))
+    // We can filter for the card div that has the text.
+    const card = page.locator(`div.bg-white.rounded-xl`).filter({ hasText: itemName }).first();
     
-    // Click to open modal or add directly
-    // Assuming clicking the item card opens a modal or adds to cart
-    await itemLocator.click();
+    // 2. Ensure card is visible
+    await expect(card).toBeVisible();
 
-    // Check if a modal opened (Add to Cart button)
-    const addToCartBtn = page.locator('button:has-text("Add to Cart")');
-    if (await addToCartBtn.isVisible()) {
-        await addToCartBtn.click();
-    }
+    // 3. Click the Add to Cart button inside the card
+    // The button has aria-label="Add" (in English) or similar.
+    // We can just find the button in the bottom right of the card.
+    const addBtn = card.locator('button[aria-label]'); // The share button also has aria-label, but it's top right.
+    // The Add button is in the flex-justify-between container at the bottom.
+    // Let's use the svg icon or just the last button in the card.
+    const buttons = card.locator('button');
+    const count = await buttons.count();
+    const actionBtn = buttons.nth(count - 1); // Last button is Add
+    
+    await actionBtn.click();
 }
 
 export async function submitOrder(page: Page) {
@@ -58,13 +63,13 @@ export async function injectMockData(page: Page) {
 
 export async function markItemOutOfStock(page: Page, itemName: string) {
     // Navigate to admin/menu
-    await page.goto('/admin/menu');
+    await page.goto('/tanjai/admin/menu');
     await page.locator(`text=${itemName}`).click();
     await page.locator('input[name="stock"]').fill('0');
     await page.locator('button:has-text("Save")').click();
 }
 
 export async function navigateToKitchen(page: Page) {
-    await page.goto('/kitchen');
+    await page.goto('/tanjai/kds');
     await expect(page.locator('h1:has-text("Kitchen Display System")').or(page.locator('text=Kitchen'))).toBeVisible();
 }
