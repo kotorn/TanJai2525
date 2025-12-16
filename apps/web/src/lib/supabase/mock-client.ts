@@ -1,3 +1,5 @@
+import { STRESS_TEST_DATA } from '../mock-data';
+
 // In-memory store (Lazy Init)
 let MOCK_DB: any = null;
 

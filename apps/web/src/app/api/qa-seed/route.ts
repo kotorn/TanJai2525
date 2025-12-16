@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { STRESS_TEST_DATA } from '@/lib/mock-data';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const supabase = createClient();
   console.log('Attempting to seed. URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);

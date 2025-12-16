@@ -1,0 +1,26 @@
+{
+    "name": "Tanjai POS",
+    "short_name": "Tanjai",
+    "description": "Smart POS for Street Food - Fast, Easy, Reliable",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#FF5722",
+    "orientation": "portrait",
+    "categories": ["business", "finance", "food"],
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": []
+}
