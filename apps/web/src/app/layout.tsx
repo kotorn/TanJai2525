@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_Thai, Plus_Jakarta_Sans, Noto_Sans } from 'next/font/g
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { LiffProvider } from '@/lib/liff/LiffProvider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const notoSansThai = Noto_Sans_Thai({
@@ -40,10 +41,12 @@ export default function RootLayout({
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
             </head>
             <body className={`${inter.variable} ${notoSansThai.variable} ${plusJakarta.variable} ${notoSans.variable} font-sans antialiased bg-[#121212] text-[#E0E0E0]`}>
-                <FeatureFlagProvider>
-                    {children}
-                    <Toaster position="top-center" />
-                </FeatureFlagProvider>
+                <LiffProvider>
+                    <FeatureFlagProvider>
+                        {children}
+                        <Toaster position="top-center" />
+                    </FeatureFlagProvider>
+                </LiffProvider>
                 <Script
                     id="register-sw"
                     strategy="afterInteractive"
