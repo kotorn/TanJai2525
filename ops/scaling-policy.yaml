@@ -1,0 +1,34 @@
+# OPS-0002: Server Scaling Policy (Cloud Run)
+# Owner: Ops Flow
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: tanjai-pos-core
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    metadata:
+      annotations:
+        # Autoscaling Settings
+        autoscaling.knative.dev/minScale: "1"      # Keep 1 warm instance (Low Latency)
+        autoscaling.knative.dev/maxScale: "10"     # Burst limit (Cost Control)
+        
+        # Concurrency (Requests per Container)
+        autoscaling.knative.dev/target: "80"       # Target concurrent requests before scaling up
+        
+        # CPU Allocation
+        run.googleapis.com/cpu-throttling: "true"  # Allocate CPU only when processing request (Cost saving)
+    spec:
+      containers:
+      - image: gcr.io/tanjai-pos/core:latest
+        resources:
+          limits:
+            cpu: "1000m"    # 1 vCPU
+            memory: "512Mi" # 512MB RAM (Node.js optimization)
+        env:
+          - name: NODE_ENV
+            value: "production"
+          - name: MAX_OLD_SPACE_SIZE
+            value: "450"    # GC Tuning
