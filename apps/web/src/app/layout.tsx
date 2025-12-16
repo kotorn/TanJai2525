@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Noto_Sans_Thai } from 'next/font/google';
+import { Inter, Noto_Sans_Thai, Plus_Jakarta_Sans, Noto_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from 'sonner';
@@ -9,6 +9,16 @@ const notoSansThai = Noto_Sans_Thai({
     subsets: ['thai', 'latin'],
     variable: '--font-thai',
     weight: ['300', '400', '500', '600', '700'],
+});
+const plusJakarta = Plus_Jakarta_Sans({
+    subsets: ['latin'],
+    variable: '--font-plus-jakarta',
+    weight: ['400', '500', '600', '700', '800'],
+});
+const notoSans = Noto_Sans({
+    subsets: ['latin'],
+    variable: '--font-noto-sans',
+    weight: ['400', '500', '700'],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +35,11 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
-            <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased`}>
+        <html lang="en" className="dark">
+            <head>
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+            </head>
+            <body className={`${inter.variable} ${notoSansThai.variable} ${plusJakarta.variable} ${notoSans.variable} font-sans antialiased bg-[#121212] text-[#E0E0E0]`}>
                 <FeatureFlagProvider>
                     {children}
                     <Toaster position="top-center" />

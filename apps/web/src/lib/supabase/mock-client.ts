@@ -94,6 +94,28 @@ function mockQuery(table: string) {
     if (table === 'orders') {
         return getMockDB().orders;
     }
+    if (table === 'qr_codes') {
+        return [
+            {
+                id: 'mock-qr-1',
+                restaurant_id: 'mock-rest-id',
+                type: 'dynamic',
+                table_number: '55',
+                token: 'valid-token',
+                expires_at: new Date(Date.now() + 86400000).toISOString(), // +1 day
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 'mock-qr-2',
+                restaurant_id: 'mock-rest-id',
+                type: 'dynamic',
+                table_number: '55',
+                token: 'expired-token',
+                expires_at: new Date(Date.now() - 86400000).toISOString(), // -1 day
+                created_at: new Date().toISOString()
+            }
+        ];
+    }
     return [];
 }
 

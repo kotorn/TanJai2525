@@ -1,8 +1,16 @@
-import { test as base, Page, expect } from '@playwright/test';
+import { test as base, Page, expect, CDPSession } from '@playwright/test';
 
 // Extend the base test type to include any custom fixtures if needed
 // For now, we just override 'page' to add our Antigravity Logic
-export const test = base.extend<{ page: Page }>({
+export const test = base.extend<{ 
+    page: Page,
+    antigravityUtils: {
+        simulateVoiceInput: (lang: string, text: string) => Promise<void>;
+        mockSubscription: (tier: 'Free' | 'Pro') => Promise<void>;
+        tamperEdgeConfig: () => Promise<void>;
+        uploadMockImage: (selector: string) => Promise<void>;
+    }
+}>({
     page: async ({ page }, use, testInfo) => {
         // 1. 🕵️ Global Network Sniffer (The Lie Detector)
         const failedRequests: string[] = [];
@@ -53,6 +61,13 @@ export const test = base.extend<{ page: Page }>({
           });
         });
 
+        // 3. 🧠 CPU Throttling for "The Infected Mobile"
+        if (testInfo.project.name === 'The Infected Mobile') {
+            const client = await page.context().newCDPSession(page);
+            await client.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+            console.log('🐢 CPU Throttling enabled (4x slowdown) for The Infected Mobile');
+        }
+
         await use(page);
 
         // Final safety check in case the throw was swallowed
@@ -60,6 +75,69 @@ export const test = base.extend<{ page: Page }>({
             expect(failedRequests).toEqual([]);
         }
     },
+
+    antigravityUtils: async ({ page }, use) => {
+        const utils = {
+            // 🗣️ Babel Simulator
+            simulateVoiceInput: async (lang: string, text: string) => {
+                await page.evaluate(({ lang, text }) => {
+                    // Start dispatching events to any active SpeechRecognition instances
+                    // This assumes the app listens to window.SpeechRecognition or webkitSpeechRecognition
+                    console.log(`🗣️ Babel Simulator: Speaking "${text}" in ${lang}`);
+                    
+                    // Dispatch a custom event that our app might be listening to for testing, 
+                    // OR mock the SpeechRecognition API entirely if possible.
+                    // For now, let's assume we can trigger the app's internal handler if exposed,
+                    // or simulated via a dispatched event on the window.
+                    window.dispatchEvent(new CustomEvent('babel-voice-input', { 
+                        detail: { transcript: text, lang: lang } 
+                    }));
+
+                    // ALSO: If the app uses standard SpeechRecognition, we tried to mock it.
+                    // But usually, E2E requires triggering the logic directly.
+                }, { lang, text });
+            },
+
+            // 🔐 Feature Flag Injector (Subscription)
+            mockSubscription: async (tier: 'Free' | 'Pro') => {
+               await page.route('**/api/auth/session', async route => {
+                    const json = {
+                        user: { name: "Test User", email: "test@example.com", image: null },
+                        expires: new Date(Date.now() + 86400 * 1000).toISOString(),
+                        tier: tier // Custom field
+                    };
+                    await route.fulfill({ json });
+               });
+               console.log(`🔐 Mocked Subscription Tier: ${tier}`);
+            },
+
+            // 🔐 Feature Flag Injector (Edge Config)
+            tamperEdgeConfig: async () => {
+                await page.route('**/*.vercel.app/**/edge-config**', async route => {
+                    await route.continue({
+                        headers: {
+                            ...route.request().headers(),
+                            'x-vercel-edge-config': 'malicious-payload'
+                        }
+                    });
+                });
+                console.log(`🔐 Tampered Edge Config Headers injected`);
+            },
+
+            // 📸 Viral Mock
+            uploadMockImage: async (selector: string) => {
+                // Create a dummy image buffer
+                const buffer = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+                await page.setInputFiles(selector, {
+                    name: 'daily-dish-mock.jpg',
+                    mimeType: 'image/jpeg',
+                    buffer: buffer
+                });
+                console.log(`📸 Mock Image uploaded to ${selector}`);
+            }
+        };
+        await use(utils);
+    }
 });
 
 export { expect };

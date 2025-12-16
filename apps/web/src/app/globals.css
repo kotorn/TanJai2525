@@ -57,10 +57,22 @@ body {
 }
 
 
-@layer base {
-  :root {
-    --primary: 24 100% 60%; /* #FF6B35 approx converted to HSL for tailwind if needed, or just hex */
-    /* Shadcn usually uses HSL or similar variables. Let's check tailwind config or just use hex in class if not defined */
-    /* Re-reading globals.css, it was empty except for basics. I should add the layer base. */
-  }
+@layer utilities {
+    .glass-panel {
+        @apply bg-[#1E1E1E]/60 backdrop-blur-md border border-white/5;
+    }
+    .glass-nav {
+         @apply bg-[#121212]/85 backdrop-blur-2xl border-t border-white/5;
+    }
+    .shadow-glow {
+        box-shadow: 0 0 20px -5px rgba(238, 108, 43, 0.4);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 }
+

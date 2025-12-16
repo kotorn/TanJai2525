@@ -49,9 +49,8 @@ export default defineConfig({
         ...devices['Pixel 5'],
         isMobile: true,
         hasTouch: true,
+        // CPU Throttling is applied in fixtures/antigravity-test.ts
       },
-      // Note: CPU throttling is done via Chrome DevTools Protocol in fixtures if needed, 
-      // but here we define the profile.
     },
 
     /* 4. The Trojan Horse (LINE In-App Browser) */
@@ -62,6 +61,7 @@ export default defineConfig({
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Line/11.19.1', // LINE UA
         hasTouch: true,
       },
+      // Goal: Ensure OAuth flows and Session persistence work within the walled garden of the LINE app.
     },
 
     /* 5. The Ischemic Network (Slow 3G + Jitter) */
@@ -69,7 +69,8 @@ export default defineConfig({
       name: 'The Ischemic Network',
       use: {
         ...devices['Desktop Chrome'],
-        // Network throttling usually injected via context options or fixture
+        // Network throttling logic typically goes here if simple, or fixture for advanced jitter.
+        // We will stick to the default fixture-based approach or Playwright's network conditions if applicable later.
       },
     },
   ],

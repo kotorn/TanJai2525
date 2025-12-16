@@ -13,6 +13,7 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    transpilePackages: ['@tanjai/ui'],
 };
 
 export default nextConfig;
