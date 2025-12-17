@@ -43,20 +43,26 @@ export const MenuHeader = ({ greeting = "Good Evening", name = "Guest" }) => {
 // --- CategoryScroll ---
 export const CategoryScroll = ({ categories, activeCategory, onSelect }) => {
   return (
-    <div className="flex gap-4 overflow-x-auto px-6 py-4 snap-x no-scrollbar mt-20">
+    <div className="flex gap-3 overflow-x-auto px-6 py-4 snap-x no-scrollbar mt-20 pb-8">
       {categories.map((cat: any) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}
-          className={`flex-shrink-0 px-6 py-2 rounded-full border transition-all duration-300 snap-start ${
+          className={`relative flex-shrink-0 px-5 py-2.5 rounded-2xl transition-all duration-300 snap-start border ${
             activeCategory === cat.id
-              ? "bg-primary-500/20 border-primary-500 text-primary-500 shadow-glow"
-              : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10"
+              ? "bg-gradient-to-br from-primary-500/20 to-primary-500/5 border-primary-500/50 text-white shadow-[0_0_20px_-5px_rgba(238,108,43,0.5)] scale-105"
+              : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:border-white/20"
           }`}
         >
-          <span className="text-sm font-medium whitespace-nowrap">
+          <span className="text-sm font-semibold tracking-wide font-display whitespace-nowrap">
             {cat.name}
           </span>
+          {activeCategory === cat.id && (
+            <motion.div
+              layoutId="activeCategoryGlow"
+              className="absolute inset-0 rounded-2xl bg-primary-500/10 blur-md -z-10"
+            />
+          )}
         </button>
       ))}
     </div>
@@ -67,79 +73,121 @@ export const CategoryScroll = ({ categories, activeCategory, onSelect }) => {
 export const MenuHero = () => {
   return (
     <div className="px-6 py-4">
-      <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-2xl bg-gray-800">
-        <div className="absolute top-4 left-4 z-10">
-          <span className="glass-panel px-3 py-1 rounded-lg text-xs font-bold text-white flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">star</span>
-            Chef &apos;s Special
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-full h-56 rounded-3xl overflow-hidden shadow-2xl shadow-primary-500/10 bg-gray-900 group"
+      >
+        <div className="absolute top-4 left-4 z-20">
+          <span className="glass-panel px-3 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5 border border-white/10 shadow-lg">
+            <span className="material-symbols-outlined text-sm text-secondary-500">star</span>
+            Chef's Pick
           </span>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+        
         {/* Placeholder for Hero Image */}
-        <div className="absolute inset-0 flex items-center justify-center text-gray-600 bg-gray-900">
-            [Hero Image Placeholder]
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+             <span className="text-gray-700 font-display text-4xl opacity-20 font-bold tracking-widest">FOOD ART</span>
         </div>
-        <div className="absolute bottom-4 left-4 right-4 z-20 flex justify-between items-end">
-          <div>
-            <h3 className="text-white text-lg font-bold font-display">
+
+        <div className="absolute bottom-5 left-5 right-5 z-20 flex justify-between items-end">
+          <div className="space-y-1">
+            <h3 className="text-white text-2xl font-bold font-display leading-none tracking-tight">
               Midnight Ramen
             </h3>
-            <p className="text-gray-300 text-xs">Rich bone broth, slow-cooked</p>
+            <p className="text-gray-300 text-xs font-light tracking-wide max-w-[150px]">
+                Rich 12hr bone broth, chashu, and marinated egg.
+            </p>
           </div>
-          <button className="bg-gradient-to-r from-primary-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-glow active:scale-95 transition-transform">
-            Get Your Warmth
+          <button className="bg-gradient-to-r from-primary-500 to-[#e05e22] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-primary-500/30 active:scale-95 transition-all hover:brightness-110">
+            Order Now
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
 
 // --- MenuList ---
+// --- MenuList ---
 export const MenuList = ({ items }) => {
   return (
-    <div className="px-6 pb-24 space-y-4">
-      <h3 className="text-white text-lg font-bold font-display mb-2">
-        Comfort Selection
-      </h3>
+    <div className="px-6 pb-28 space-y-6">
+      <div className="flex justify-between items-end mb-4">
+         <h3 className="text-white text-xl font-bold font-display tracking-tight">
+            Comfort Selection
+         </h3>
+         <span className="text-xs text-gray-500 font-medium">{items.length} dishes</span>
+      </div>
+      
+      <div className="grid gap-4">
       {items.map((item: any) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileTap={{ scale: 0.98 }}
-          className="glass-panel p-3 rounded-xl flex gap-4 items-center"
-        >
-          <div className="w-20 h-20 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden">
-             {/* Placeholder for Item Image */}
-              <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-xs">
-                 Img
-              </div>
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between items-start">
-              <h4 className="text-white font-medium text-base">{item.name}</h4>
-              <span className="text-secondary-500 font-bold">฿{item.price}</span>
-            </div>
-            <p className="text-gray-400 text-xs mt-1 line-clamp-2">
-              {item.description}
-            </p>
-            <div className="mt-2 flex gap-2">
-                {item.tags?.map((tag:string) => (
-                    <span key={tag} className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded">
-                        {tag}
-                    </span>
-                ))}
-            </div>
-          </div>
-          <button className="w-8 h-8 rounded-full bg-primary-500/20 text-primary-500 flex items-center justify-center border border-primary-500/50">
-            <span className="material-symbols-outlined text-lg">add</span>
-          </button>
-        </motion.div>
+        <MenuItemCard key={item.id} item={item} />
       ))}
+      </div>
     </div>
   );
 };
+
+// --- MenuItemCard (High Fidelity) ---
+const MenuItemCard = ({ item }: { item: any }) => {
+    return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          whileTap={{ scale: 0.98 }}
+          className="group relative p-3 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 shadow-lg backdrop-blur-sm overflow-hidden"
+        >
+           {/* Glass Shine Effect */}
+           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+          <div className="flex gap-4">
+            {/* Image Container */}
+            <div className="w-24 h-24 rounded-xl bg-gray-800 flex-shrink-0 relative overflow-hidden shadow-inner group-hover:shadow-glow transition-all duration-500">
+               {/* Placeholder for Item Image */}
+                <div className="absolute inset-0 flex items-center justify-center text-gray-600 text-xs font-medium">
+                   {item.image ? (
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    ) : (
+                        <span className="material-symbols-outlined text-4xl opacity-20">ramen_dining</span>
+                    )}
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 flex flex-col justify-between py-1">
+              <div>
+                <div className="flex justify-between items-start">
+                  <h4 className="text-white font-bold text-lg font-display leading-tight">{item.name}</h4>
+                  <span className="text-secondary-500 font-bold text-lg drop-shadow-sm">฿{item.price}</span>
+                </div>
+                <p className="text-gray-400 text-xs mt-1 leading-relaxed line-clamp-2">
+                  {item.description}
+                </p>
+              </div>
+              
+              <div className="flex justify-between items-end mt-2">
+                 <div className="flex gap-1.5 flex-wrap">
+                    {item.tags?.map((tag:string) => (
+                        <span key={tag} className="text-[10px] uppercase tracking-wider font-bold text-gray-400 bg-black/20 px-2 py-1 rounded-md border border-white/5">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+                <button className="w-9 h-9 rounded-full bg-gradient-to-r from-primary-500 presumably-to-primary-600 text-white shadow-lg shadow-primary-500/20 flex items-center justify-center hover:scale-110 active:scale-90 transition-transform duration-200">
+                    <span className="material-symbols-outlined text-xl">add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+    )
+}
 
 // --- BottomNav ---
 export const BottomNav = () => {

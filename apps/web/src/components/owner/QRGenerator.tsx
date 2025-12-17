@@ -4,6 +4,8 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { motion } from "framer-motion";
+import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 
 export function QRGenerator() {
   const [activeTab, setActiveTab] = useState("static");
@@ -15,12 +17,58 @@ export function QRGenerator() {
   const staticURL = `https://app.tanjai.com/table/${tableId}`;
 
   const handleGenerateDynamic = () => {
-    // Mock generation - in real app this would call API
-    const transactionId = Math.random().toString(36).substring(7);
+    // Cryptographically secure random ID generation
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const transactionId = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    
     setGeneratedDynamicURL(`https://app.tanjai.com/pay/${transactionId}`);
     const now = new Date();
     now.setMinutes(now.getMinutes() + 15);
     setExpiry(now);
+  };
+
+  const handlePrint = async () => {
+      try {
+          // Generate QR Data URL
+          const qrDataUrl = await QRCode.toDataURL(staticURL, { width: 400, margin: 2 });
+          
+          // Create PDF (80mm width is standard thermal, height auto or fixed)
+          // 80mm = ~3.15 inches. pt = 1/72 inch. 80mm approx 226pt.
+          // Let's use 'mm' units directly.
+          const doc = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: [80, 100]
+          });
+
+          // Design Recipe
+          doc.setFontSize(12);
+          doc.text("Tanjai POS", 40, 10, { align: "center" });
+          
+          doc.setFontSize(10);
+          doc.text("Scan to Order", 40, 16, { align: "center" });
+
+          // QR Image centered
+          // 80mm w, let's make QR 50mm
+          const imgSize = 50;
+          const xPos = (80 - imgSize) / 2;
+          doc.addImage(qrDataUrl, 'PNG', xPos, 20, imgSize, imgSize);
+
+          doc.setFontSize(16);
+          doc.setFont("helvetica", "bold");
+          doc.text(`Table ${tableId}`, 40, 80, { align: "center" });
+
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          doc.text("Powered by Tanjai", 40, 90, { align: "center" });
+
+          // Auto print or save
+          doc.autoPrint();
+          doc.output('dataurlnewwindow');
+      } catch (err) {
+          console.error("Failed to generate PDF", err);
+      }
   };
 
   return (
@@ -73,7 +121,10 @@ export function QRGenerator() {
             <p className="text-black font-mono text-sm">{staticURL}</p>
           </div>
 
-          <button className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <button 
+            onClick={handlePrint}
+            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
             <span className="material-symbols-outlined">print</span>
             Print Table Label
           </button>

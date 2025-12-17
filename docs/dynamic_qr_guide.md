@@ -23,5 +23,15 @@ Use this mode to accept payments or specific orders.
 5. Show this QR to the customer. When they scan it, they will be directed to the payment confirmation page.
 6. Once scanned/paid, the QR expires automatically.
 
-> [!NOTE]
 > Dynamic QRs are One-Time Use only for security. Do not print these for reuse.
+
+## 3. How to Print & Stick (New!)
+1.  **Generate PDF**: Click the "Print Table Label" button in the "Static (Table)" tab.
+2.  **Printer Settings**:
+    *   **Paper Size**: 80mm Thermal Roll.
+    *   **Margins**: None (or Minimum).
+    *   **Scale**: 100%.
+3.  **Deployment**:
+    *   Stick clearly on the table corner or a stand.
+    *   **Tip**: Use clear tape or acrylic stands to protect from spillages.
+    *   **Flood Test**: We've verified that the system can handle mass generation, so feel free to print all 50 tables at once!
