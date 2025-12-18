@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function PayPage({ params }: { params: { id: string } }) {
@@ -22,7 +21,9 @@ export default function PayPage({ params }: { params: { id: string } }) {
                 <h1 className="text-3xl font-bold text-white mb-2">Already Paid</h1>
                 <p className="text-gray-400 mb-8 text-lg font-light">This transaction has been completed.</p>
                 <Link href="/menu">
-                    <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 h-12 px-8 rounded-xl">Back to Menu</Button>
+                    <button className="border border-white/10 text-white hover:bg-white/5 h-12 px-8 rounded-xl font-medium transition-colors">
+                        Back to Menu
+                    </button>
                 </Link>
             </div>
         );
@@ -37,7 +38,9 @@ export default function PayPage({ params }: { params: { id: string } }) {
                 <h1 className="text-3xl font-bold text-white mb-2">QR Expired</h1>
                 <p className="text-gray-400 mb-8 text-lg font-light">This payment code is no longer valid.</p>
                 <Link href="/menu">
-                    <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 h-12 px-8 rounded-xl">Back to Menu</Button>
+                    <button className="border border-white/10 text-white hover:bg-white/5 h-12 px-8 rounded-xl font-medium transition-colors">
+                        Back to Menu
+                    </button>
                 </Link>
             </div>
         );
@@ -55,9 +58,9 @@ export default function PayPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <Link href="/menu">
-                    <Button className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-glow">
+                    <button className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-glow transition-all active:scale-95">
                         Proceed to Pay
-                    </Button>
+                    </button>
                 </Link>
              </div>
         </div>

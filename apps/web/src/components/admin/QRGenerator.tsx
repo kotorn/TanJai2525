@@ -2,12 +2,6 @@
 
 import React, { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Printer, RefreshCw, QrCode, Banknote } from "lucide-react";
 
 interface QRGeneratorProps {
@@ -35,7 +29,6 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({ tenantId, baseUrl }) =
   };
 
   const handlePrint = () => {
-      // Basic print logic via new window
       const printWindow = window.open('', '_blank');
       if (printWindow) {
           const canvas = document.getElementById('static-qr-canvas') as HTMLCanvasElement;
@@ -68,77 +61,91 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({ tenantId, baseUrl }) =
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Tabs defaultValue="static" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 mb-8 h-14 bg-surface-dark border border-white/10 rounded-xl p-1">
-          <TabsTrigger value="static" className="text-lg data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+      {/* Tabs */}
+      <div className="grid w-full grid-cols-2 mb-8 bg-surface-dark border border-white/10 rounded-xl p-1">
+          <button 
+            onClick={() => setActiveTab("static")}
+            className={`flex items-center justify-center py-3 rounded-lg transition-all font-medium ${activeTab === 'static' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+          >
             <QrCode className="w-5 h-5 mr-2" /> Static (Tables)
-          </TabsTrigger>
-          <TabsTrigger value="dynamic" className="text-lg data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+          </button>
+          <button 
+            onClick={() => setActiveTab("dynamic")}
+            className={`flex items-center justify-center py-3 rounded-lg transition-all font-medium ${activeTab === 'dynamic' ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+          >
              <Banknote className="w-5 h-5 mr-2" /> Dynamic (Pay)
-          </TabsTrigger>
-        </TabsList>
+          </button>
+      </div>
         
-        <TabsContent value="static" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Card className="glass-panel border-0 text-white">
-            <CardHeader>
-              <CardTitle>Table QR Code</CardTitle>
-              <CardDescription className="text-gray-400">Generate permanent QR codes for tables.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label>Table Number</Label>
-                <Select value={selectedTable} onValueChange={setSelectedTable}>
-                  <SelectTrigger className="bg-surface-dark border-white/10 text-white h-12">
-                    <SelectValue placeholder="Select Table" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-surface-dark border-white/10 text-white">
-                    {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        Table {num}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Content */}
+      <div className="glass-panel p-6 rounded-3xl border border-white/10 text-white shadow-glass min-h-[400px]">
+        
+        {activeTab === 'static' && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Table QR Code</h2>
+              <p className="text-gray-400 text-sm">Generate permanent QR codes for tables.</p>
+            </div>
 
-              <div className="flex flex-col items-center justify-center p-8 border border-white/10 rounded-2xl bg-white text-black">
-                <QRCodeCanvas id="static-qr-canvas" value={staticQRUrl} size={240} level="H" includeMargin />
-                <p className="mt-4 text-xs text-gray-500 font-mono">{staticQRUrl}</p>
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Table Number</label>
+              <select 
+                value={selectedTable} 
+                onChange={(e) => setSelectedTable(e.target.value)}
+                className="w-full h-12 bg-surface-dark border border-white/10 rounded-lg px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num.toString()}>
+                    Table {num}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <Button className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-white" onClick={handlePrint}>
-                <Printer className="mr-2 h-5 w-5" /> Print Label
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            <div className="flex flex-col items-center justify-center p-8 border border-white/10 rounded-2xl bg-white text-black">
+              <QRCodeCanvas id="static-qr-canvas" value={staticQRUrl} size={240} level="H" includeMargin />
+              <p className="mt-4 text-xs text-gray-500 font-mono break-all text-center">{staticQRUrl}</p>
+            </div>
 
-        <TabsContent value="dynamic" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Card className="glass-panel border-0 text-white">
-             <CardHeader>
-              <CardTitle>Payment QR Code</CardTitle>
-              <CardDescription className="text-gray-400">Generate one-time QR codes for payments.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-               <div className="space-y-2">
-                 <Label>Amount (THB)</Label>
+            <button 
+                onClick={handlePrint}
+                className="w-full h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold flex items-center justify-center transition-colors"
+            >
+              <Printer className="mr-2 h-5 w-5" /> Print Label
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'dynamic' && (
+           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+             <div>
+              <h2 className="text-xl font-bold mb-1">Payment QR Code</h2>
+              <p className="text-gray-400 text-sm">Generate one-time QR codes for payments.</p>
+            </div>
+
+             <div className="space-y-2">
+                 <label className="text-sm font-medium">Amount (THB)</label>
                  <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">฿</span>
-                    <Input 
+                    <input 
                       type="number" 
                       placeholder="0.00" 
                       value={amount} 
                       onChange={(e) => setAmount(e.target.value)} 
-                      className="pl-8 bg-surface-dark border-white/10 text-white h-12 text-lg"
+                      className="w-full h-12 pl-8 bg-surface-dark border border-white/10 rounded-lg text-white text-lg focus:outline-none focus:ring-2 focus:ring-secondary"
                     />
                  </div>
-               </div>
+             </div>
                
-               <Button onClick={generateDynamicQR} className="w-full h-12 text-lg bg-secondary hover:bg-secondary/90 text-black font-bold" disabled={!amount || loading}>
+             <button 
+                onClick={generateDynamicQR} 
+                className="w-full h-12 bg-secondary hover:bg-secondary/90 text-black font-bold rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!amount || loading}
+             >
                  {loading ? <RefreshCw className="mr-2 h-5 w-5 animate-spin" /> : "Generate QR"}
-               </Button>
+             </button>
 
-               {dynamicQRUrl && (
+             {dynamicQRUrl && (
                  <div className="flex flex-col items-center justify-center p-6 border border-white/10 rounded-2xl bg-white mt-6 animate-in zoom-in duration-300 relative overflow-hidden">
                     <QRCodeCanvas value={dynamicQRUrl} size={240} level="H" includeMargin />
                     <div className="mt-4 bg-red-100 text-red-600 px-4 py-2 rounded-full flex items-center gap-2 font-bold text-sm">
@@ -146,11 +153,11 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({ tenantId, baseUrl }) =
                         Expires in 14:59
                     </div>
                  </div>
-               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+             )}
+           </div>
+        )}
+
+      </div>
     </div>
   );
 };
