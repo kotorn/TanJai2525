@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/database.types';
 
@@ -15,12 +15,22 @@ import { Loader2, Share2 } from 'lucide-react';
 
 export default function MenuPage({ params }: { params: { tenant: string } }) {
   const router = useRouter();
-  // Initialize lang based on URL param if it's a valid language code
-  const initialLang = LANGUAGES.some(l => l.code === params.tenant)
-    ? params.tenant
-    : 'th';
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  // Initialize lang based on Query Param (Priority) > URL Param (Legacy) > Default
+  const currentLang = searchParams.get('lang') || 
+    (LANGUAGES.some(l => l.code === params.tenant) ? params.tenant : 'th');
 
-  const [lang, setLang] = useState(initialLang);
+  const [lang, setLang] = useState(currentLang);
+
+  // Update effect to sync state if URL changes externally
+  useEffect(() => {
+    const urlLang = searchParams.get('lang');
+    if (urlLang && LANGUAGES.some(l => l.code === urlLang)) {
+        setLang(urlLang);
+    }
+  }, [searchParams]);
   const [isMember, setIsMember] = useState(false);
   
   // State for Data
@@ -106,8 +116,8 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         <LanguageSwitcher 
             currentLang={lang} 
             onLanguageChange={(newLang) => {
-                setLang(newLang);
-                router.push(`/${newLang}`);
+                setLang(newLang); // Optimistic update
+                router.push(`${pathname}?lang=${newLang}`);
             }} 
         />
         
@@ -115,7 +125,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         <div role="tablist" className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
              <button
                 role="tab"
-                aria-selected={activeCategory === 'all'}
+                aria-selected={activeCategory === 'all' ? "true" : "false"}
                 onClick={() => setActiveCategory('all')}
                 className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === 'all' 
@@ -129,7 +139,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
                 <button
                     key={cat.id}
                     role="tab"
-                    aria-selected={activeCategory === cat.id}
+                    aria-selected={activeCategory === cat.id ? "true" : "false"}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                         activeCategory === cat.id 

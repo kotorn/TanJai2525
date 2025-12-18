@@ -49,7 +49,7 @@ jobs:
         run: npx playwright install --with-deps
         
       - name: Run Playwright Tests
-        run: npx playwright test
+        run: npm run test:e2e
         env:
           CI: true
           
