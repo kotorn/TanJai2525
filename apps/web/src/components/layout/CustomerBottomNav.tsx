@@ -4,23 +4,22 @@ import Link from "next/link";
 
 export const CustomerBottomNav = () => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-nav safe-area-bottom">
-      <div className="flex justify-around items-center px-4 py-3">
-        <NavItem icon={<Home className="w-6 h-6" />} label="Home" href="/" />
-        <NavItem icon={<UtensilsCrossed className="w-6 h-6" />} label="Menu" href="/menu" active />
-        <div className="relative w-full">
-          <NavItem icon={<ClipboardList className="w-6 h-6" />} label="Orders" href="/orders" />
-          <span className="absolute top-0 right-[25%] -mr-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-glow" />
+    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-sm safe-area-bottom">
+      <div className="glass-panel rounded-full px-6 py-4 flex justify-between items-center shadow-soft bg-white/90 backdrop-blur-xl border-white/40">
+        <NavItem icon={<Home className="w-6 h-6" />} href="/" />
+        <NavItem icon={<UtensilsCrossed className="w-6 h-6" />} href="/menu" active />
+        <div className="relative">
+             <NavItem icon={<ClipboardList className="w-6 h-6" />} href="/orders" />
+             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
         </div>
-        <NavItem icon={<User className="w-6 h-6" />} label="Profile" href="/profile" />
+        <NavItem icon={<User className="w-6 h-6" />} href="/profile" />
       </div>
     </nav>
   );
 };
 
-const NavItem = ({ icon, label, href, active }: { icon: React.ReactNode; label: string; href: string; active?: boolean }) => (
-  <Link href={href} className={`flex flex-col items-center justify-center w-full transition-all duration-300 ${active ? "text-primary scale-110" : "text-muted-foreground hover:text-white"}`}>
+const NavItem = ({ icon, href, active }: { icon: React.ReactNode; href: string; active?: boolean }) => (
+  <Link href={href} className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${active ? "bg-primary text-white shadow-md transform -translate-y-2 scale-110" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
     {icon}
-    <span className="text-[10px] mt-1 font-medium tracking-wide">{label}</span>
   </Link>
 );
