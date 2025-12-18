@@ -111,7 +111,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         <div role="tablist" className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
              <button
                 role="tab"
-                aria-selected={activeCategory === 'all' ? "true" : "false"}
+                aria-selected={activeCategory === 'all' ? "true" : undefined}
                 onClick={() => setActiveCategory('all')}
                 className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === 'all' 
@@ -125,7 +125,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
                 <button
                     key={cat.id}
                     role="tab"
-                    aria-selected={activeCategory === cat.id ? "true" : "false"}
+                    aria-selected={activeCategory === cat.id ? "true" : undefined}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                         activeCategory === cat.id 

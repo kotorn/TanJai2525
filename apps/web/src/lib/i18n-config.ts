@@ -18,7 +18,8 @@ export const TRANSLATIONS = {
     total: 'ยอดรวม',
     items: 'รายการ',
     checkout: 'ชำระเงิน',
-    currency: '฿'
+    currency: '฿',
+    share: 'แชร์'
   },
   en: {
     title: 'Tanjai POS',
@@ -28,7 +29,8 @@ export const TRANSLATIONS = {
     total: 'Total',
     items: 'items',
     checkout: 'Checkout',
-    currency: 'THB'
+    currency: 'THB',
+    share: 'Share'
   },
   my: {
     title: 'Tanjai POS',
@@ -38,7 +40,8 @@ export const TRANSLATIONS = {
     total: 'စုစုပေါင်း',
     items: 'ပစ္စည်းများ',
     checkout: 'ငွေချေမည်',
-    currency: '฿'
+    currency: '฿',
+    share: 'Share'
   },
   shn: {
     title: 'Tanjai POS',
@@ -48,7 +51,8 @@ export const TRANSLATIONS = {
     total: 'တင်းမူတ်း',
     items: 'ဢၼ်',
     checkout: 'ပၼ်ငိုၼ်း',
-    currency: '฿'
+    currency: '฿',
+    share: 'Share'
   },
   lo: {
     title: 'Tanjai POS',
@@ -58,7 +62,8 @@ export const TRANSLATIONS = {
     total: 'ລວມ',
     items: 'ລາຍການ',
     checkout: 'ຊຳລະເງິນ',
-    currency: '฿'
+    currency: '฿',
+    share: 'ແບ່ງປັນ'
   },
   jp: {
     title: 'Tanjai POS',
@@ -68,7 +73,8 @@ export const TRANSLATIONS = {
     total: '合計',
     items: '点',
     checkout: 'チェックアウト',
-    currency: '¥'
+    currency: '¥',
+    share: '共有'
   },
   cn: {
     title: 'Tanjai POS',
@@ -78,7 +84,8 @@ export const TRANSLATIONS = {
     total: '总计',
     items: '件',
     checkout: '结账',
-    currency: '¥'
+    currency: '¥',
+    share: '分享'
   },
   vn: {
     title: 'Tanjai POS',
@@ -88,6 +95,7 @@ export const TRANSLATIONS = {
     total: 'Tổng cộng',
     items: 'món',
     checkout: 'Thanh toán',
-    currency: '₫'
+    currency: '₫',
+    share: 'Chia sẻ'
   }
 };
