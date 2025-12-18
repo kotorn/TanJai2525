@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ViralModal from '@/components/ViralModal';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Share2 } from 'lucide-react';
 
 export default function MenuPage({ params }: { params: { tenant: string } }) {
   const router = useRouter();
@@ -108,10 +108,10 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         />
         
         {/* Category Tabs */}
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div role="tablist" className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
              <button
                 role="tab"
-                aria-selected={activeCategory === 'all'}
+                aria-selected={activeCategory === 'all' ? "true" : "false"}
                 onClick={() => setActiveCategory('all')}
                 className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === 'all' 
@@ -125,7 +125,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
                 <button
                     key={cat.id}
                     role="tab"
-                    aria-selected={activeCategory === cat.id}
+                    aria-selected={activeCategory === cat.id ? "true" : "false"}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                         activeCategory === cat.id 
@@ -149,8 +149,10 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
             <button 
               onClick={() => setViralItem(item)}
               className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full text-gray-600 shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
+              aria-label={t.share || "Share"}
+              title={t.share || "Share"}
             >
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y1="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y1="10.49"/></svg>
+               <Share2 size={16} />
             </button>
 
             <div className="relative h-32 w-full bg-gray-200">
