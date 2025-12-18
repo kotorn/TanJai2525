@@ -61,7 +61,10 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'tanjai.app'
   
-  let currentHost = hostname.replace(`.${ROOT_DOMAIN}`, '')
+  let currentHost = '';
+  if (hostname.endsWith(`.${ROOT_DOMAIN}`)) {
+    currentHost = hostname.replace(`.${ROOT_DOMAIN}`, '');
+  }
   if (hostname.includes('localhost')) {
      const parts = hostname.split('.')
      if (parts[0] !== 'localhost') {

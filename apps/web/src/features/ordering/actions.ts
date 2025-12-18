@@ -59,7 +59,20 @@ export async function submitOrder(restaurantId: string, tableId: string, items: 
      throw new Error('Failed to save order items');
   }
 
-  // 4. Revalidate & Redirect
+  // 4. Trigger LINE Notification (Async, don't block response)
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user && user.app_metadata.provider === 'line') {
+      import('@/lib/line').then(({ sendOrderNotification }) => {
+          sendOrderNotification(
+              user.identities?.find(i => i.provider === 'line')?.provider_id || user.id,
+              order.id,
+              totalAmount,
+              items.map(i => ({ name: `Item ${i.menu_item_id}` })) // Placeholder names
+          );
+      }).catch(err => console.error('Failed to trigger LINE notification:', err));
+  }
+
+  // 5. Revalidate & Redirect
   revalidatePath(`/r/${restaurantId}/t/${tableId}`);
   return { success: true, orderId: order.id };
 }
