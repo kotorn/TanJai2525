@@ -59,13 +59,17 @@ body {
 
 @layer utilities {
     .glass-panel {
-        @apply bg-[#1E1E1E]/60 backdrop-blur-md border border-white/5;
+        @apply bg-[#1E1E1E]/60 backdrop-blur-lg border border-white/10;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     .glass-nav {
-         @apply bg-[#121212]/85 backdrop-blur-2xl border-t border-white/5;
+         @apply bg-[#121212]/70 backdrop-blur-xl border-b border-white/5;
     }
     .shadow-glow {
-        box-shadow: 0 0 20px -5px rgba(238, 108, 43, 0.4);
+        box-shadow: 0 0 25px -5px rgba(238, 108, 43, 0.5);
+    }
+    .shadow-glass {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     .no-scrollbar::-webkit-scrollbar {
         display: none;

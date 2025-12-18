@@ -11,7 +11,9 @@ type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ViralModal from '@/components/ViralModal';
-import { Loader2, Share2 } from 'lucide-react';
+import { Loader2, Share2, ShoppingBasket, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { CartDrawer } from '@/features/ordering/components/cart-drawer';
 
 export default function MenuPage({ params }: { params: { tenant: string } }) {
   const router = useRouter();
@@ -76,13 +78,24 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
     localStorage.setItem('guest_cart', JSON.stringify(cart));
   }, [cart]);
 
+  // 1. Dynamic Greeting Logic
+  const [greeting, setGreeting] = useState('');
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Good Morning');
+    else if (hour < 18) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
+  }, []);
+
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS];
   const currentFont = LANGUAGES.find(l => l.code === lang)?.font || 'font-sans';
+
 
   const handleMemberLogin = () => { window.location.href = '/login'; };
 
   const addToCart = (item: MenuItem) => {
      setCart(prev => [...prev, { id: item.id, price: item.price }]);
+     toast.success(`เพิ่ม ${item.name} ลงในตะกร้าแล้ว`);
   };
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
@@ -92,45 +105,44 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
     ? items 
     : items.filter(i => i.category_id === activeCategory);
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (loading) return <div className="flex h-screen items-center justify-center bg-[#121212]"><Loader2 className="animate-spin text-BURNT_ORANGE" /></div>;
 
   return (
-    <div className={`min-h-screen bg-gray-50 pb-24 ${currentFont}`}>
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-          <div className="flex items-center gap-2">
-             {!isMember ? (
-                <button 
-                  onClick={handleMemberLogin}
-                  className="text-xs font-bold bg-gray-900 text-white px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm"
-                >
-                  Login
-                </button>
-             ) : (
-                <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100">Member</span>
-             )}
+    <div className={`min-h-screen bg-[#121212] text-[#E0E0E0] pb-32 ${currentFont} font-body overflow-x-hidden`}>
+      {/* 1. Sticky Glass Header */}
+      <header className="sticky top-0 z-40 glass-nav px-4 py-4 flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col">
+            <span className="text-xs text-TEXT_SECONDARY font-medium">{greeting}, Guest</span>
+            <div className="flex items-center gap-1">
+                <h1 className="text-lg font-black font-display text-white tracking-tight">{t.title}</h1>
+                <div className="w-1.5 h-1.5 rounded-full bg-BURNT_ORANGE animate-pulse"></div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <LanguageSwitcher 
+                currentLang={lang} 
+                onLanguageChange={(newLang) => {
+                    setLang(newLang);
+                    router.push(`${pathname}?lang=${newLang}`);
+                }} 
+             />
+             <button onClick={handleMemberLogin} className="glass-panel p-2 rounded-xl text-white active:scale-95 transition-all">
+                <Loader2 size={18} className={isMember ? "text-green-500" : "text-white"} />
+             </button>
           </div>
         </div>
-        <LanguageSwitcher 
-            currentLang={lang} 
-            onLanguageChange={(newLang) => {
-                setLang(newLang); // Optimistic update
-                router.push(`${pathname}?lang=${newLang}`);
-            }} 
-        />
-        
-        {/* Category Tabs */}
-        <div role="tablist" className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+
+        {/* 2. Category Scroll (Horizontal Snap) */}
+        <div role="tablist" className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
              <button
                 role="tab"
                 aria-selected={activeCategory === 'all' ? "true" : "false"}
                 onClick={() => setActiveCategory('all')}
-                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+                className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${
                     activeCategory === 'all' 
-                    ? 'bg-orange-500 text-white shadow-md' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-BURNT_ORANGE text-white shadow-glow' 
+                    : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
                 }`}
             >
                 {t.category_all}
@@ -141,10 +153,10 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
                     role="tab"
                     aria-selected={activeCategory === cat.id ? "true" : "false"}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+                    className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${
                         activeCategory === cat.id 
-                        ? 'bg-orange-500 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-BURNT_ORANGE text-white shadow-glow' 
+                        : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
                     }`}
                 >
                     {cat.name}
@@ -153,45 +165,72 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         </div>
       </header>
 
-      {/* Menu Grid */}
-      <main className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* 3. Hero Section (Chef's Special) */}
+      <div className="p-4">
+         <div className="relative h-48 w-full rounded-3xl overflow-hidden shadow-2xl group active:scale-[0.98] transition-all">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+            <Image 
+                src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=800&auto=format&fit=crop" 
+                alt="Chef's Special" 
+                fill 
+                className="object-cover group-hover:scale-110 transition-transform duration-700" 
+            />
+            <div className="absolute top-4 left-4 z-20 glass-panel px-3 py-1 rounded-full border-BURNT_ORANGE/30">
+                <span className="text-[10px] font-black tracking-widest text-BURNT_ORANGE uppercase italic">Chef's Special</span>
+            </div>
+            <div className="absolute bottom-4 left-4 z-20">
+                <h2 className="text-xl font-black font-display text-white">Midnight Ramen</h2>
+                <p className="text-xs text-gray-300 font-medium italic">Experience the warmth of 12-hour broth</p>
+            </div>
+            <button 
+                onClick={() => toast.info('Menu Recommended!')}
+                className="absolute bottom-4 right-4 z-20 bg-BURNT_ORANGE text-white p-3 rounded-2xl shadow-glow hover:scale-105 active:scale-95 transition-all"
+            >
+                <ShoppingBasket size={20} />
+            </button>
+         </div>
+      </div>
+
+      {/* 4. Menu Grid (Responsive) */}
+      <main className="px-4 pb-12 grid grid-cols-2 gap-4">
         {filteredItems.map((item) => (
           <div 
             key={item.id} 
-            className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 active:scale-95 transition-transform duration-100 group relative"
+            className="glass-panel rounded-[2rem] overflow-hidden group active:scale-95 transition-all duration-200 flex flex-col"
           >
-            <button 
-              onClick={() => setViralItem(item)}
-              className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full text-gray-600 shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
-              aria-label={t.share || "Share"}
-              title={t.share || "Share"}
-            >
-               <Share2 size={16} />
-            </button>
-
-            <div className="relative h-32 w-full bg-gray-200">
-               {/* Use a placeholder if image fails in dry run */}
-               {item.image_url && <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />} 
-               {!item.image_url && <div className="absolute inset-0 flex items-center justify-center text-gray-400">No Image</div>}
+            <div className="relative h-36 w-full overflow-hidden">
+               {item.image_url ? (
+                 <Image src={item.image_url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+               ) : (
+                 <div className="absolute inset-0 bg-white/5 flex items-center justify-center text-TEXT_MUTED">
+                    <ShoppingBasket size={32} opacity={0.2} />
+                 </div>
+               )}
+               <button 
+                onClick={(e) => { e.stopPropagation(); setViralItem(item); }}
+                className="absolute top-3 right-3 z-10 glass-panel p-2 rounded-full text-white/80 hover:text-white transition-all shadow-lg"
+               >
+                 <Share2 size={14} />
+               </button>
             </div>
 
-            <div className="p-3">
-              <h3 className="font-bold text-gray-800 text-lg leading-tight mb-1 truncate">
-                {item.name}
-              </h3>
+            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-white text-base leading-tight truncate font-display">
+                    {item.name}
+                </h3>
+                <p className="text-[10px] text-TEXT_SECONDARY mt-1 line-clamp-1">{item.description}</p>
+              </div>
               
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-orange-600 font-bold text-lg">
-                  {item.price} <span className="text-xs">{t.currency}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-BURNT_ORANGE font-black text-lg font-mono">
+                  <span className="text-[10px] mr-1">฿</span>{item.price}
                 </span>
                 <button 
                   onClick={() => addToCart(item)}
-                  className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 shadow-sm"
-                  aria-label={t.addToCart}
+                  className="bg-white/5 hover:bg-BURNT_ORANGE text-TEXT_SECONDARY hover:text-white p-2.5 rounded-2xl border border-white/5 shadow-inner transition-all group/btn"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+                  <Plus size={18} className="group-active/btn:rotate-90 transition-transform" />
                 </button>
               </div>
             </div>
@@ -199,17 +238,10 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         ))}
       </main>
 
-      {/* Floating Cart Bar (Visible if items in cart) */}
-      {count > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg safe-area-bottom">
-            <button className="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl flex justify-between items-center shadow-xl active:scale-95 transition-all">
-                <div className="flex items-center gap-2">
-                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">{count} {t.items}</span>
-                </div>
-                <span className="text-lg">{t.checkout} • {total} {t.currency}</span>
-            </button>
-        </div>
-      )}
+      {/* 5. Bottom Navigation / Floating Cart */}
+      <nav className="fixed bottom-0 left-0 right-0 glass-nav pt-4 pb-8 px-6 z-50">
+         <CartDrawer restaurantId={params.tenant} tableId="5" />
+      </nav>
 
       {/* Viral Modal */}
       {viralItem && (

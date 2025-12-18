@@ -24,20 +24,19 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: {
-           DEFAULT: "hsl(var(--background))",
-           light: "#f8f6f6",
+           DEFAULT: "#f8f6f6",
            dark: "#121212",
         },
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#ee6c2b",
           foreground: "hsl(var(--primary-foreground))",
-          500: "#ee6c2b", // Burnt Orange
+          500: "#ee6c2b", 
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT: "#FFB300",
           foreground: "hsl(var(--secondary-foreground))",
-          500: "#FFB300", // Golden Yolk
+          500: "#FFB300", 
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -88,8 +87,8 @@ const config = {
         thai: ["Noto Sans Thai", "sans-serif"],
       },
       boxShadow: {
-        "glow": "0 0 20px -5px rgba(238, 108, 43, 0.4)",
-        "glass": "0 4px 30px rgba(0, 0, 0, 0.1)",
+        "glow": "0 0 20px -5px rgba(238, 108, 43, 0.5)",
+        "glass": "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
       }
     },
   },
