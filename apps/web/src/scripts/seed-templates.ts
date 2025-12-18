@@ -79,7 +79,8 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
   const optionGroupCache = new Map<string, string>();
 
   // 1. Insert Categories
-  for (const [catIndex, category] of template.categories.entries()) {
+  for (let catIndex = 0; catIndex < template.categories.length; catIndex++) {
+    const category = template.categories[catIndex];
     // // // console.log(`Processing Category: ${category.name}`);
     
     const { data: catData, error: catError } = await supabase
@@ -124,7 +125,8 @@ async function seedRestaurant(restaurantId: string, template: RestaurantTemplate
       const itemId = itemData.id;
 
       // 3. Process Option Groups
-      for (const [ogIndex, group] of item.option_groups.entries()) {
+      for (let ogIndex = 0; ogIndex < item.option_groups.length; ogIndex++) {
+        const group = item.option_groups[ogIndex];
         let groupId = optionGroupCache.get(group.name);
 
         if (!groupId) {
@@ -206,7 +208,7 @@ async function main() {
   const args = process.argv.slice(2);
   const helpIndex = args.indexOf('--help');
   if (helpIndex >= 0 || args.length < 2) {
-    // // // console.log(`
+    console.log(`
 Usage: npx tsx apps/web/src/scripts/seed-templates.ts <restaurant_id> <template_slug>
 
 Available Templates:

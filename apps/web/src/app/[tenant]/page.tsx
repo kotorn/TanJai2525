@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Database } from '@/lib/database.types';
+
+type Category = Database['public']['Tables']['menu_categories']['Row'];
+type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ViralModal from '@/components/ViralModal';
@@ -20,8 +24,8 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   const [isMember, setIsMember] = useState(false);
   
   // State for Data
-  const [categories, setCategories] = useState<any[]>([]);
-  const [items, setItems] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
@@ -29,7 +33,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   const [cart, setCart] = useState<{id: string, price: number}[]>([]);
   
   // State for Viral Modal
-  const [viralItem, setViralItem] = useState<any>(null);
+  const [viralItem, setViralItem] = useState<MenuItem | null>(null);
 
   const supabase = createClient();
 
@@ -67,7 +71,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
 
   const handleMemberLogin = () => { window.location.href = '/login'; };
 
-  const addToCart = (item: any) => {
+  const addToCart = (item: MenuItem) => {
      setCart(prev => [...prev, { id: item.id, price: item.price }]);
   };
 
@@ -111,7 +115,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         <div role="tablist" className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
              <button
                 role="tab"
-                aria-selected={activeCategory === 'all' ? "true" : undefined}
+                aria-selected={activeCategory === 'all'}
                 onClick={() => setActiveCategory('all')}
                 className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === 'all' 
@@ -125,7 +129,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
                 <button
                     key={cat.id}
                     role="tab"
-                    aria-selected={activeCategory === cat.id ? "true" : undefined}
+                    aria-selected={activeCategory === cat.id}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                         activeCategory === cat.id 
