@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -9,7 +10,13 @@ import ViralModal from '@/components/ViralModal';
 import { Loader2 } from 'lucide-react';
 
 export default function MenuPage({ params }: { params: { tenant: string } }) {
-  const [lang, setLang] = useState('th');
+  const router = useRouter();
+  // Initialize lang based on URL param if it's a valid language code
+  const initialLang = LANGUAGES.some(l => l.code === params.tenant)
+    ? params.tenant
+    : 'th';
+
+  const [lang, setLang] = useState(initialLang);
   const [isMember, setIsMember] = useState(false);
   
   // State for Data
@@ -92,7 +99,13 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
              )}
           </div>
         </div>
-        <LanguageSwitcher currentLang={lang} onLanguageChange={setLang} />
+        <LanguageSwitcher 
+            currentLang={lang} 
+            onLanguageChange={(newLang) => {
+                setLang(newLang);
+                router.push(`/${newLang}`);
+            }} 
+        />
         
         {/* Category Tabs */}
         <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">

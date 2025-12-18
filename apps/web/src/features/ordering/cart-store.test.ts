@@ -62,4 +62,23 @@ breakdown = useCartStore.getState().getTaxBreakdown();
 assert(Math.abs(breakdown.total8 - 216) < 0.01, "Total8 should be 216");
 assert(Math.abs(breakdown.taxAmount8 - 16) < 0.01, "Tax8 should be 16");
 
+// Test 4: Floor Logic Check (Imperfect Number)
+// 100 Yen (8%) -> Net: 100/1.08 = 92.592... -> Tax: 7.407... -> Floor: 7
+addItem({
+    menuItemId: '3', name: 'Cheap Snack', price: 100, quantity: 1, options: {},
+    taxRate: 0.08, isAlcohol: false
+});
+
+breakdown = useCartStore.getState().getTaxBreakdown();
+// Previous total8 was 216, now + 100 = 316
+assert(Math.abs(breakdown.total8 - 316) < 0.01, "Total8 should be 316");
+
+// Total Tax8:
+// Previous Tax8 (for 216) = 16 (Exact: 216 - 200 = 16)
+// New Item Tax (for 100) = 7 (Floor(100 - 92.59))
+// Wait, the logic sums TOTAL first, then calculates tax.
+// Total 8% Gross = 316.
+// Tax = Floor(316 - 316/1.08) = Floor(316 - 292.5925) = Floor(23.407) = 23.
+assert(breakdown.taxAmount8 === 23, `Tax8 should be 23 (Floored from ~23.40, was ${breakdown.taxAmount8})`);
+
 console.log(`\n🎉 Test Complete: ${passed}/${total} Passed`);

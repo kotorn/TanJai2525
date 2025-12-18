@@ -89,8 +89,9 @@ export const useCartStore = create<CartState>()(
 
                 // Tax Calculation (Inclusive Tax)
                 // Tax = Price - (Price / (1 + Rate))
-                const taxAmount8 = total8 - (total8 / 1.08);
-                const taxAmount10 = total10 - (total10 / 1.10);
+                // Japan Tax Rule: Floor to nearest Yen
+                const taxAmount8 = Math.floor(total8 - (total8 / 1.08));
+                const taxAmount10 = Math.floor(total10 - (total10 / 1.10));
 
                 return {
                     total8,
