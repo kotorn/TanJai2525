@@ -11,9 +11,11 @@ type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 import { TRANSLATIONS, LANGUAGES } from '@/lib/i18n-config';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ViralModal from '@/components/ViralModal';
-import { Loader2, Share2, ShoppingBasket, Plus } from 'lucide-react';
+import { Skeleton } from '@tanjai/ui';
+import { Loader2, Share2, ShoppingBasket, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { CartDrawer } from '@/features/ordering/components/cart-drawer';
+import { SafeImage } from '@tanjai/ui';
 
 export default function MenuPage({ params }: { params: { tenant: string } }) {
   const router = useRouter();
@@ -39,6 +41,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   // State for Cart
@@ -52,18 +55,22 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   useEffect(() => {
     async function loadData() {
         setLoading(true);
-        // Get Restaurant by Slug (from params.tenant)
-        // Mock Client handles 'tanjai' slug
-        
-        const { data: cats } = await supabase.from('menu_categories').select('*').order('sort_order');
-        if (cats) {
-            setCategories(cats);
+        setError(null);
+        try {
+            const { data: cats, error: catErr } = await supabase.from('menu_categories').select('*').order('sort_order');
+            if (catErr) throw catErr;
+            if (cats) setCategories(cats);
+
+            const { data: menuItems, error: itemsErr } = await supabase.from('menu_items').select('*').eq('is_available', true);
+            if (itemsErr) throw itemsErr;
+            if (menuItems) setItems(menuItems);
+        } catch (err: any) {
+            console.error('Error loading menu:', err);
+            setError(err.message || 'Failed to load menu data');
+            toast.error('Could not load menu. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        const { data: menuItems } = await supabase.from('menu_items').select('*').eq('is_available', true);
-        if (menuItems) setItems(menuItems);
-
-        setLoading(false);
     }
     loadData();
 
@@ -98,14 +105,54 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
      toast.success(`เพิ่ม ${item.name} ลงในตะกร้าแล้ว`);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
-  const count = cart.length;
-
   const filteredItems = activeCategory === 'all' 
     ? items 
     : items.filter(i => i.category_id === activeCategory);
 
-  if (loading) return <div className="flex h-screen items-center justify-center bg-[#121212]"><Loader2 className="animate-spin text-BURNT_ORANGE" /></div>;
+  // --- Specialized UI Components ---
+  const MenuSkeleton = () => (
+    <div className="px-4 pb-12 grid grid-cols-2 gap-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="glass-panel rounded-[2rem] overflow-hidden flex flex-col h-64">
+          <Skeleton className="h-36 w-full opacity-20" />
+          <div className="p-4 space-y-3">
+            <Skeleton className="h-4 w-3/4 opacity-20" />
+            <Skeleton className="h-3 w-1/2 opacity-10" />
+            <div className="flex justify-between items-center pt-2">
+              <Skeleton className="h-6 w-12 opacity-20" />
+              <Skeleton className="h-10 w-10 rounded-2xl opacity-20" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ErrorDisplay = () => (
+    <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+      <div className="bg-red-500/10 p-4 rounded-full mb-4">
+        <AlertCircle className="text-red-500 w-12 h-12" />
+      </div>
+      <h2 className="text-xl font-bold text-white mb-2">Oops! Something went wrong</h2>
+      <p className="text-TEXT_SECONDARY mb-6 max-w-xs">{error || 'We had trouble loading the menu. Please check your connection.'}</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="flex items-center gap-2 bg-BURNT_ORANGE text-white px-6 py-2 rounded-full font-bold active:scale-95 transition-all shadow-glow"
+      >
+        <RefreshCw size={18} /> Retry
+      </button>
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div className="col-span-2 flex flex-col items-center justify-center p-12 text-center h-64 opacity-60">
+      <div className="bg-white/5 p-6 rounded-full mb-4">
+        <ShoppingBasket className="text-TEXT_MUTED w-12 h-12" />
+      </div>
+      <h3 className="text-lg font-bold text-white mb-1">No items found</h3>
+      <p className="text-xs text-TEXT_SECONDARY">Try checking a different category.</p>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen bg-[#121212] text-[#E0E0E0] pb-32 ${currentFont} font-body overflow-x-hidden`}>
@@ -191,51 +238,76 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
          </div>
       </div>
 
-      {/* 4. Menu Grid (Responsive) */}
-      <main className="px-4 pb-12 grid grid-cols-2 gap-4">
-        {filteredItems.map((item) => (
-          <div 
-            key={item.id} 
-            className="glass-panel rounded-[2rem] overflow-hidden group active:scale-95 transition-all duration-200 flex flex-col"
-          >
-            <div className="relative h-36 w-full overflow-hidden">
-               {item.image_url ? (
-                 <Image src={item.image_url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-               ) : (
-                 <div className="absolute inset-0 bg-white/5 flex items-center justify-center text-TEXT_MUTED">
-                    <ShoppingBasket size={32} opacity={0.2} />
-                 </div>
-               )}
-               <button 
-                onClick={(e) => { e.stopPropagation(); setViralItem(item); }}
-                className="absolute top-3 right-3 z-10 glass-panel p-2 rounded-full text-white/80 hover:text-white transition-all shadow-lg"
-               >
-                 <Share2 size={14} />
-               </button>
+      <main className="px-4 pb-12">
+        {loading ? (
+            <MenuSkeleton />
+        ) : error ? (
+            <ErrorDisplay />
+        ) : filteredItems.length === 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+                <EmptyState />
             </div>
+        ) : (
+            <div className="grid grid-cols-2 gap-4">
+                {filteredItems.map((item) => (
+                    <div 
+                        key={item.id} 
+                        className="glass-panel rounded-[2rem] overflow-hidden group active:scale-95 transition-all duration-200 flex flex-col"
+                    >
+                        <div className="relative h-36 w-full overflow-hidden">
+                        {item.image_url ? (
+                            <SafeImage 
+                                src={item.image_url} 
+                                alt={item.name} 
+                                fill 
+                                className="object-cover group-hover:scale-110 transition-transform duration-500" 
+                            />
+                        ) : (
+                            <div className="absolute inset-0 bg-white/5 flex items-center justify-center text-TEXT_MUTED">
+                                <ShoppingBasket size={32} opacity={0.2} />
+                            </div>
+                        )}
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setViralItem(item); }}
+                            className="absolute top-3 right-3 z-10 glass-panel p-2 rounded-full text-white/80 hover:text-white transition-all shadow-lg"
+                        >
+                            <Share2 size={14} />
+                        </button>
+                        </div>
 
-            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
-              <div>
-                <h3 className="font-bold text-white text-base leading-tight truncate font-display">
-                    {item.name}
-                </h3>
-                <p className="text-[10px] text-TEXT_SECONDARY mt-1 line-clamp-1">{item.description}</p>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-BURNT_ORANGE font-black text-lg font-mono">
-                  <span className="text-[10px] mr-1">฿</span>{item.price}
-                </span>
-                <button 
-                  onClick={() => addToCart(item)}
-                  className="bg-white/5 hover:bg-BURNT_ORANGE text-TEXT_SECONDARY hover:text-white p-2.5 rounded-2xl border border-white/5 shadow-inner transition-all group/btn"
-                >
-                  <Plus size={18} className="group-active/btn:rotate-90 transition-transform" />
-                </button>
-              </div>
+                        <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+                        <div>
+                            <h3 className="font-bold text-white text-base leading-tight truncate font-display">
+                                {item.name}
+                            </h3>
+                            <p className="text-[10px] text-TEXT_SECONDARY mt-1 line-clamp-1">{item.description}</p>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-BURNT_ORANGE font-black text-lg font-mono">
+                                <span className="text-[10px] mr-1">฿</span>{item.price}
+                            </span>
+                            <button 
+                                onClick={() => addToCart(item)}
+                                className="bg-white/5 hover:bg-BURNT_ORANGE text-TEXT_SECONDARY hover:text-white p-2.5 rounded-2xl border border-white/5 shadow-inner transition-all group/btn"
+                            >
+                                <Plus size={18} className="group-active/btn:rotate-90 transition-transform" />
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                ))}
+                
+                {/* Visual indicator that end is reached */}
+                {!loading && filteredItems.length > 0 && (
+                    <div className="col-span-2 py-8 text-center">
+                        <p className="text-[10px] text-TEXT_SECONDARY/40 font-medium tracking-widest uppercase">
+                            You've reached the end of the menu
+                        </p>
+                    </div>
+                )}
             </div>
-          </div>
-        ))}
+        )}
       </main>
 
       {/* 5. Bottom Navigation / Floating Cart */}
