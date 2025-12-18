@@ -2,8 +2,10 @@
 // import { SupabaseClient } from '@supabase/supabase-js';
 type SupabaseClient = any;
 
-export const createClient = () => ({
-    from: () => ({ select: () => ({ data: [], error: null }) })
+// stub updated to match usage
+export const createClient = (url?: string, key?: string, options?: any) => ({
+    from: () => ({ select: () => ({ data: [], error: null }) }),
+    rpc: () => ({ error: null })
 } as any);
 
 // Helper to get a Supabase client with the Tenant Context set

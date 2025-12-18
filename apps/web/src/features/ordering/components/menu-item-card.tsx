@@ -28,7 +28,9 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
       name: item.name,
       price: item.price,
       quantity: quantity,
-      options: {} // TODO: Add options support
+      options: [] as any[], // TODO: Add options support
+      taxRate: 0,
+      isAlcohol: false
     });
     setIsOpen(false);
     setQuantity(1);

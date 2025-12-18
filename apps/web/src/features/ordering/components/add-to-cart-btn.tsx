@@ -18,7 +18,9 @@ export default function AddToCartBtn({ item }: { item: any }) {
             name: item.name,
             price: item.price,
             quantity: 1,
-            options: {}
+            options: [] as any[],
+            taxRate: 0,
+            isAlcohol: false
         });
         // In a real app we'd need a Toaster provider
         // // // console.log('Added to cart', item.name);
@@ -31,6 +33,7 @@ export default function AddToCartBtn({ item }: { item: any }) {
         <button
             onClick={handleAdd}
             disabled={isOutOfStock}
+            aria-label="Add to cart"
             className={`p-2 rounded-full absolute bottom-4 right-4 shadow-lg transition-all ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600 active:scale-90'}`}
         >
             <Plus className="w-5 h-5" />

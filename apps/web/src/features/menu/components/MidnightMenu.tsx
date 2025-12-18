@@ -79,7 +79,9 @@ export const MidnightMenu = ({ categories }: MidnightMenuProps) => {
           name: item.name,
           price: item.price,
           quantity: 1,
-          options: [] // Default no options for now
+          options: [] as any[], // Default no options for now
+          taxRate: 0,
+          isAlcohol: false
       });
       toast.success(`Added ${item.name} to warmth`);
   };

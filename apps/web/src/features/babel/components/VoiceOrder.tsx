@@ -4,6 +4,14 @@ import { useState } from 'react';
 import { Mic, MicOff, Globe, Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
+declare global {
+  interface Window {
+    speechRecognitionInstance?: any;
+    SpeechRecognition?: any;
+    webkitSpeechRecognition?: any;
+  }
+}
+
 export default function VoiceOrder() {
   const [isListening, setIsListening] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -101,6 +109,8 @@ export default function VoiceOrder() {
         {/* Language Selector */}
         <div className="flex gap-2">
            <select 
+             aria-label="Target Language"
+             title="Target Language"
              className="flex-1 p-2 border rounded-lg bg-gray-50 text-sm font-medium"
              value={targetLang}
              onChange={(e) => setTargetLang(e.target.value)}
