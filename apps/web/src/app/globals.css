@@ -3,52 +3,36 @@
 @tailwind utilities;
 
 /* Import Fonts from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+Lao:wght@300;400;500;700&family=Noto+Sans+Myanmar:wght@300;400;500;700&family=Inter:wght@400;500;700&display=swap');
+/* Import Fonts from Google Fonts - Playfair Display (Serif) & Lato (Sans) */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
 
 :root {
-  --font-thai: 'Noto Sans Thai', sans-serif;
-  --font-lao: 'Noto Sans Lao', sans-serif;
-  --font-burmese: 'Noto Sans Myanmar', sans-serif; /* Supports Shan/Tai Yai */
-  --font-sans: 'Inter', sans-serif;
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Lato', sans-serif;
+    --font-thai: 'Noto Sans Thai', sans-serif;
 
-  /* Sidebar Configuration */
-  --sidebar-width: 16rem;
-  --sidebar-width-icon: 3rem;
-  --sidebar-width-mobile: 18rem;
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 255, 255, 255;
+    --background-end-rgb: 255, 255, 255;
 }
 
 /* Utility Classes for Fonts */
-.font-thai { font-family: var(--font-thai); }
-.font-lao { font-family: var(--font-lao); }
-.font-burmese { font-family: var(--font-burmese); }
-.font-sans { font-family: var(--font-sans); }
-
-/* Hide scrollbar for language switcher */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    /* scrollbar-width: none; - Wrapped in @supports to silence IDE warnings about compatibility */
-}
-@supports (scrollbar-width: none) {
-    .scrollbar-hide {
-        scrollbar-width: none;
-    }
+.font-display {
+    font-family: var(--font-serif);
 }
 
-/* Safe area for mobile PWA */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+.font-body {
+    font-family: var(--font-sans);
+}
+
+.font-thai {
+    font-family: var(--font-thai);
 }
 
 
 body {
-  color: #111827; /* Gray-900 */
-  background: #F9FAFB; /* Gray-50 */
+    color: #000000;
+    background: #FFFFFF;
 }
 
 
@@ -57,24 +41,29 @@ body {
         @apply bg-[#1E1E1E]/60 backdrop-blur-lg border border-white/10;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
+
     .glass-nav {
-         @apply bg-[#121212]/70 backdrop-blur-xl border-b border-white/5;
+        @apply bg-[#121212]/70 backdrop-blur-xl border-b border-white/5;
     }
+
     .shadow-glow {
         box-shadow: 0 0 25px -5px rgba(238, 108, 43, 0.5);
     }
+
     .shadow-glass {
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
+
     .shadow-soft {
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
     }
+
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
+
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
 }
-
