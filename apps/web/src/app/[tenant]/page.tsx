@@ -47,6 +47,9 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   // State for Cart
   const [cart, setCart] = useState<{id: string, price: number}[]>([]);
   
+  // State for Hero Item
+  const [heroItem, setHeroItem] = useState<MenuItem | null>(null);
+
   // State for Viral Modal
   const [viralItem, setViralItem] = useState<MenuItem | null>(null);
 
@@ -63,7 +66,12 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
 
             const { data: menuItems, error: itemsErr } = await supabase.from('menu_items').select('*').eq('is_available', true);
             if (itemsErr) throw itemsErr;
-            if (menuItems) setItems(menuItems);
+            if (menuItems) {
+                setItems(menuItems);
+                // Set the first item with an image as hero if none exists
+                const featured = menuItems.find(i => i.image_url);
+                if (featured) setHeroItem(featured);
+            }
         } catch (err: any) {
             console.error('Error loading menu:', err);
             setError(err.message || 'Failed to load menu data');
@@ -212,28 +220,45 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
         </div>
       </header>
 
-      {/* 3. Hero Section (Chef's Special) */}
       <div className="p-4">
-         <div className="relative h-48 w-full rounded-3xl overflow-hidden shadow-2xl group active:scale-[0.98] transition-all">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
-            <Image 
-                src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=800&auto=format&fit=crop" 
-                alt="Chef's Special" 
-                fill 
-                className="object-cover group-hover:scale-110 transition-transform duration-700" 
-            />
-            <div className="absolute top-4 left-4 z-20 glass-panel px-3 py-1 rounded-full border-BURNT_ORANGE/30">
-                <span className="text-[10px] font-black tracking-widest text-BURNT_ORANGE uppercase italic">Chef's Special</span>
+         <div className="relative h-56 w-full rounded-[2.5rem] overflow-hidden shadow-2xl group active:scale-[0.98] transition-all bg-white/5">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
+            {heroItem?.image_url ? (
+                <Image 
+                    src={heroItem.image_url} 
+                    alt="Featured Item" 
+                    fill 
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" 
+                />
+            ) : (
+                <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                    <ShoppingBasket size={64} />
+                    <span className="absolute text-[10rem] font-black pointer-events-none opacity-5 select-none">TANJAI</span>
+                </div>
+            )}
+            
+            <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                <div className="glass-panel px-3 py-1 rounded-full border-BURNT_ORANGE/30 w-fit">
+                    <span className="text-[10px] font-black tracking-widest text-BURNT_ORANGE uppercase italic">
+                        {heroItem ? "Chef's Recommendation" : "Welcome to Tanjai"}
+                    </span>
+                </div>
             </div>
-            <div className="absolute bottom-4 left-4 z-20">
-                <h2 className="text-xl font-black font-display text-white">Midnight Ramen</h2>
-                <p className="text-xs text-gray-300 font-medium italic">Experience the warmth of 12-hour broth</p>
+
+            <div className="absolute bottom-6 left-6 z-20">
+                <h2 className="text-2xl font-black font-display text-white mb-1">
+                    {heroItem ? heroItem.name : "Authentic Flavors"}
+                </h2>
+                <p className="text-sm text-gray-300 font-medium italic max-w-[200px] line-clamp-1">
+                    {heroItem ? heroItem.description : "Discover our signature dishes"}
+                </p>
             </div>
+
             <button 
-                onClick={() => toast.info('Menu Recommended!')}
-                className="absolute bottom-4 right-4 z-20 bg-BURNT_ORANGE text-white p-3 rounded-2xl shadow-glow hover:scale-105 active:scale-95 transition-all"
+                onClick={() => heroItem ? addToCart(heroItem) : toast.info('Browse our menu below!')}
+                className="absolute bottom-6 right-6 z-20 bg-BURNT_ORANGE text-white p-4 rounded-2xl shadow-glow hover:scale-105 active:scale-95 transition-all"
             >
-                <ShoppingBasket size={20} />
+                <Plus size={24} />
             </button>
          </div>
       </div>
