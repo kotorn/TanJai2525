@@ -46,6 +46,7 @@ export async function middleware(request: NextRequest) {
   const isPublicPath = 
     url.pathname.startsWith('/_next') || 
     url.pathname.startsWith('/api') || 
+    url.pathname.startsWith('/demo') || 
     url.pathname.includes('.') || 
     url.pathname === '/' // Maybe landing page is public?
 
