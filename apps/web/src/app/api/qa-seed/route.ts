@@ -1,10 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { STRESS_TEST_DATA } from '@/lib/mock-data';
+import { apiGuard } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Security Guard
+  const guardResult = apiGuard(req);
+  if (guardResult) return guardResult;
+
   const supabase = createClient();
   console.log('Attempting to seed. URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
   console.log('Key length:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length);

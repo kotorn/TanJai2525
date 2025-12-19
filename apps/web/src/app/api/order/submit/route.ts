@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { routeToStation, StationID } from '@/lib/kitchen/station-router';
+import { routeToStation } from '@/lib/kitchen/station-router';
+import { createClient } from '@/lib/supabase/server';
+import { apiGuard } from '@/lib/api-auth';
 
 // DEV-0001: Order Ingestion API
 // Owner: Dev Core
@@ -21,8 +23,13 @@ interface SubmitOrderPayload {
 }
 
 export async function POST(req: NextRequest) {
+    // Security Guard
+    const guardResult = apiGuard(req);
+    if (guardResult) return guardResult;
+
     try {
         const body = await req.json() as SubmitOrderPayload;
+        const supabase = createClient();
 
         // 1. Basic Validation
         if (!body.restaurantId || !body.tableId || !body.items || body.items.length === 0) {
@@ -31,40 +38,64 @@ export async function POST(req: NextRequest) {
 
         console.log(`[API] Processing Order for Table ${body.tableId}...`);
 
-        // 2. Mock Inventory Check (ARC-0002 Logic would go here)
-        // const isStockAvailable = await checkInventory(body.items);
-        // if (!isStockAvailable) return NextResponse.json({ error: 'Out of Stock' }, { status: 409 });
-
-        // 3. Process Routing & Structure Data for DB
+        // 2. Process Routing & Structure Data for DB
         const routedItems = body.items.map(item => {
             const station = routeToStation({ 
                 id: item.menuItemId, 
                 category: item.category,
-                tags: [] // In real app, fetch tags from DB based on ID
+                tags: [] 
             });
 
             return {
-                ...item,
+                menu_item_id: item.menuItemId,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                notes: item.notes,
                 station,
                 status: 'PENDING'
             };
         });
 
-        // 4. Mock Database Insertion
-        // await supabase.from('orders').insert({ ... });
-        // await supabase.from('order_items').insert(routedItems);
+        // 3. Database Insertion
+        // Insert Order
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .insert({
+                restaurant_id: body.restaurantId,
+                table_id: body.tableId,
+                guest_id: body.guestId,
+                status: 'PENDING_PACK',
+                total_amount: body.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            })
+            .select()
+            .single();
 
-        console.log('[API] Order Routed Successfully:', routedItems);
+        if (orderError) throw orderError;
 
-        // 5. Success Response
+        // Insert Order Items
+        const itemsToInsert = routedItems.map(item => ({
+            ...item,
+            order_id: order.id
+        }));
+
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(itemsToInsert);
+
+        if (itemsError) throw itemsError;
+
+        console.log('[API] Order Persistence Success:', order.id);
+
+        // 4. Success Response
         return NextResponse.json({
             success: true,
-            orderId: `ord_${Date.now()}`,
+            orderId: order.id,
             routedItems: routedItems
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('[API] Order Submit Error:', error);
-        return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ success: false, error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }

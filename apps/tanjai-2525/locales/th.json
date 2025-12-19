@@ -11,12 +11,18 @@
     "welcome": "ยินดีต้อนรับ"
   },
   "liff": {
-    "initializing": "กำลังเริ่มต้น LIFF...",
-    "notInLine": "กรุณาเปิดแอปใน LINE",
-    "loginRequired": "กรุณาเข้าสู่ระบบด้วย LINE",
+    "subtitle": "POS บนมือถือสำหรับร้าน 2525minishop",
+    "initializing": "ระบบกำลังเตรียมการ...",
+    "loginRequired": "กรุณาเข้าสู่ระบบผ่าน LINE เพื่อดำเนินการต่อ",
     "loginButton": "เข้าสู่ระบบด้วย LINE",
+    "syncingSupabase": "กำลังเชื่อมต่อกับฐานข้อมูล...",
     "configError": "ไม่พบการตั้งค่า LIFF ID",
     "initError": "ไม่สามารถเริ่มต้น LIFF ได้"
+  },
+  "catalog": {
+    "title": "รายการอาหาร",
+    "search": "ค้นหา...",
+    "all": "ทั้งหมด"
   },
   "home": {
     "title": "หน้าหลัก",

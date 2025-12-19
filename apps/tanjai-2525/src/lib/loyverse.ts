@@ -92,14 +92,46 @@ export class LoyverseClient {
    * to keep menu_items table up-to-date
    */
   async syncProducts(): Promise<{ synced: number; errors: string[] }> {
-    // TODO: Implement sync logic
-    // 1. Fetch items from Loyverse
-    // 2. Transform to Supabase schema
-    // 3. Upsert into menu_items table
-    // 4. Return sync results
+    const { createClient } = await import('./supabase');
+    const supabase = createClient();
     
-    console.warn('syncProducts not yet implemented');
-    return { synced: 0, errors: [] };
+    try {
+      console.log('[Loyverse] Starting product sync...');
+      
+      // 1. Fetch items from Loyverse
+      const items = await this.getItems();
+      console.log(`[Loyverse] Found ${items.length} items to sync.`);
+
+      // 2. Prepare data for Supabase
+      // Note: In real scenarios, we'd also sync categories
+      const menuItems = items.map(item => ({
+        id: item.id, // Use Loyverse ID as primary key or external ref
+        name: item.item_name,
+        description: item.description || '',
+        price: item.variants?.[0]?.price || 0,
+        is_available: !item.is_deleted,
+        // For MVP, we use category_id if available, or fallback
+        category_id: item.category_id, 
+        updated_at: new Date().toISOString(),
+      }));
+
+      // 3. Upsert into menu_items table
+      const { data, error } = await supabase
+        .from('menu_items')
+        .upsert(menuItems, { onConflict: 'id' });
+
+      if (error) {
+        console.error('[Loyverse] Supabase Upsert Error:', error);
+        return { synced: 0, errors: [error.message] };
+      }
+
+      console.log(`[Loyverse] Successfully synced ${menuItems.length} items.`);
+      return { synced: menuItems.length, errors: [] };
+
+    } catch (error: any) {
+      console.error('[Loyverse] Sync failed:', error);
+      return { synced: 0, errors: [error.message] };
+    }
   }
 }
 

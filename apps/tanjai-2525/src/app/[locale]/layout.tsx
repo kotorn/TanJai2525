@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_Thai } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { LiffProvider } from '@/providers/LiffProvider';
+import { CartProvider } from '@/features/cart/CartContext';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -27,7 +28,11 @@ export default async function RootLayout({
     <html lang={locale} className={`${inter.variable} ${notoSansThai.variable}`}>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
-          <LiffProvider>{children}</LiffProvider>
+          <LiffProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </LiffProvider>
         </NextIntlClientProvider>
       </body>
     </html>

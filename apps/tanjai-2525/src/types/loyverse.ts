@@ -9,6 +9,8 @@ export interface LoyverseItem {
   category_id?: string;
   primary_image_url?: string;
   variants: LoyverseVariant[];
+  is_available: boolean;
+  is_deleted: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +75,7 @@ export const LoyverseItemSchema = z.object({
   category_id: z.string().optional(),
   primary_image_url: z.string().url().optional(),
   variants: z.array(z.any()),
+  is_deleted: z.boolean().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

@@ -11,12 +11,19 @@
     "welcome": "Welcome"
   },
   "liff": {
-    "initializing": "Initializing LIFF...",
+    "subtitle": "Mobile POS for 2525minishop",
+    "initializing": "Initializing system...",
     "notInLine": "Please open this app in LINE",
-    "loginRequired": "Please login with LINE",
+    "loginRequired": "Please login via LINE to continue",
     "loginButton": "Login with LINE",
+    "syncingSupabase": "Connecting to database...",
     "configError": "LIFF ID not configured",
     "initError": "Failed to initialize LIFF"
+  },
+  "catalog": {
+    "title": "Menu items",
+    "search": "Search...",
+    "all": "All"
   },
   "home": {
     "title": "Home",

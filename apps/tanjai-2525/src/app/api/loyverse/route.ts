@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiGuard } from '@/lib/api-auth';
 
 /**
  * Loyverse Webhook Handler
- * 
- * Receives webhook events from Loyverse when:
- * - Items are updated
- * - Inventory changes
- * - Receipts are created
- * 
- * @see https://developer.loyverse.com/docs/#tag/Webhooks
  */
 export async function POST(request: NextRequest) {
+  // Security Guard
+  const guardResult = apiGuard(request);
+  if (guardResult) return guardResult;
+
   try {
     const body = await request.json();
     
@@ -40,21 +38,28 @@ export async function POST(request: NextRequest) {
  * 
  * Call this endpoint to manually sync products from Loyverse
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Security Guard
+  const guardResult = apiGuard(request);
+  if (guardResult) return guardResult;
+
+  const { createLoyverseClient } = await import('@/lib/loyverse');
+  
   try {
-    // TODO: Implement manual sync
-    // const client = createLoyverseClient();
-    // const result = await client.syncProducts();
+    const client = createLoyverseClient();
+    const result = await client.syncProducts();
 
     return NextResponse.json({
       success: true,
-      message: 'Sync endpoint ready (not yet implemented)',
+      message: 'Product sync completed',
+      synced: result.synced,
+      errors: result.errors,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Loyverse Sync Error:', error);
     
     return NextResponse.json(
-      { error: 'Failed to sync products' },
+      { error: error.message || 'Failed to sync products' },
       { status: 500 }
     );
   }
