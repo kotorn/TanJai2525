@@ -9,11 +9,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitOrder } from '../actions';
 import { toast } from 'sonner';
+import { Input } from "@tanjai/ui";
 
 export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; tableId: string }) {
   const { items, removeItem, updateQuantity, total, clearCart } = useCartStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
   const router = useRouter();
 
   const cartTotal = total();
@@ -25,7 +27,9 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
             restaurantId, 
             tableId, 
             items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.quantity, options: i.options, priceCheck: i.price })),
-            cartTotal
+            cartTotal,
+            undefined, // specialInstructions
+            promoCode
         );
         
         if (result.success) {
@@ -63,7 +67,7 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
             <DrawerTitle className="font-display text-2xl">ออเดอร์ของคุณ</DrawerTitle>
           </DrawerHeader>
           
-          <ScrollArea className="h-[50vh] p-4">
+          <ScrollArea className="h-[45vh] p-4">
             <div className="flex flex-col gap-4">
                 {items.map((item) => (
                     <div key={item.menuItemId} className="flex justify-between items-center border-b border-white/5 pb-4 last:border-0">
@@ -89,8 +93,17 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
           </ScrollArea>
 
           <DrawerFooter className="pb-8">
+            <div className="mb-4">
+               <label className="text-xs text-TEXT_SECONDARY uppercase tracking-widest mb-2 block">Promotion Code</label>
+               <Input 
+                placeholder="กรอกรหัสส่วนลด..." 
+                className="bg-white/5 border-white/10 text-white rounded-xl"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+               />
+            </div>
             <div className="flex justify-between items-center mb-6 text-xl font-bold font-display">
-                <span className="text-TEXT_SECONDARY">ยอดรวมทั้งหมด</span>
+                <span className="text-TEXT_SECONDARY">ยอดรวม</span>
                 <span className="text-BURNT_ORANGE text-2xl">฿{cartTotal}</span>
             </div>
             <Button size="lg" className="bg-BURNT_ORANGE hover:bg-BURNT_ORANGE/90 text-white rounded-2xl py-7 text-lg font-black shadow-glow" onClick={handleCheckout} disabled={isSubmitting}>

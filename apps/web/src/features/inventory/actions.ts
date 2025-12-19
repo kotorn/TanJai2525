@@ -1,33 +1,15 @@
 'use server';
 
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-// Stubbed to unblock build
-const supabase = {
-    from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({}), update: () => ({}), eq: () => ({}), single: () => ({ data: null }) })
-} as any;
-
-type InventoryItemInput = {
-    name: string;
-    unit: string;
-    cost_per_unit: number;
-    current_stock: number;
-    min_stock_level: number;
-};
+import { InventoryService, type InventoryItemInput } from '@/services/inventory-service';
 
 export async function addInventoryItem(tenantId: string, item: InventoryItemInput) {
+    const supabase = await createClient();
+    const inventoryService = new InventoryService(supabase);
+
     try {
-        const { error } = await supabase
-            .from('inventory_items')
-            .insert({
-                tenant_id: tenantId,
-                ...item
-            });
-
-        if (error) throw error;
-
+        await inventoryService.addInventoryItem(tenantId, item);
         revalidatePath(`/${tenantId}/inventory`);
         return { success: true };
     } catch (e: any) {
@@ -36,12 +18,13 @@ export async function addInventoryItem(tenantId: string, item: InventoryItemInpu
 }
 
 export async function updateStock(itemId: string, newStock: number) {
-    // Simple update for manual correction
-    const { error } = await supabase
-        .from('inventory_items')
-        .update({ current_stock: newStock })
-        .eq('id', itemId);
+    const supabase = await createClient();
+    const inventoryService = new InventoryService(supabase);
 
-    if (error) return { success: false, error: error.message };
-    return { success: true };
+    try {
+        await inventoryService.updateStock(itemId, newStock);
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
 }

@@ -1,32 +1,45 @@
 'use server';
 
-// Stubbed
-// import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-// const supabase = createClient(supabaseUrl, supabaseKey);
+import { PaymentService } from '@/services/payment-service';
 
 export async function markOrderPaid(tenantId: string, orderId: string) {
-    const { db } = await import('@/lib/mock-db');
-    db.updateOrder(orderId, { 
-        status: 'paid', 
-        payment_method: 'cash',
-        paid_at: new Date().toISOString()
-    });
+    const supabase = await createClient();
+    const paymentService = new PaymentService(supabase);
 
-    revalidatePath(`/${tenantId}`);
-    revalidatePath(`/${tenantId}/admin/cashier`);
-
-    return { success: true };
+    try {
+        // "cash" is default here, but service allows flexibility
+        await paymentService.processPayment(orderId, 'cash', 0); 
+        
+        revalidatePath(`/${tenantId}`);
+        revalidatePath(`/${tenantId}/admin/cashier`);
+        return { success: true };
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
 }
 
 export async function getUnpaidOrders(tenantId: string) {
-    const { db } = await import('@/lib/mock-db');
-    const orders = db.getOrders(tenantId);
+    const supabase = await createClient();
     
-    // Filter
-    return orders.filter((o: any) => o.status !== 'paid' && o.status !== 'cancelled')
-          .sort((a: any, b: any) => a.created_at.localeCompare(b.created_at));
+    // Direct DB query is fine for "reading" lists if not complex business logic,
+    // or we could add `getUnpaidOrders` to PaymentService if we want strict encapsulation.
+    // For now, let's keep simple reading here or use Service?
+    // "Service Layer" usually implies encapsulation.
+    
+    const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('restaurant_id', tenantId)
+        .neq('status', 'paid')
+        .neq('status', 'cancelled')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Get Unpaid Orders Error:', error);
+        return [];
+    }
+
+    return orders;
 }

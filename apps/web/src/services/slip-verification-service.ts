@@ -1,4 +1,4 @@
-// apps/web/src/features/payment/slip-verification.ts
+// apps/web/src/services/slip-verification-service.ts
 
 interface SlipVerificationResult {
     isValid: boolean;
