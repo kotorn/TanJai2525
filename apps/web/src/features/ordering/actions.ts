@@ -7,7 +7,7 @@ import { CartService, type ServiceCartItem } from '@/services/cart-service';
 // Export type alias for compatibility
 export type CartItem = ServiceCartItem;
 
-export async function submitOrder(restaurantId: string, tableId: string, items: CartItem[], totalAmount: number, specialInstructions?: string, promotionCode?: string) {
+export async function submitOrder(restaurantId: string, tableId: string, items: CartItem[], totalAmount: number, specialInstructions?: string, promotionCode?: string, customerEmail?: string, customerPhone?: string) {
   const supabase = await createClient();
   
   // 1. Get User Context (Important for Service Layer & Notifications)
@@ -25,7 +25,9 @@ export async function submitOrder(restaurantId: string, tableId: string, items: 
       totalAmount,
       specialInstructions,
       userId: user?.id,
-      promotionCode
+      promotionCode,
+      customerEmail,
+      customerPhone
     });
 
     // 4. [Event Simulation] Trigger LINE Notification

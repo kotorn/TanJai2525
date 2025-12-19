@@ -16,6 +16,7 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [promoCode, setPromoCode] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const router = useRouter();
 
   const cartTotal = total();
@@ -29,7 +30,8 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
             items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.quantity, options: i.options, priceCheck: i.price })),
             cartTotal,
             undefined, // specialInstructions
-            promoCode
+            promoCode,
+            customerEmail || undefined // Only pass if not empty
         );
         
         if (result.success) {
@@ -100,6 +102,16 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
                 className="bg-white/5 border-white/10 text-white rounded-xl"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
+               />
+            </div>
+            <div className="mb-6">
+               <label className="text-xs text-TEXT_SECONDARY uppercase tracking-widest mb-2 block">อีเมลสำหรับใบเสร็จ (ไม่บังคับ)</label>
+               <Input 
+                placeholder="email@example.com" 
+                type="email"
+                className="bg-white/5 border-white/10 text-white rounded-xl"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
                />
             </div>
             <div className="flex justify-between items-center mb-6 text-xl font-bold font-display">

@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { PromotionService } from './promotion-service';
+import { CustomerService } from './customer-service';
 
 export type ServiceCartItem = {
   menu_item_id: string;
@@ -17,6 +18,8 @@ export type CreateOrderDTO = {
   specialInstructions?: string;
   userId?: string;
   promotionCode?: string;
+  customerEmail?: string; // For Guest Checkout
+  customerPhone?: string; 
 };
 
 export class CartService {
@@ -46,8 +49,12 @@ export class CartService {
 
     const finalTotal = totalAmount - discountAmount;
 
-    // 2. [Validation] (Future: Validate inventory, prices, tax)
-    console.log(`[CartService] Creating order for Table ${tableId}, Final Total: ${finalTotal}`);
+    // 2. [Customer Logic] Find or Create Customer
+    const customerService = new CustomerService(this.supabase);
+    const customerId = await customerService.handleCheckoutCustomer(data.customerEmail, userId, data.customerPhone);
+
+    // 3. [Validation] (Future: Validate inventory, prices, tax)
+    console.log(`[CartService] Creating order for Table ${tableId}, Customer: ${customerId}, Final Total: ${finalTotal}`);
 
     // 2. [Transaction] Create Order Header
     const { data: order, error: orderError } = await this.supabase
@@ -59,6 +66,7 @@ export class CartService {
         total_amount: finalTotal,
         discount_amount: discountAmount,
         promotion_id: appliedPromotionId,
+        customer_id: customerId,
         special_instructions: specialInstructions,
         user_id: userId // If authenticated
       })
