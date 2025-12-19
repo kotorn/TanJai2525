@@ -1,6 +1,7 @@
 import { fetchKitchenOrders } from '@/features/kds/actions';
 import { KitchenBoard } from '@/features/kds/components/KitchenBoard';
 import { notFound } from 'next/navigation';
+import { FeatureGate } from '@/components/saas/FeatureGate'; // Import FeatureGate
 
 // Force dynamic because KDS depends on realtime DB state
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,9 @@ export default async function KitchenPage({ params }: { params: { tenant: string
       </header>
       
       <main className="flex-1 overflow-hidden">
-        <KitchenBoard initialOrders={orders} tenantId={params.tenant} />
+        <FeatureGate feature="module:kds">
+            <KitchenBoard initialOrders={orders} tenantId={params.tenant} />
+        </FeatureGate>
       </main>
     </div>
   );

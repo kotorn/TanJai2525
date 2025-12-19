@@ -6,16 +6,31 @@ export interface PrinterStatus {
   version: string;
 }
 
+interface BridgeResponse {
+    success: boolean;
+    error?: string;
+}
+
 export class HardwareService {
-  // In production, this might be configurable via LocalStorage or Settings
-  private bridgeUrl = 'http://localhost:8080';
+  private bridgeUrl = process.env.NEXT_PUBLIC_HARDWARE_BRIDGE_URL || 'http://localhost:8080';
+  private bridgeToken = process.env.NEXT_PUBLIC_HARDWARE_BRIDGE_TOKEN || '';
+
+  private getHeaders() {
+      return {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.bridgeToken}`
+      };
+  }
 
   /**
    * Check if the Hardware Bridge is running.
    */
   async checkConnection(): Promise<boolean> {
     try {
-      const res = await fetch(`${this.bridgeUrl}/status`);
+      // Need headers? Status might be protected now.
+      const res = await fetch(`${this.bridgeUrl}/status`, {
+          headers: { 'Authorization': `Bearer ${this.bridgeToken}` }
+      });
       if (res.ok) {
         return true;
       }
@@ -28,15 +43,15 @@ export class HardwareService {
   /**
    * Send order data to the local printer.
    */
-  async printReceipt(order: any): Promise<boolean> {
+  async printReceipt(order: any): Promise<boolean> { // TODO: Replace 'any' with Order type shared with KDS
     try {
       const res = await fetch(`${this.bridgeUrl}/print-receipt`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify(order),
       });
 
-      const data = await res.json();
+      const data: BridgeResponse = await res.json();
       if (data.success) {
         toast.success("พิมพ์ใบเสร็จเรียบร้อย 🖨️");
         return true;
@@ -58,9 +73,10 @@ export class HardwareService {
     try {
       const res = await fetch(`${this.bridgeUrl}/open-drawer`, {
         method: 'POST',
+        headers: this.getHeaders(), // Protected endpoint
       });
       
-      const data = await res.json();
+      const data: BridgeResponse = await res.json();
       if (data.success) {
         toast.success("เปิดลิ้นชักเรียบร้อย 💵");
         return true;

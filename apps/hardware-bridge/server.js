@@ -6,8 +6,21 @@ const { ThermalPrinter, PrinterTypes, CharacterSet, BreakLine } = require('node-
 const app = express();
 const port = 8080;
 
+// Security Token (In production, this should be in .env or a config file)
+const BRIDGE_TOKEN = "tanjai_bridge_secure_token_2025";
+
 app.use(cors());
 app.use(bodyParser.json());
+
+// Auth Middleware
+const authenticate = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${BRIDGE_TOKEN}`) {
+        console.warn(`[Bridge] Unauthorized access attempt from ${req.ip}`);
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+    next();
+};
 
 // Mock Printer Configuration (Change to 'interface: //./COM1' or specific driver for real hardware)
 let printer = new ThermalPrinter({
@@ -21,8 +34,8 @@ let printer = new ThermalPrinter({
     }
 });
 
-// 1. Status Check
-app.get('/status', async (req, res) => {
+// 1. Status Check (Public or Protected? Let's protect it too to prevent scanning)
+app.get('/status', authenticate, async (req, res) => {
     try {
         const isConnected = await printer.isPrinterConnected();
         res.json({
@@ -40,7 +53,7 @@ app.get('/status', async (req, res) => {
 });
 
 // 2. Print Receipt
-app.post('/print-receipt', async (req, res) => {
+app.post('/print-receipt', authenticate, async (req, res) => {
     try {
         const order = req.body;
         console.log('[Bridge] Printing Receipt for Order:', order.id);
@@ -89,7 +102,7 @@ app.post('/print-receipt', async (req, res) => {
 });
 
 // 3. Open Drawer
-app.post('/open-drawer', async (req, res) => {
+app.post('/open-drawer', authenticate, async (req, res) => {
     console.log('[Bridge] Opening Cash Drawer');
     try {
         printer.openCashDrawer();
@@ -103,4 +116,5 @@ app.post('/open-drawer', async (req, res) => {
 
 app.listen(port, () => {
     console.log(`🖨️ Hardware Bridge running on http://localhost:${port}`);
+    console.log(`🔒 Security Token: ${BRIDGE_TOKEN}`);
 });
