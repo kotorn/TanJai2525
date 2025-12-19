@@ -25,38 +25,37 @@ const config = {
         ring: "hsl(var(--ring))",
         background: {
            DEFAULT: "#f8f6f6",
-           dark: "#121212",
+           background: "#121212", // Deep Night
         },
-        foreground: "hsl(var(--foreground))",
+        foreground: "#E0E0E0", // Main Text
         primary: {
-          DEFAULT: "#E31837", // Suki Red
-          foreground: "hsl(var(--primary-foreground))",
-          500: "#E31837", 
-        },
-        secondary: {
-          DEFAULT: "#FFB300",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#FFB300", // Accent Gold
+          foreground: "#000000",
           500: "#FFB300", 
         },
+        secondary: {
+          DEFAULT: "#1E1E1E", // Surface
+          foreground: "#9E9E9E", // Muted Text
+        },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+            DEFAULT: "#FF5722", // Accent Fire
+            foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+            DEFAULT: "#1E1E1E",
+            foreground: "#9E9E9E",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+            DEFAULT: "#64FFDA", // Tech Teal
+            foreground: "#000000",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+            DEFAULT: "#1E1E1E",
+            foreground: "#E0E0E0",
+        },
+        popover: {
+            DEFAULT: "#1E1E1E",
+            foreground: "#E0E0E0",
         },
         surface: {
             dark: "#1E1E1E"
