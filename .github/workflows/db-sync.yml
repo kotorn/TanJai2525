@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - 'supabase/migrations/**'
-            - 'supabase/config.toml'
-                  - '.github/workflows/db-sync.yml'
+      - 'supabase/config.toml'
+      - '.github/workflows/db-sync.yml'
 
 jobs:
   deploy_db:
