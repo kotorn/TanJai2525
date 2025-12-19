@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Noto_Sans_Thai, Plus_Jakarta_Sans, Noto_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
@@ -25,6 +25,20 @@ export const metadata: Metadata = {
     title: 'Tanjai POS',
     description: 'Smart POS for Street Food',
     manifest: '/manifest.json',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "black-translucent",
+        title: "TanJai POS",
+    }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, 
+  viewportFit: "cover",
+  themeColor: "#FFB300",
 };
 
 import { NetworkStatus } from '@/components/ui/network-status';
