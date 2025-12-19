@@ -22,6 +22,13 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(
+        process.env.NEXT_PUBLIC_ROOT_DOMAIN
+            ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+            : process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : 'http://localhost:3000'
+    ),
     title: 'Tanjai POS',
     description: 'Smart POS for Street Food',
     manifest: '/manifest.json',
