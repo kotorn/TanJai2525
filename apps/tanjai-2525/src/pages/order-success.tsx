@@ -4,12 +4,12 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@tanjai/ui';
 import { CheckCircle2, Package, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/router';
+import { GetStaticPropsContext } from 'next';
 
 export default function OrderSuccess() {
   const t = useTranslations();
-  const params = useParams();
-  const locale = params.locale as string;
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -52,7 +52,7 @@ export default function OrderSuccess() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Link href={`/${locale}`} className="w-full">
+          <Link href="/" className="w-full">
             <Button className="w-full bg-white text-black font-black h-14 rounded-2xl hover:bg-zinc-200 transition-colors">
               Continue Shopping
             </Button>
@@ -65,4 +65,12 @@ export default function OrderSuccess() {
       </div>
     </div>
   );
+}
+
+export async function getStaticProps({ locale }: GetStaticPropsContext) {
+  return {
+    props: {
+      messages: (await import(`../../locales/${locale}.json`)).default,
+    },
+  };
 }

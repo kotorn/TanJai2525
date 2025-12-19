@@ -4,9 +4,10 @@ import { useLiff } from '@/providers/LiffProvider';
 import { useTranslations } from 'next-intl';
 import { ProductCatalog } from '@/features/catalog/ProductCatalog';
 import { CartSheet } from '@/features/cart/CartSheet';
+import { GetStaticPropsContext } from 'next';
 
 export default function Home() {
-  const { isInitializing, isLoggedIn, profile, supabaseUser, error, login } = useLiff();
+  const { isInitializing, isLoggedIn, profile, error, login } = useLiff();
   const t = useTranslations();
 
   // Show Loading during LIFF init
@@ -21,43 +22,38 @@ export default function Home() {
     );
   }
 
-  // Show Error if any
+  // Show Error State
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6 bg-zinc-950">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center">
-          <p className="text-red-400 font-bold">{t('common.error')}</p>
-          <p className="text-red-300/80 text-sm mt-2">{error}</p>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-8">
+        <div className="max-w-md text-center space-y-4">
+          <div className="text-red-500 text-6xl">⚠</div>
+          <h2 className="text-2xl font-bold text-white">LIFF Initialization Failed</h2>
+          <p className="text-zinc-400">{error}</p>
+          <p className="text-zinc-500 text-sm">Please open this page in LINE app</p>
         </div>
       </div>
     );
   }
 
-  // Not Logged In
+  // Show Login Screen
   if (!isLoggedIn) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-zinc-950">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-amber-950 p-8">
         <div className="max-w-md w-full space-y-8 text-center">
-          <h1 className="text-5xl font-bold text-amber-500">{t('app.title')}</h1>
-          <p className="text-zinc-400">{t('app.subtitle')}</p>
-          <button
-            onClick={login}
-            className="w-full px-6 py-4 bg-amber-600 text-white font-black rounded-2xl shadow-lg shadow-amber-900/20 active:scale-95 transition-transform"
-          >
-            {t('app.loginButton')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Logged in but waiting for Supabase sync
-  if (!supabaseUser) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-amber-500 border-t-transparent" />
-          <p className="text-zinc-400">{t('app.syncingSupabase')}</p>
+          <div>
+            <h1 className="text-5xl font-bold text-amber-500 mb-2">{t('app.title')}</h1>
+            <p className="text-zinc-400 text-sm">{t('app.subtitle')}</p>
+          </div>
+          <div className="bg-zinc-900/50 backdrop-blur border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <p className="text-zinc-300">{t('liff.loginRequired')}</p>
+            <button
+              onClick={login}
+              className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-lg hover:from-amber-400 hover:to-orange-400 transition-all transform hover:scale-105"
+            >
+              {t('liff.loginButton')}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -85,4 +81,12 @@ export default function Home() {
       <CartSheet />
     </main>
   );
+}
+
+export async function getStaticProps({ locale }: GetStaticPropsContext) {
+  return {
+    props: {
+      messages: (await import(`../../locales/${locale}.json`)).default,
+    },
+  };
 }
