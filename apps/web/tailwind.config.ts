@@ -29,9 +29,9 @@ const config = {
         },
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#ee6c2b",
+          DEFAULT: "#E31837", // Suki Red
           foreground: "hsl(var(--primary-foreground))",
-          500: "#ee6c2b", 
+          500: "#E31837", 
         },
         secondary: {
           DEFAULT: "#FFB300",
