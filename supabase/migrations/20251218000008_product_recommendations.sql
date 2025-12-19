@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS product_views (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   menu_item_id UUID REFERENCES menu_items(id) ON DELETE CASCADE,
   tenant_slug TEXT NOT NULL,
-  viewed_at TIMESTAMPTZ DEFAULT NOW(),
-  
-  -- Track unique views per day
-  UNIQUE(user_id, menu_item_id, DATE(viewed_at))
+  viewed_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Create unique index for tracking views per day
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_views_user_item_date 
+  ON product_views (user_id, menu_item_id, DATE(viewed_at));
 
 -- Product recommendations (pre-computed)
 CREATE TABLE IF NOT EXISTS product_recommendations (

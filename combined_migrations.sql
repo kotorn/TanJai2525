@@ -22,9 +22,13 @@ create policy "Public can read active qrs"
   using (true); -- Public needs to read to validate/pay
 -- supabase/migrations/20251218000000_smart_qr_tables.sql
 
--- 1. Modify 'tables' to help with Static QR
-ALTER TABLE tables 
-ADD COLUMN IF NOT EXISTS qr_code_static_url TEXT;
+-- 1. Modify 'tables' to help with Static QR (only if table exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tables' AND table_schema = 'public') THEN
+        EXECUTE 'ALTER TABLE tables ADD COLUMN IF NOT EXISTS qr_code_static_url TEXT';
+    END IF;
+END $$;
 
 -- 2. Create 'dynamic_qrs' table
 CREATE TABLE IF NOT EXISTS dynamic_qrs (
@@ -1324,11 +1328,12 @@ CREATE TABLE IF NOT EXISTS product_views (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   menu_item_id UUID REFERENCES menu_items(id) ON DELETE CASCADE,
   tenant_slug TEXT NOT NULL,
-  viewed_at TIMESTAMPTZ DEFAULT NOW(),
-  
-  -- Track unique views per day
-  UNIQUE(user_id, menu_item_id, DATE(viewed_at))
+  viewed_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Create unique index for tracking views per day (replaces the invalid UNIQUE constraint)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_views_user_item_date 
+  ON product_views (user_id, menu_item_id, DATE(viewed_at));
 
 -- Product recommendations (pre-computed)
 CREATE TABLE IF NOT EXISTS product_recommendations (
