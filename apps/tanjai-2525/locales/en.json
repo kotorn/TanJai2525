@@ -1,0 +1,25 @@
+{
+  "app": {
+    "title": "TanJai 2525",
+    "subtitle": "Mission Merger: Phase 1"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "login": "Login",
+    "logout": "Logout",
+    "welcome": "Welcome"
+  },
+  "liff": {
+    "initializing": "Initializing LIFF...",
+    "notInLine": "Please open this app in LINE",
+    "loginRequired": "Please login with LINE",
+    "loginButton": "Login with LINE",
+    "configError": "LIFF ID not configured",
+    "initError": "Failed to initialize LIFF"
+  },
+  "home": {
+    "title": "Home",
+    "description": "POS System for Restaurants"
+  }
+}

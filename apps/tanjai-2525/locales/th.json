@@ -1,0 +1,25 @@
+{
+  "app": {
+    "title": "TanJai 2525",
+    "subtitle": "Mission Merger: Phase 1"
+  },
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "เกิดข้อผิดพลาด",
+    "login": "เข้าสู่ระบบ",
+    "logout": "ออกจากระบบ",
+    "welcome": "ยินดีต้อนรับ"
+  },
+  "liff": {
+    "initializing": "กำลังเริ่มต้น LIFF...",
+    "notInLine": "กรุณาเปิดแอปใน LINE",
+    "loginRequired": "กรุณาเข้าสู่ระบบด้วย LINE",
+    "loginButton": "เข้าสู่ระบบด้วย LINE",
+    "configError": "ไม่พบการตั้งค่า LIFF ID",
+    "initError": "ไม่สามารถเริ่มต้น LIFF ได้"
+  },
+  "home": {
+    "title": "หน้าหลัก",
+    "description": "ระบบ POS สำหรับร้านอาหาร"
+  }
+}
