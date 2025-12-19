@@ -27,7 +27,8 @@ export const metadata: Metadata = {
     manifest: '/manifest.json',
 };
 
-import { FeatureFlagProvider } from '@/features/flags/FeatureFlagProvider';
+import { NetworkStatus } from '@/components/ui/network-status';
+import { ReactQueryProvider } from '@/providers/react-query-provider';
 
 export default function RootLayout({
     children,
@@ -40,11 +41,16 @@ export default function RootLayout({
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
             </head>
             <body className={`${inter.variable} ${notoSansThai.variable} ${plusJakarta.variable} ${notoSans.variable} font-sans antialiased bg-[#121212] text-[#E0E0E0]`}>
-                <FeatureFlagProvider>
-                    {children}
-                    <Toaster position="top-center" />
-                </FeatureFlagProvider>
+                <ReactQueryProvider>
+                    <FeatureFlagProvider>
+                        {children}
+                        <Toaster position="top-center" />
+                        <NetworkStatus />
+                    </FeatureFlagProvider>
+                </ReactQueryProvider>
                 <Script
+// ... rest of file
+// ... rest of file (script tag)
                     id="register-sw"
                     strategy="afterInteractive"
                     dangerouslySetInnerHTML={{

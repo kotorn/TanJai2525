@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { submitOrder } from '../actions';
 import { toast } from 'sonner';
 import { Input } from "@tanjai/ui";
+import { offlineService } from '@/services/offline-service';
 
 export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; tableId: string }) {
   const { items, removeItem, updateQuantity, total, clearCart } = useCartStore();
@@ -24,6 +25,35 @@ export function CartDrawer({ restaurantId, tableId }: { restaurantId: string; ta
   const handleCheckout = async () => {
     setIsSubmitting(true);
     try {
+        // [OFFLINE MODE INTERCEPTION]
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            console.log('[CartDrawer] Offline detected, queuing order...');
+            
+            await offlineService.saveOrder({
+                restaurantId,
+                tableId,
+                items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.quantity, options: i.options, priceCheck: i.price })),
+                totalAmount: cartTotal,
+                specialInstructions: undefined,
+                promotionCode: promoCode || undefined,
+                customerEmail: customerEmail || undefined,
+                // Note: customerPhone is missing in state, assumes undefined
+            });
+
+            toast.warning('🌐 Offline Mode: Order saved locally!', {
+                description: 'We will upload it automatically when internet returns.',
+                duration: 5000,
+            });
+            
+            clearCart();
+            setIsOpen(false);
+            // Redirect to a specific offline success page or just the success page (if it works offline)
+            // For now, assume success page might need Order ID. 
+            // We'll use a placeholder "offline_queued" ID.
+            router.push(`/order/success/offline_queued`);
+            return;
+        }
+
         const result = await submitOrder(
             restaurantId, 
             tableId, 

@@ -2,12 +2,65 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, MessageCircle, ArrowLeft, Printer } from 'lucide-react';
 import { Button } from '@tanjai/ui';
+import { createClient } from '@/lib/supabase/client';
+import { hardwareService } from '@/services/hardware-service';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function OrderSuccessPage() {
   const { orderId } = useParams();
   const shortOrderId = typeof orderId === 'string' ? orderId.slice(-6).toUpperCase() : '';
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = async () => {
+    if (typeof orderId !== 'string') return;
+    setIsPrinting(true);
+    try {
+        const supabase = createClient();
+        // Fetch full order details
+        const { data: order, error } = await supabase
+            .from('orders')
+            .select(`
+                *,
+                order_items (
+                    quantity,
+                    price,
+                    menu_items (
+                        name
+                    )
+                )
+            `)
+            .eq('id', orderId)
+            .single();
+
+        if (error || !order) {
+            toast.error('ไม่พบข้อมูลออเดอร์');
+            return;
+        }
+
+        // Transform to Bridge Payload
+        const payload = {
+            id: shortOrderId,
+            tableId: order.table_no,
+            totalAmount: order.total_amount,
+            items: order.order_items.map((oi: any) => ({
+                name: oi.menu_items?.name || 'Unknown Item',
+                quantity: oi.quantity,
+                price: oi.price
+            }))
+        };
+
+        await hardwareService.printReceipt(payload);
+
+    } catch (err) {
+        console.error(err);
+        toast.error('Failed to print');
+    } finally {
+        setIsPrinting(false);
+    }
+  };
 
   // Deep link to LINE Official Account
   // In production, this should come from tenant settings in the database
@@ -48,6 +101,16 @@ export default function OrderSuccessPage() {
                 <p className="text-sm text-gray-500 mt-1">กรุณาแจ้งพนักงานเพื่อชำระเงิน</p>
               </div>
             )}
+
+            <Button 
+                variant="secondary" 
+                className="w-full bg-white/10 hover:bg-white/20 text-white py-6 rounded-2xl flex items-center justify-center gap-2"
+                onClick={handlePrint}
+                disabled={isPrinting}
+            >
+                <Printer size={24} />
+                <span>{isPrinting ? 'กำลังพิมพ์...' : 'พิมพ์ใบเสร็จ'}</span>
+            </Button>
 
             <Link href="/" className="block w-full">
                 <Button variant="ghost" className="w-full text-TEXT_SECONDARY flex items-center gap-2">
