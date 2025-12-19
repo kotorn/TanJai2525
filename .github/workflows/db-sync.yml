@@ -1,13 +1,21 @@
 name: Sync Supabase DB
 
+
 on:
   push:
     branches:
       - main
     paths:
+<<<<<<< HEAD
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/db-sync.yml"
+=======
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/db-sync.yml'
+
+>>>>>>> ae669c103331a0d8ed26030077ef2846ebaddeef
 
 jobs:
   deploy_db:
@@ -15,11 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
+
       - name: Deploy Migrations
-        run: supabase db push --no-preview --db-url "$SUPABASE_DB_URL"
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
