@@ -33,16 +33,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false, 
-  viewportFit: "cover",
-  themeColor: "#FFB300",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+    themeColor: "#FFB300",
 };
 
 import { NetworkStatus } from '@/components/ui/network-status';
 import { ReactQueryProvider } from '@/providers/react-query-provider';
+import { FeatureFlagProvider } from '@/features/flags/FeatureFlagProvider';
 
 export default function RootLayout({
     children,
@@ -63,8 +64,8 @@ export default function RootLayout({
                     </FeatureFlagProvider>
                 </ReactQueryProvider>
                 <Script
-// ... rest of file
-// ... rest of file (script tag)
+                    // ... rest of file
+                    // ... rest of file (script tag)
                     id="register-sw"
                     strategy="afterInteractive"
                     dangerouslySetInnerHTML={{
