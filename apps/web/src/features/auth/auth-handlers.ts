@@ -1,10 +1,4 @@
-// Stubbed to unblock build
-const createClientComponentClient = () => ({
-    auth: { 
-        signInWithOAuth: async () => ({ data: null, error: null }),
-        getSession: async () => ({ data: { session: null }, error: null })
-    }
-} as any);
+import { createClient } from '@/lib/supabase/client';
 
 const getRedirectUrl = () => `${window.location.origin}/auth/callback`;
 
@@ -12,7 +6,7 @@ const getRedirectUrl = () => `${window.location.origin}/auth/callback`;
  * Trigger Line Login
  */
 export const signInWithLine = async () => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'line' as any,
         options: {
@@ -28,7 +22,7 @@ export const signInWithLine = async () => {
  * Trigger Google Login
  */
 export const signInWithGoogle = async () => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -47,7 +41,7 @@ export const signInWithGoogle = async () => {
  * Trigger Apple Login
  */
 export const signInWithApple = async () => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
