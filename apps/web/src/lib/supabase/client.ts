@@ -21,10 +21,10 @@ export const createClient = () => {
         // We verified env vars exist, so strict check is safe.
     }
 
-    // Create and cache the singleton instance
+    // Create and cache the singleton instance - Use fallbacks for build time to prevent crash
     supabaseClientInstance = createBrowserClient<Database>(
-        supabaseUrl!,
-        supabaseKey!
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseKey || 'placeholder-key'
     );
 
     return supabaseClientInstance;
