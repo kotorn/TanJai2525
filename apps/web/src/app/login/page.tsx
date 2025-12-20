@@ -34,16 +34,16 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-3">
-                    {/* Line Login (Primary) */}
+                    {/* Facebook Login (Primary - Working) */}
                     <Button
-                        onClick={() => handleLogin('line')}
+                        onClick={() => handleLogin('facebook')}
                         disabled={isLoading}
-                        className="w-full bg-[#06C755] hover:bg-[#05b34c] text-white h-12 text-base font-bold shadow-lg shadow-green-500/20 transition-all active:scale-95"
+                        className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white h-12 text-base font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
                     >
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 mr-3">
-                            <path d="M22.03 10.925c0-4.9-4.9-8.925-10.98-8.925C5.02 2 0 6.025 0 10.925c0 4.375 3.86 8.08 9.07 8.785.35.08.825.245.945.56.105.285.07.725.035 1.01l-.14 0.85c-.05.3-.23 1.17 1.025.64 5.37-3.14 7.37-5.325 10.05-9.1.53-.78.98-1.745.98-2.745z" />
+                        <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                         </svg>
-                        Log in with LINE
+                        Log in with Facebook
                     </Button>
 
                     <div className="relative py-2">
@@ -55,19 +55,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {/* Facebook Login */}
-                    <Button
-                        onClick={() => handleLogin('facebook')}
-                        disabled={isLoading}
-                        className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white h-11 font-semibold transition-all active:scale-95"
-                    >
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                        </svg>
-                        Facebook
-                    </Button>
-
-                    {/* Google Login */}
+                    {/* Google Login (Pending Config) */}
                     <Button
                         variant="outline"
                         onClick={() => handleLogin('google')}
@@ -83,18 +71,7 @@ export default function LoginPage() {
                         Google
                     </Button>
 
-                    {/* Apple Login */}
-                    <Button
-                        variant="secondary"
-                        onClick={() => handleLogin('apple')}
-                        disabled={isLoading}
-                        className="w-full bg-black text-white hover:bg-gray-800 h-11 font-semibold transition-all active:scale-95"
-                    >
-                        <svg className="w-5 h-5 mr-2 pb-0.5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.21-.93 3.23-.71 1.57.12 2.66.84 3.16 1.59-3.23 1.96-2.58 6.55 1.05 7.9-.53 1.48-1.29 3.16-2.52 3.45M12.03 5.32c-.09 2.03-1.61 3.41-3.23 3.41-.5.03-1.89-1.28-1.57-3.41.97-1.92 2.72-2.91 4.33-2.91.13 2.05-.12 2.14.47 2.91z" />
-                        </svg>
-                        Apple ID
-                    </Button>
+                    {/* Temporary Hidden: LINE (Not found) & Apple (No Creds) */}
                 </div>
 
                 {process.env.NODE_ENV === 'development' && (
