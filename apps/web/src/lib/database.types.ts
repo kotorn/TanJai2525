@@ -411,6 +411,126 @@ export interface Database {
           created_at?: string
         }
       }
+      ingredients: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          unit: string
+          cost_per_unit: number
+          current_stock: number
+          min_stock_level: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          unit: string
+          cost_per_unit?: number
+          current_stock?: number
+          min_stock_level?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          unit?: string
+          cost_per_unit?: number
+          current_stock?: number
+          min_stock_level?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      recipes: {
+        Row: {
+          id: string
+          menu_item_id: string
+          ingredient_id: string
+          quantity_required: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          menu_item_id: string
+          ingredient_id: string
+          quantity_required: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          menu_item_id?: string
+          ingredient_id?: string
+          quantity_required?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipes_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipes_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      inventory_transactions: {
+        Row: {
+          id: string
+          ingredient_id: string
+          type: 'restock' | 'sale' | 'waste' | 'audit'
+          quantity_change: number
+          cost_at_time: number | null
+          reference_id: string | null
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ingredient_id: string
+          type: 'restock' | 'sale' | 'waste' | 'audit'
+          quantity_change: number
+          cost_at_time?: number | null
+          reference_id?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ingredient_id?: string
+          type?: 'restock' | 'sale' | 'waste' | 'audit'
+          quantity_change?: number
+          cost_at_time?: number | null
+          reference_id?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transactions_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       stock_ledger: {
         Row: {
           id: string

@@ -22,9 +22,9 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     experimental: {
-        serverComponentsExternalPackages: ['@supabase/ssr', '@supabase/supabase-js'],
+        serverComponentsExternalPackages: [],
     },
-    transpilePackages: ['@tanjai/ui'],
+    transpilePackages: ['@tanjai/ui', '@supabase/ssr', '@supabase/supabase-js'],
     images: {
         remotePatterns: [
             {
@@ -32,13 +32,6 @@ const nextConfig = {
                 hostname: '**',
             },
         ],
-    },
-    webpack: (config) => {
-        config.resolve.alias = {
-            ...config.resolve.alias,
-            '@supabase/supabase-js': '@supabase/supabase-js/dist/main/index.js',
-        };
-        return config;
     },
 };
 

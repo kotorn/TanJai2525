@@ -1,87 +1,40 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import OrderTicket from './order-ticket';
-import { WifiOff, Wifi, Globe } from 'lucide-react';
-
-import { createClient } from '@/lib/supabase/client';
+import { useState } from 'react';
+import { WifiOff, Wifi } from 'lucide-react';
+import { useRealtimeOrders } from '@/features/kds/hooks/use-realtime-orders';
+import { OrderCard } from './order-card';
 
 export type SupportedLanguage = 'en' | 'my' | 'km' | 'la';
 
 export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: any[], tenantId: string }) {
-    const [orders, setOrders] = useState(initialOrders);
-    const [isConnected, setIsConnected] = useState(true);
+    // We ignore initialOrders here because the hook handles the state, 
+    // BUT to avoid flash, we could initialize the hook with it. 
+    // For now, the hook fetches on mount. 
+    // Optimization: Pass initialOrders to hook?
+    // Let's rely on the hook's fetching for data consistency.
+
+    const { orders, loading, updateStatus } = useRealtimeOrders(tenantId);
     const [displayLanguage, setDisplayLanguage] = useState<SupportedLanguage>('en');
 
-    useEffect(() => {
-        const supabase = createClient();
-
-        // Subscribe to INSERT and UPDATE on 'orders' table
-        // Subscribe to INSERT and UPDATE on 'orders' table
-        const channel = supabase.channel(`kds-${tenantId}`);
-
-        channel
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'orders',
-                    filter: `restaurant_id=eq.${tenantId}`,
-                },
-                async (payload) => {
-                    if (payload.eventType === 'INSERT') {
-                        window.location.reload();
-                    } else if (payload.eventType === 'UPDATE') {
-                        setOrders((prev) =>
-                            prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o)
-                                .filter(o => o.status !== 'completed' && o.status !== 'cancelled')
-                        );
-                    }
-                }
-            )
-            .subscribe((status) => {
-                setIsConnected(status === 'SUBSCRIBED');
-            });
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [tenantId]);
-
-    // Filter out completed orders from view
-    const activeOrders = orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
+    // Filter out completed orders from view (unless we want a history tab)
+    const activeOrders = orders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'completed');
 
     return (
         <div>
-            <div className="bg-gray-800 text-white p-4 flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <div className="bg-gray-800 text-white p-4 flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sticky top-0 z-10 shadow-md">
                 <div className="flex items-center gap-4">
                     <h1 className="text-xl font-bold">Kitchen Display System</h1>
                     <div className="flex items-center bg-gray-700 rounded-lg p-1">
-                        <button
-                            onClick={() => setDisplayLanguage('en')}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'en' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
-                        >
-                            EN
-                        </button>
-                        <button
-                            onClick={() => setDisplayLanguage('my')}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'my' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
-                        >
-                            MY
-                        </button>
-                        <button
-                            onClick={() => setDisplayLanguage('km')}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'km' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
-                        >
-                            KM
-                        </button>
-                        <button
-                            onClick={() => setDisplayLanguage('la')}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${displayLanguage === 'la' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
-                        >
-                            LA
-                        </button>
+                        {(['en', 'my', 'km', 'la'] as const).map((lang) => (
+                            <button
+                                key={lang}
+                                onClick={() => setDisplayLanguage(lang)}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all uppercase ${displayLanguage === lang ? 'bg-orange-600 text-white shadow-sm' : 'text-gray-300 hover:text-white'}`}
+                            >
+                                {lang}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -93,25 +46,26 @@ export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: a
                         {displayLanguage === 'la' && 'ລາວ (Lao)'}
                     </span>
                     <div className="flex items-center gap-2 text-sm">
-                        {isConnected ? <Wifi className="text-green-400 w-4 h-4" /> : <WifiOff className="text-red-400 w-4 h-4" />}
-                        {isConnected ? 'Live' : 'Disconnected'}
+                        {!loading ? <Wifi className="text-green-400 w-4 h-4" /> : <WifiOff className="text-yellow-400 w-4 h-4" />}
+                        {!loading ? 'Live' : 'Connecting...'}
                     </div>
                 </div>
             </div>
 
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                 {activeOrders.map(order => (
-                    <OrderTicket
+                    <OrderCard
                         key={order.id}
                         order={order}
-                        tenantId={tenantId}
+                        onUpdateStatus={updateStatus}
                         displayLanguage={displayLanguage}
                     />
                 ))}
 
-                {activeOrders.length === 0 && (
-                    <div className="col-span-full text-center py-20 text-gray-400 border-2 border-dashed rounded-lg">
-                        No active orders. Ready for service!
+                {!loading && activeOrders.length === 0 && (
+                    <div className="col-span-full text-center py-20 text-gray-400 border-2 border-dashed rounded-lg border-gray-300">
+                        <p className="text-xl">all clear</p>
+                        <p className="text-sm">No active orders</p>
                     </div>
                 )}
             </div>
