@@ -13,6 +13,40 @@ interface SlipProvider {
     verify(slipImage: File | Blob | string): Promise<SlipVerificationResult>;
 }
 
+// 0. Ollama Vision (Local 3090) - Zero Cost PRIORITY
+class OllamaVisionProvider implements SlipProvider {
+    name = 'Ollama Vision (Local)';
+    async verify(slipImage: string): Promise<SlipVerificationResult> {
+        try {
+            const { OllamaService } = await import('../features/social-commerce/services/ollama-service');
+            const prompt = `Analyze this Thai bank transfer slip and extract the following JSON: 
+            {
+                "isValid": boolean, 
+                "amount": number, 
+                "transferredAt": "ISO Date String", 
+                "senderName": "string"
+            }
+            Only return the JSON.`;
+
+            const responseText = await OllamaService.analyzeImage(slipImage, prompt);
+            const data = JSON.parse(responseText.match(/\{[\s\S]*\}/)?.[0] || '{}');
+
+            if (!data.amount) throw new Error('Could not extract amount');
+
+            return {
+                isValid: true,
+                amount: Number(data.amount),
+                transferredAt: data.transferredAt ? new Date(data.transferredAt) : new Date(),
+                senderName: data.senderName || 'Unknown (Local AI)',
+                providerUsed: 'Ollama'
+            };
+        } catch (error) {
+            console.error('[OllamaVisionProvider] Failed:', error);
+            throw error;
+        }
+    }
+}
+
 // 1. EasySlip Implementation
 class EasySlipProvider implements SlipProvider {
     name = 'EasySlip';

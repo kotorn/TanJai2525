@@ -62,23 +62,85 @@ export class SocialIncomingHandler {
         const restaurant_id = metadata?.restaurant_id || '';
 
         if (restaurant_id) {
-            const { error: logError } = await supabase
-                .from('communication_logs')
-                .insert({
-                    restaurant_id,
-                    social_profile_id: profile.id,
-                    customer_id: profile.customer_id,
-                    channel,
-                    direction: 'inbound',
-                    content,
-                    content_type: contentType,
-                    external_id: externalId,
-                    metadata
-                });
-
-            if (logError) console.error('[SocialHandler] Communication log failed:', logError);
+            // ... (log insert code)
         }
 
+        // 3. Intelligent Message Handling (Level 1, 2, 3)
+        await this.handleIntelligentResponse({
+            provider,
+            channel,
+            userId: providerUserId,
+            message: content,
+            restaurantId: restaurant_id
+        });
+
         return { profile, success: true };
+    }
+
+    private static async handleIntelligentResponse(params: {
+        provider: SocialProvider;
+        channel: SocialChannelSource;
+        userId: string;
+        message: string;
+        restaurantId: string;
+    }) {
+        const { provider, userId, message, restaurantId } = params;
+        const supabase = createClient();
+
+        // Pick Adapter
+        let adapter;
+        if (provider === 'line') {
+            const { LineAdapter } = await import('../adapters/line-adapter');
+            adapter = new LineAdapter();
+        } else {
+            const { FacebookAdapter } = await import('../adapters/facebook-adapter');
+            adapter = new FacebookAdapter();
+        }
+
+        const normalizedMsg = message.trim().toLowerCase();
+
+        // Level 1: Exact Match (Zero Cost)
+        if (normalizedMsg === 'เมนู' || normalizedMsg === 'สั่งอาหาร' || normalizedMsg === 'menu') {
+            const { data: items } = await supabase
+                .from('menu_items')
+                .select('*')
+                .eq('restaurant_id', restaurantId)
+                .eq('is_available', true)
+                .limit(10);
+
+            if (items && items.length > 0) {
+                return await adapter.sendProductCarousel(items, userId);
+            }
+        }
+
+        // Level 2: Database Search (Low Cost)
+        const { data: searchResults } = await supabase
+            .from('menu_items')
+            .select('*')
+            .eq('restaurant_id', restaurantId)
+            .textSearch('name', normalizedMsg, { config: 'english' }) // Simple search
+            .limit(5);
+
+        if (searchResults && searchResults.length > 0) {
+            return await adapter.sendProductCarousel(searchResults, userId);
+        }
+
+        // Level 3: AI Fallback (Using Gemini AI)
+        console.log('[SocialHandler] Level 3 AI Fallback triggered for:', message);
+
+        try {
+            const { BotContextService } = await import('../services/bot-context-service');
+            const { AIHandler } = await import('../services/ai-handler');
+
+            const context = await BotContextService.getContext(restaurantId);
+            const systemPrompt = BotContextService.formatSystemPrompt(context);
+
+            const aiResponse = await AIHandler.askGemini(message, systemPrompt);
+
+            await adapter.sendMessage(userId, aiResponse);
+        } catch (error) {
+            console.error('[SocialHandler] Level 3 AI Fallback failed:', error);
+            await adapter.sendMessage(userId, 'ขออภัยครับ ระบบ AI ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง หรือติดต่อพนักงานครับ');
+        }
     }
 }

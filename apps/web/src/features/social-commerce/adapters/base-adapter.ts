@@ -10,6 +10,7 @@ export interface ISocialChannelAdapter {
      * For Facebook: Generic Template
      */
     sendOrderSummary(orderId: string, userId: string): Promise<{ success: boolean; messageId?: string; error?: any }>;
+    sendProductCarousel(products: any[], userId: string): Promise<{ success: boolean; messageId?: string; error?: any }>;
 
     /**
      * Synchronize inventory levels to external marketplaces (e.g. TikTok Shop)

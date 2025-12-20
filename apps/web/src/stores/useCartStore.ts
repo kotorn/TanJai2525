@@ -12,17 +12,22 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-  
+
   // Actions
   addItem: (item: CartItem) => void;
   removeItem: (menuItemId: string) => void;
   updateQuantity: (menuItemId: string, quantity: number) => void;
   clearCart: () => void;
-  
+
   // Computed
   totalItems: () => number;
   totalPrice: () => number;
-  
+
+  // UTM Tracking
+  utmSource: string | null;
+  utmMedium: string | null;
+  setUTM: (source: string | null, medium: string | null) => void;
+
   // Sync with Supabase (for logged-in users)
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: () => Promise<void>;
@@ -37,7 +42,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existingItem = state.items.find(
             (i) => i.menuItemId === item.menuItemId &&
-            JSON.stringify(i.options) === JSON.stringify(item.options)
+              JSON.stringify(i.options) === JSON.stringify(item.options)
           );
 
           if (existingItem) {
@@ -45,7 +50,7 @@ export const useCartStore = create<CartStore>()(
             return {
               items: state.items.map((i) =>
                 i.menuItemId === item.menuItemId &&
-                JSON.stringify(i.options) === JSON.stringify(item.options)
+                  JSON.stringify(i.options) === JSON.stringify(item.options)
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
@@ -89,6 +94,12 @@ export const useCartStore = create<CartStore>()(
           (sum, item) => sum + item.price * item.quantity,
           0
         );
+      },
+
+      utmSource: null,
+      utmMedium: null,
+      setUTM: (source, medium) => {
+        set({ utmSource: source, utmMedium: medium });
       },
 
       syncWithDatabase: async () => {

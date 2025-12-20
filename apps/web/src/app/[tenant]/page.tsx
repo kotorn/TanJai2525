@@ -22,6 +22,7 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isKiosk = searchParams.get('mode') === 'kiosk';
 
   // Initialize lang based on Query Param (Priority) > URL Param (Legacy) > Default
   const currentLang = searchParams.get('lang') ||
@@ -103,6 +104,35 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
     else setGreeting('Good Evening');
   }, []);
 
+  // 2. Kiosk Idle Timer
+  useEffect(() => {
+    if (!isKiosk) return;
+
+    let timer: NodeJS.Timeout;
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        console.log('[Kiosk] Idle timeout reached. Resetting...');
+        setCart([]); // Clear cart
+        setActiveCategory('all');
+        toast.info('Session reset due to inactivity');
+      }, 60000); // 60 seconds
+    };
+
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('touchstart', resetTimer);
+    window.addEventListener('click', resetTimer);
+
+    resetTimer();
+
+    return () => {
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('touchstart', resetTimer);
+      window.removeEventListener('click', resetTimer);
+      clearTimeout(timer);
+    };
+  }, [isKiosk]);
+
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS];
   const currentFont = LANGUAGES.find(l => l.code === lang)?.font || 'font-sans';
 
@@ -164,60 +194,62 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
   );
 
   return (
-    <div className={`min-h-screen bg-[#121212] text-[#E0E0E0] pb-32 ${currentFont} font-body overflow-x-hidden`}>
+    <div className={`min-h-screen bg-[#121212] text-[#E0E0E0] pb-32 ${currentFont} font-body overflow-x-hidden ${isKiosk ? 'kiosk-mode' : ''}`}>
       {/* 1. Sticky Glass Header */}
-      <header className="sticky top-0 z-40 glass-nav px-4 py-4 flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="text-xs text-TEXT_SECONDARY font-medium">{greeting}, Guest</span>
-            <div className="flex items-center gap-1">
-              <h1 className="text-lg font-black font-display text-white tracking-tight">{t.title}</h1>
-              <div className="w-1.5 h-1.5 rounded-full bg-BURNT_ORANGE animate-pulse"></div>
+      {!isKiosk && (
+        <header className="sticky top-0 z-40 glass-nav px-4 py-4 flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <span className="text-xs text-TEXT_SECONDARY font-medium">{greeting}, Guest</span>
+              <div className="flex items-center gap-1">
+                <h1 className="text-lg font-black font-display text-white tracking-tight">{t.title}</h1>
+                <div className="w-1.5 h-1.5 rounded-full bg-BURNT_ORANGE animate-pulse"></div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher
+                currentLang={lang}
+                onLanguageChange={(newLang) => {
+                  setLang(newLang);
+                  router.push(`${pathname}?lang=${newLang}`);
+                }}
+              />
+              <button onClick={handleMemberLogin} className="glass-panel p-2 rounded-xl text-white active:scale-95 transition-all">
+                <Loader2 size={18} className={isMember ? "text-green-500" : "text-white"} />
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher
-              currentLang={lang}
-              onLanguageChange={(newLang) => {
-                setLang(newLang);
-                router.push(`${pathname}?lang=${newLang}`);
-              }}
-            />
-            <button onClick={handleMemberLogin} className="glass-panel p-2 rounded-xl text-white active:scale-95 transition-all">
-              <Loader2 size={18} className={isMember ? "text-green-500" : "text-white"} />
-            </button>
-          </div>
-        </div>
 
-        {/* 2. Category Scroll (Horizontal Snap) */}
-        <div role="tablist" className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
-          <button
-            role="tab"
-            aria-selected={activeCategory === 'all' ? "true" : "false"}
-            onClick={() => setActiveCategory('all')}
-            className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === 'all'
+          {/* 2. Category Scroll (Horizontal Snap) */}
+          <div role="tablist" className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
+            <button
+              role="tab"
+              aria-selected={activeCategory === 'all' ? "true" : "false"}
+              onClick={() => setActiveCategory('all')}
+              className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === 'all'
                 ? 'bg-BURNT_ORANGE text-white shadow-glow'
                 : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
-              }`}
-          >
-            {t.category_all}
-          </button>
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              role="tab"
-              aria-selected={activeCategory === cat.id ? "true" : "false"}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === cat.id
-                  ? 'bg-BURNT_ORANGE text-white shadow-glow'
-                  : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
                 }`}
             >
-              {cat.name}
+              {t.category_all}
             </button>
-          ))}
-        </div>
-      </header>
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                role="tab"
+                aria-selected={activeCategory === cat.id ? "true" : "false"}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === cat.id
+                  ? 'bg-BURNT_ORANGE text-white shadow-glow'
+                  : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
+                  }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </header>
+      )}
 
       <div className="p-4">
         <div className="relative h-56 w-full rounded-[2.5rem] overflow-hidden shadow-2xl group active:scale-[0.98] transition-all bg-white/5">
@@ -335,9 +367,17 @@ export default function MenuPage({ params }: { params: { tenant: string } }) {
       </main>
 
       {/* 5. Bottom Navigation / Floating Cart */}
-      <nav className="fixed bottom-0 left-0 right-0 glass-nav pt-4 pb-8 px-6 z-50">
-        <CartDrawer restaurantId={params.tenant} tableId="5" />
-      </nav>
+      {!isKiosk && (
+        <nav className="fixed bottom-0 left-0 right-0 glass-nav pt-4 pb-8 px-6 z-50">
+          <CartDrawer restaurantId={params.tenant} tableId="5" />
+        </nav>
+      )}
+
+      {isKiosk && cart.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-6">
+          <CartDrawer restaurantId={params.tenant} tableId="KIOSK" />
+        </div>
+      )}
 
       {/* Viral Modal */}
       {viralItem && (

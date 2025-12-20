@@ -106,12 +106,80 @@ export class LineAdapter implements ISocialChannelAdapter {
         }
     }
 
+    async sendProductCarousel(products: any[], userId: string) {
+        if (!this.accessToken) return { success: false, error: 'Config missing' };
+
+        try {
+            const bubbles = products.map(product => ({
+                type: 'bubble',
+                hero: {
+                    type: 'image',
+                    url: product.image_url || 'https://tanjai.app/placeholder-food.png',
+                    size: 'full',
+                    aspectRatio: '20:13',
+                    aspectMode: 'cover'
+                },
+                body: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [
+                        { type: 'text', text: product.name, weight: 'bold', size: 'xl' },
+                        { type: 'text', text: `${product.price} THB`, size: 'sm', color: '#1DB446' }
+                    ]
+                },
+                footer: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [
+                        {
+                            type: 'button',
+                            style: 'primary',
+                            color: '#1DB446',
+                            action: {
+                                type: 'uri',
+                                label: 'สั่งเลย',
+                                uri: `${process.env.NEXT_PUBLIC_APP_URL}/menu/${product.id}`
+                            }
+                        }
+                    ]
+                }
+            }));
+
+            const response = await fetch('https://api.line.me/v2/bot/message/push', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.accessToken}`
+                },
+                body: JSON.stringify({
+                    to: userId,
+                    messages: [{
+                        type: 'flex',
+                        altText: 'รายการสินค้าที่คุณค้นหา',
+                        contents: {
+                            type: 'carousel',
+                            contents: bubbles.slice(0, 10) // LINE limit
+                        }
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            return { success: response.ok, messageId: data.requestId };
+        } catch (error) {
+            console.error('[LineAdapter] Carousel failed:', error);
+            return { success: false, error };
+        }
+    }
+
     async syncInventory(productId: string, qty: number) {
         // LINE OA doesn't have native inventory sync like TikTok
         return { success: true };
     }
 
-    async getProfile(userId: string) {
+    async getProfile(userId: string): Promise<{ name: string; avatarUrl?: string; error?: any }> {
+        if (!this.accessToken) return { name: '', error: 'Config missing' };
+
         try {
             const response = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
                 headers: { 'Authorization': `Bearer ${this.accessToken}` }
@@ -120,10 +188,10 @@ export class LineAdapter implements ISocialChannelAdapter {
             return {
                 name: data.displayName,
                 avatarUrl: data.pictureUrl,
-                success: true
+                error: response.ok ? undefined : data.message
             };
         } catch (error) {
-            return { success: false, error };
+            return { name: '', error };
         }
     }
 }

@@ -265,6 +265,9 @@ export interface Database {
           customer_notes: string | null
           channel_source: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
           external_order_id: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          source_url: string | null
           created_at: string
         }
         Insert: {
@@ -277,6 +280,9 @@ export interface Database {
           customer_notes?: string | null
           channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
           external_order_id?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          source_url?: string | null
           created_at?: string
         }
         Update: {
@@ -289,7 +295,51 @@ export interface Database {
           customer_notes?: string | null
           channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
           external_order_id?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          source_url?: string | null
           created_at?: string
+        }
+      }
+      stock_ledger: {
+        Row: {
+          id: string
+          restaurant_id: string
+          inventory_item_id: string
+          order_id: string | null
+          movement_type: 'in' | 'out' | 'adjustment' | 'waste'
+          quantity: number
+          previous_quantity: number | null
+          new_quantity: number | null
+          reason: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          inventory_item_id: string
+          order_id?: string | null
+          movement_type: 'in' | 'out' | 'adjustment' | 'waste'
+          quantity: number
+          previous_quantity?: number | null
+          new_quantity?: number | null
+          reason?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          inventory_item_id?: string
+          order_id?: string | null
+          movement_type?: 'in' | 'out' | 'adjustment' | 'waste'
+          quantity?: number
+          previous_quantity?: number | null
+          new_quantity?: number | null
+          reason?: string | null
+          created_at?: string
+          created_by?: string | null
         }
       }
       social_profiles: {

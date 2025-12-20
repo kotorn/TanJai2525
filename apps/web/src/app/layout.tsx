@@ -51,6 +51,8 @@ export const viewport: Viewport = {
 import { NetworkStatus } from '@/components/ui/network-status';
 import { ReactQueryProvider } from '@/providers/react-query-provider';
 import { FeatureFlagProvider } from '@/features/flags/FeatureFlagProvider';
+import { UTMTracker } from '@/components/analytics/UTMTracker';
+import { Suspense } from 'react';
 
 export default function RootLayout({
     children,
@@ -65,6 +67,9 @@ export default function RootLayout({
             <body className={`${inter.variable} ${notoSansThai.variable} ${plusJakarta.variable} ${notoSans.variable} font-sans antialiased bg-[#121212] text-[#E0E0E0]`}>
                 <ReactQueryProvider>
                     <FeatureFlagProvider>
+                        <Suspense fallback={null}>
+                            <UTMTracker />
+                        </Suspense>
                         {children}
                         <Toaster position="top-center" />
                         <NetworkStatus />
