@@ -1,21 +1,35 @@
 import { createClient as createSupabaseJsClient } from './adapter';
 import { createMockClient } from './mock-client';
 import { Database } from '../database.types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+// Singleton cache to prevent multiple GoTrueClient instances
+let supabaseClientInstance: SupabaseClient<Database> | null = null;
 
 export const createClient = () => {
+    // Return cached instance if it exists
+    if (supabaseClientInstance) {
+        return supabaseClientInstance;
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     // Fallback to Mock if Env Vars are missing (e.g. Local QA, or Vercel preview without keys)
-    if (!supabaseUrl || !supabaseKey) { 
+    if (!supabaseUrl || !supabaseKey) {
         if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_IS_MOCK_ALLOWED) {
-             console.warn('⚠️ Supabase credentials missing. Falling back to Mock Client.');
+            console.warn('⚠️ Supabase credentials missing. Falling back to Mock Client.');
         }
-        return createMockClient();
+        const mockClient = createMockClient();
+        supabaseClientInstance = mockClient;
+        return mockClient;
     }
 
-    return createSupabaseJsClient<Database>(
+    // Create and cache the singleton instance
+    supabaseClientInstance = createSupabaseJsClient<Database>(
         supabaseUrl,
         supabaseKey
     );
+
+    return supabaseClientInstance;
 };
