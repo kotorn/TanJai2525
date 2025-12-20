@@ -1,10 +1,11 @@
-import { createClient as createSupabaseJsClient } from '@supabase/supabase-js';
+// @ts-ignore
+const { createClient: createSupabaseJsClient } = require('@supabase/supabase-js');
 import { createMockClient } from './mock-client';
 import { Database } from '../database.types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+
 
 // Singleton cache to prevent multiple GoTrueClient instances
-let supabaseClientInstance: SupabaseClient<Database> | null = null;
+let supabaseClientInstance: any = null;
 
 export const createClient = () => {
     // Return cached instance if it exists

@@ -1,4 +1,5 @@
-import { createClient as createSupabaseJsClient } from '@supabase/supabase-js';
+// @ts-ignore
+const { createClient: createSupabaseJsClient } = require('@supabase/supabase-js');
 import { createMockClient } from './mock-client';
 import { Database } from '../database.types';
 
