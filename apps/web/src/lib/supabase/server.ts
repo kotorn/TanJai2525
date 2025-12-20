@@ -1,4 +1,4 @@
-import { createClient as createSupabaseJsClient } from './adapter';
+import { createClient as createSupabaseJsClient } from '@supabase/supabase-js';
 import { createMockClient } from './mock-client';
 import { Database } from '../database.types';
 
