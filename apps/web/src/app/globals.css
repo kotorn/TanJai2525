@@ -1,10 +1,9 @@
+/* Import Fonts from Google Fonts - Playfair Display (Serif) & Lato (Sans) */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Fonts from Google Fonts */
-/* Import Fonts from Google Fonts - Playfair Display (Serif) & Lato (Sans) */
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
 
 :root {
     --background: 0 0% 7%; /* #121212 */
