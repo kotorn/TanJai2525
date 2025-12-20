@@ -6,7 +6,7 @@ import { Plus, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ItemDetailsModal from "./ItemDetailsModal";
-import { useCartStore } from "../store/cart-store";
+import { CartDrawer } from "./CartDrawer";
 
 interface MenuBrowserProps {
     categories: any[];
@@ -20,7 +20,7 @@ export default function MenuBrowser({ categories, items, tableId }: MenuBrowserP
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const filteredItems = items.filter(item => item.category_id === selectedCategory);
-    
+
     // Cart Store
     const cartTotalItems = useCartStore(state => state.getTotalItems());
     const cartTotalPrice = useCartStore(state => state.getTotalPrice());
@@ -40,8 +40,8 @@ export default function MenuBrowser({ categories, items, tableId }: MenuBrowserP
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
                             className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                                ${selectedCategory === cat.id 
-                                    ? "bg-orange-500 text-white shadow-md" 
+                                ${selectedCategory === cat.id
+                                    ? "bg-orange-500 text-white shadow-md"
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`
                             }
                         >
@@ -58,10 +58,10 @@ export default function MenuBrowser({ categories, items, tableId }: MenuBrowserP
                         No items in this category.
                     </div>
                 )}
-                
+
                 {filteredItems.map((item) => (
-                    <div 
-                        key={item.id} 
+                    <div
+                        key={item.id}
                         className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3 active:scale-[0.98] transition-transform duration-200 cursor-pointer"
                         onClick={() => handleItemClick(item)}
                     >
@@ -90,24 +90,15 @@ export default function MenuBrowser({ categories, items, tableId }: MenuBrowserP
                 ))}
             </div>
 
-            {/* Floating Browse Cart Button */}
-            {cartTotalItems > 0 && (
-                <div className="fixed bottom-4 left-4 right-4 animate-in slide-in-from-bottom-5 z-20">
-                    <Link href={`/order/cart?tableId=${tableId}`}>
-                        <Button className="w-full bg-black text-white hover:bg-gray-900 rounded-full h-14 shadow-lg flex justify-between px-6 text-base">
-                            <span className="bg-white/20 px-2 py-1 rounded text-sm font-bold">{cartTotalItems} Items</span>
-                            <span>View Cart</span>
-                            <span className="font-bold">฿{cartTotalPrice}</span>
-                        </Button>
-                    </Link>
-                </div>
-            )}
+
+            {/* Cart Drawer */}
+            <CartDrawer tableId={tableId} />
 
             {/* Item Details Modal */}
-            <ItemDetailsModal 
-                item={selectedItem} 
-                open={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
+            <ItemDetailsModal
+                item={selectedItem}
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
             />
         </div>
     );
