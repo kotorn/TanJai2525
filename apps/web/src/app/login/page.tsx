@@ -1,25 +1,35 @@
 'use client';
 
-import { signInWithLine, signInWithGoogle, signInWithApple, signInWithFacebook, signInWithEmail } from '@/features/auth/auth-handlers';
+import { signInWithLine, signInWithGoogle, signInWithApple, signInWithFacebook, signInWithEmail, signUpWithEmail } from '@/features/auth/auth-handlers';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from "@tanjai/ui";
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [mode, setMode] = useState<'signin' | 'signup'>('signin');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await signInWithEmail(email, password);
-            console.log('[Auth] Email login successful');
+            if (mode === 'signin') {
+                await signInWithEmail(email, password);
+                console.log('[Auth] Email login successful');
+            } else {
+                await signUpWithEmail(email, password);
+                toast.success('Registration successful! Please check your email to confirm.');
+                setMode('signin');
+            }
         } catch (error: any) {
-            console.error('[Auth] Email login failed:', error);
-            toast.error(error?.message || 'Failed to sign in');
+            console.error(`[Auth] ${mode} failed:`, error);
+            toast.error(error?.message || `Failed to ${mode === 'signin' ? 'sign in' : 'sign up'}`);
             setIsLoading(false);
+        } finally {
+            // Keep loading true on success for signin (redirecting), but false for signup
+            if (mode === 'signup') setIsLoading(false);
         }
     };
 
@@ -43,14 +53,36 @@ export default function LoginPage() {
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border border-gray-100 backdrop-blur-sm">
 
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-6">
                     <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Tanjai POS</h1>
-                    <p className="text-gray-500 font-medium">Sign in to manage your shop</p>
+                    <p className="text-gray-500 font-medium">
+                        {mode === 'signin' ? 'Sign in to manage your shop' : 'Create an account to get started'}
+                    </p>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+                    <button
+                        onClick={() => setMode('signin')}
+                        className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all ${mode === 'signin' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        Sign In
+                    </button>
+                    <button
+                        onClick={() => setMode('signup')}
+                        className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all ${mode === 'signup' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        Sign Up
+                    </button>
                 </div>
 
                 <div className="space-y-4">
-                    {/* Email Login Form */}
-                    <form className="space-y-3" onSubmit={handleEmailLogin}>
+                    {/* Email Form */}
+                    <form className="space-y-3" onSubmit={handleEmailAuth}>
                         <div className="space-y-1 text-left">
                             <label className="text-sm font-medium text-gray-700">Email</label>
                             <input
@@ -73,6 +105,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                minLength={6}
                             />
                         </div>
                         <Button
@@ -80,7 +113,7 @@ export default function LoginPage() {
                             className="w-full bg-black text-white hover:bg-gray-800 h-11 font-semibold"
                             disabled={isLoading}
                         >
-                            Sign in
+                            {isLoading ? 'Processing...' : (mode === 'signin' ? 'Sign in' : 'Create Account')}
                         </Button>
                     </form>
 
