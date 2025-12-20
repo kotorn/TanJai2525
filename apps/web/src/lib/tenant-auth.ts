@@ -87,3 +87,59 @@ export async function validateSuperAdmin(): Promise<{ user: User }> {
 
     return { user };
 }
+
+/**
+ * Validates if the tenant has an active subscription.
+ * Redirects to /subscription/expired if not active.
+ * Bypasses check if the user is a Super Admin.
+ */
+export async function validateSubscription(tenantSlug: string) {
+    const supabase = createClient();
+
+    // 1. Resolve Tenant ID from Slug
+    const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('slug', tenantSlug)
+        .single();
+
+    if (tenantError || !tenant) return; // Should be handled by page 404 primarily, but safe to return
+
+    // 2. Check Subscription Status
+    const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('status, plan_id, end_date')
+        .eq('tenant_id', tenant.id)
+        .single();
+
+    // Default to 'free' or 'active' logic if no record found? 
+    // Strict Mode: No record = Expired immediately (unless free tier is implicit)
+    // For now, let's assume if no record -> Check if User is Super Admin, otherwise Block.
+
+    const isActive = subscription && (
+        subscription.status === 'active' ||
+        subscription.plan_id === 'free' ||
+        (subscription.end_date && new Date(subscription.end_date) > new Date())
+    );
+
+    if (isActive) return; // All good
+
+    // 3. Subscription Failed - Check for Super Admin Bypass
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        const { data: profile } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (profile && profile.role === 'super_admin') {
+            // Allow access but maybe log or warn?
+            return;
+        }
+    }
+
+    // 4. Block Access
+    const isPending = subscription?.status === 'pending_verification';
+    redirect(`/subscription/expired?tenant=${tenantSlug}${isPending ? '&status=pending' : ''}`);
+}

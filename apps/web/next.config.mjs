@@ -33,6 +33,13 @@ const nextConfig = {
             },
         ],
     },
+    webpack: (config) => {
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            '@supabase/supabase-js': '@supabase/supabase-js/dist/main/index.js',
+        };
+        return config;
+    },
 };
 
 export default withPWA(nextConfig);

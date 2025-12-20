@@ -9,34 +9,58 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      restaurants: {
+      tenants: {
         Row: {
           id: string
           created_at: string
           name: string
+          slug: string | null
           owner_id: string | null
           plan_id: string
           subscription_status: 'active' | 'past_due' | 'canceled' | 'trial'
+          settings: Json | null
+          cuisine_type: string | null
+          banner_url: string | null
+          address: string | null
+          phone: string | null
+          logo_url: string | null
+          current_plan: string | null
         }
         Insert: {
           id?: string
           created_at?: string
           name: string
+          slug?: string | null
           owner_id?: string | null
           plan_id?: string
           subscription_status?: 'active' | 'past_due' | 'canceled' | 'trial'
+          settings?: Json | null
+          cuisine_type?: string | null
+          banner_url?: string | null
+          address?: string | null
+          phone?: string | null
+          logo_url?: string | null
+          current_plan?: string | null
         }
         Update: {
           id?: string
           created_at?: string
           name?: string
+          slug?: string | null
           owner_id?: string | null
           plan_id?: string
           subscription_status?: 'active' | 'past_due' | 'canceled' | 'trial'
+          settings?: Json | null
+          cuisine_type?: string | null
+          banner_url?: string | null
+          address?: string | null
+          phone?: string | null
+          logo_url?: string | null
+          current_plan?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "restaurants_plan_id_fkey"
+            foreignKeyName: "tenants_plan_id_fkey"
             columns: ["plan_id"]
             referencedRelation: "system_plans"
             referencedColumns: ["id"]
@@ -70,36 +94,48 @@ export interface Database {
       subscriptions: {
         Row: {
           id: string
-          restaurant_id: string
+          tenant_id: string
           plan_id: string
-          status: 'active' | 'past_due' | 'canceled' | 'trial'
-          current_period_start: string
-          current_period_end: string
+          status: 'active' | 'past_due' | 'canceled' | 'trial' | 'pending_verification' | 'expired'
+          current_period_start: string | null
+          current_period_end: string | null
+          start_date: string
+          end_date: string | null
+          auto_renew: boolean | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
-          restaurant_id: string
-          plan_id: string
-          status: 'active' | 'past_due' | 'canceled' | 'trial'
-          current_period_start: string
-          current_period_end: string
+          tenant_id: string
+          plan_id?: string
+          status?: 'active' | 'past_due' | 'canceled' | 'trial' | 'pending_verification' | 'expired'
+          current_period_start?: string | null
+          current_period_end?: string | null
+          start_date?: string
+          end_date?: string | null
+          auto_renew?: boolean | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          restaurant_id?: string
+          tenant_id?: string
           plan_id?: string
-          status?: 'active' | 'past_due' | 'canceled' | 'trial'
-          current_period_start?: string
-          current_period_end?: string
+          status?: 'active' | 'past_due' | 'canceled' | 'trial' | 'pending_verification' | 'expired'
+          current_period_start?: string | null
+          current_period_end?: string | null
+          start_date?: string
+          end_date?: string | null
+          auto_renew?: boolean | null
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            referencedRelation: "restaurants"
+            foreignKeyName: "subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
@@ -116,24 +152,30 @@ export interface Database {
           subscription_id: string
           amount: number
           slip_image_url: string
-          status: 'pending' | 'approved' | 'rejected'
-          created_at: string
+          status: 'pending' | 'approved' | 'rejected' | 'verified'
+          uploaded_at: string
+          reviewed_by: string | null
+          reviewed_at: string | null
         }
         Insert: {
           id?: string
           subscription_id: string
           amount: number
           slip_image_url: string
-          status?: 'pending' | 'approved' | 'rejected'
-          created_at?: string
+          status?: 'pending' | 'approved' | 'rejected' | 'verified'
+          uploaded_at?: string
+          reviewed_by?: string | null
+          reviewed_at?: string | null
         }
         Update: {
           id?: string
           subscription_id?: string
           amount?: number
           slip_image_url?: string
-          status?: 'pending' | 'approved' | 'rejected'
-          created_at?: string
+          status?: 'pending' | 'approved' | 'rejected' | 'verified'
+          uploaded_at?: string
+          reviewed_by?: string | null
+          reviewed_at?: string | null
         }
         Relationships: [
           {
@@ -151,6 +193,7 @@ export interface Database {
           role: 'owner' | 'staff' | 'super_admin' | 'customer'
           created_at: string
           email: string | null
+          full_name: string | null
         }
         Insert: {
           id: string
@@ -158,6 +201,7 @@ export interface Database {
           role?: 'owner' | 'staff' | 'super_admin' | 'customer'
           created_at?: string
           email?: string | null
+          full_name?: string | null
         }
         Update: {
           id?: string
@@ -165,12 +209,13 @@ export interface Database {
           role?: 'owner' | 'staff' | 'super_admin' | 'customer'
           created_at?: string
           email?: string | null
+          full_name?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "users_tenant_id_fkey"
             columns: ["tenant_id"]
-            referencedRelation: "restaurants"
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           }
         ]
@@ -201,7 +246,7 @@ export interface Database {
           {
             foreignKeyName: "menu_categories_restaurant_id_fkey"
             columns: ["restaurant_id"]
-            referencedRelation: "restaurants"
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           }
         ]
@@ -247,7 +292,7 @@ export interface Database {
           {
             foreignKeyName: "menu_items_restaurant_id_fkey"
             columns: ["restaurant_id"]
-            referencedRelation: "restaurants"
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
