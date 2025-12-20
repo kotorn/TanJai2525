@@ -17,20 +17,20 @@ export default function KDSBoard({ initialOrders, tenantId }: { initialOrders: a
         const supabase = createClient();
 
         // Subscribe to INSERT and UPDATE on 'orders' table
-        const channel = supabase
-            .channel(`kds-${tenantId}`)
+        // Subscribe to INSERT and UPDATE on 'orders' table
+        const channel = supabase.channel(`kds-${tenantId}`);
+
+        channel
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
                     table: 'orders',
-                    filter: `restaurant_id=eq.${tenantId}`, // Updated to real column name 'restaurant_id'
+                    filter: `restaurant_id=eq.${tenantId}`,
                 },
                 async (payload) => {
                     if (payload.eventType === 'INSERT') {
-                        // For a real app we need to fetch the relations (items) too
-                        // Simplified: Reload or re-fetch
                         window.location.reload();
                     } else if (payload.eventType === 'UPDATE') {
                         setOrders((prev) =>

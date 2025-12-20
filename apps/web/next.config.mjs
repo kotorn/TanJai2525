@@ -21,7 +21,7 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    transpilePackages: ['@tanjai/ui'],
+    transpilePackages: ['@tanjai/ui', '@supabase/ssr', '@supabase/supabase-js'],
     images: {
         remotePatterns: [
             {

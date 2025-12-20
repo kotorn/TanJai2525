@@ -1,5 +1,5 @@
 import { createClient } from './supabase/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 
 /**
@@ -65,7 +65,7 @@ export async function validateSuperAdmin(): Promise<{ user: User }> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-        throw new Error('Authentication required');
+        redirect('/login');
     }
 
     // We explicitly type the data interaction if inference fails in certain environments
