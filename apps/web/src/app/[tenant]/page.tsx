@@ -193,11 +193,13 @@ function MenuPageContent({ params }: { params: { tenant: string } }) {
     </div>
   );
 
+
   return (
     <div className={`min-h-screen bg-[#121212] text-[#E0E0E0] pb-32 ${currentFont} font-body overflow-x-hidden ${isKiosk ? 'kiosk-mode' : ''}`}>
       {/* 1. Sticky Glass Header */}
-      {!isKiosk && (
-        <header className="sticky top-0 z-40 glass-nav px-4 py-4 flex flex-col gap-4">
+      <header className={`sticky top-0 z-40 glass-nav px-4 flex flex-col ${isKiosk ? 'py-2 gap-2' : 'py-4 gap-4'}`}>
+        {/* Top Navigation (Hidden in Kiosk Mode) */}
+        {!isKiosk && (
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
               <span className="text-xs text-TEXT_SECONDARY font-medium">{greeting}, Guest</span>
@@ -219,37 +221,37 @@ function MenuPageContent({ params }: { params: { tenant: string } }) {
               </button>
             </div>
           </div>
+        )}
 
-          {/* 2. Category Scroll (Horizontal Snap) */}
-          <div role="tablist" className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
+        {/* 2. Category Scroll (Always Visible, even in Kiosk Mode) */}
+        <div role="tablist" className="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
+          <button
+            role="tab"
+            aria-selected={activeCategory === 'all' ? "true" : "false"}
+            onClick={() => setActiveCategory('all')}
+            className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === 'all'
+              ? 'bg-BURNT_ORANGE text-white shadow-glow'
+              : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
+              }`}
+          >
+            {t.category_all}
+          </button>
+          {categories.map(cat => (
             <button
+              key={cat.id}
               role="tab"
-              aria-selected={activeCategory === 'all' ? "true" : "false"}
-              onClick={() => setActiveCategory('all')}
-              className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === 'all'
+              aria-selected={activeCategory === cat.id ? "true" : "false"}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === cat.id
                 ? 'bg-BURNT_ORANGE text-white shadow-glow'
                 : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
                 }`}
             >
-              {t.category_all}
+              {cat.name}
             </button>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                role="tab"
-                aria-selected={activeCategory === cat.id ? "true" : "false"}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`snap-start whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all ${activeCategory === cat.id
-                  ? 'bg-BURNT_ORANGE text-white shadow-glow'
-                  : 'bg-white/5 text-TEXT_SECONDARY border border-white/5 hover:bg-white/10'
-                  }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </header>
-      )}
+          ))}
+        </div>
+      </header>
 
       <div className="p-4">
         <div className="relative h-56 w-full rounded-[2.5rem] overflow-hidden shadow-2xl group active:scale-[0.98] transition-all bg-white/5">
