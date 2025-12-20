@@ -202,7 +202,7 @@ function MenuPageContent({ params }: { params: { tenant: string } }) {
             <div className="flex flex-col">
               <span className="text-xs text-TEXT_SECONDARY font-medium">{greeting}, Guest</span>
               <div className="flex items-center gap-1">
-                <h1 className="text-lg font-black font-display text-white tracking-tight">{t.title}</h1>
+                <h1 className="text-lg font-black font-display text-white tracking-tight">{t.title} (v2)</h1>
                 <div className="w-1.5 h-1.5 rounded-full bg-BURNT_ORANGE animate-pulse"></div>
               </div>
             </div>
