@@ -1,12 +1,27 @@
 'use client';
 
-import { signInWithLine, signInWithGoogle, signInWithApple, signInWithFacebook } from '@/features/auth/auth-handlers';
+import { signInWithLine, signInWithGoogle, signInWithApple, signInWithFacebook, signInWithEmail } from '@/features/auth/auth-handlers';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from "@tanjai/ui";
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleEmailLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await signInWithEmail(email, password);
+            console.log('[Auth] Email login successful');
+        } catch (error: any) {
+            console.error('[Auth] Email login failed:', error);
+            toast.error(error?.message || 'Failed to sign in');
+            setIsLoading(false);
+        }
+    };
 
     const handleLogin = async (provider: 'line' | 'google' | 'apple' | 'facebook') => {
         setIsLoading(true);
@@ -35,7 +50,7 @@ export default function LoginPage() {
 
                 <div className="space-y-4">
                     {/* Email Login Form */}
-                    <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); /* TODO: Implement email/password output */ }}>
+                    <form className="space-y-3" onSubmit={handleEmailLogin}>
                         <div className="space-y-1 text-left">
                             <label className="text-sm font-medium text-gray-700">Email</label>
                             <input
@@ -43,6 +58,9 @@ export default function LoginPage() {
                                 placeholder="name@example.com"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
                                 disabled={isLoading}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                             />
                         </div>
                         <div className="space-y-1 text-left">
@@ -52,9 +70,13 @@ export default function LoginPage() {
                                 placeholder="••••••••"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
                                 disabled={isLoading}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
                             />
                         </div>
                         <Button
+                            type="submit"
                             className="w-full bg-black text-white hover:bg-gray-800 h-11 font-semibold"
                             disabled={isLoading}
                         >
