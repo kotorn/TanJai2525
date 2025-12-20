@@ -51,3 +51,18 @@ export const signInWithApple = async () => {
     if (error) throw error;
     return data;
 };
+
+/**
+ * Trigger Facebook Login
+ */
+export const signInWithFacebook = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+            redirectTo: getRedirectUrl(),
+        },
+    });
+    if (error) throw error;
+    return data;
+};
