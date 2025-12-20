@@ -15,23 +15,37 @@ export async function validateTenantOwnership(tenantSlug: string) {
         throw new Error('Authentication required');
     }
 
-    // 2. Check restaurant ownership
-    // Assuming 'restaurants' table has 'slug' and 'owner_id'
-    const { data: restaurant, error: resError } = await supabase
-        .from('restaurants')
-        .select('id, owner_id')
+    // 2. Get Tenant by Slug
+    const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('id')
         .eq('slug', tenantSlug)
         .single();
 
-    if (resError || !restaurant) {
+    if (tenantError || !tenant) {
         console.error(`[Security] Tenant not found: ${tenantSlug}`);
         return notFound();
     }
 
-    if (restaurant.owner_id !== user.id) {
-        console.warn(`[Security] Unauthorized access attempt: User ${user.id} tried to access tenant ${tenantSlug}`);
-        throw new Error('Unauthorized: You do not own this store');
+    // 3. Verify User's Role for this Tenant
+    // We check the public.users profile to see if they are linked to this tenant as 'owner'
+    const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('tenant_id, role')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError || !profile) {
+         console.warn(`[Security] User profile not found for ${user.id}`);
+         throw new Error('User profile not found');
     }
 
-    return { user, restaurant };
+    if (profile.tenant_id !== tenant.id || profile.role !== 'owner') {
+        console.warn(`[Security] Unauthorized: User ${user.id} (Tenant: ${profile.tenant_id}) tried to access Tenant ${tenant.id}`);
+        // Allow access if they are 'staff'?? For now strict 'owner' check for admin dashboard.
+        // Or generic 'has access'
+        throw new Error('Unauthorized: You do not have permission to access this store');
+    }
+
+    return { user, tenant };
 }
