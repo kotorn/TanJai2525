@@ -18,10 +18,13 @@ export default function LoginPage() {
             if (mode === 'signin') {
                 await signInWithEmail(email, password);
                 console.log('[Auth] Email login successful');
+                // Force redirect to onboarding or dashboard
+                window.location.href = '/onboarding';
             } else {
                 await signUpWithEmail(email, password);
                 toast.success('Registration successful! Please check your email to confirm.');
-                setMode('signin');
+                // For safety, redirect too if auto-login
+                window.location.href = '/onboarding';
             }
         } catch (error: any) {
             console.error(`[Auth] ${mode} failed:`, error);
