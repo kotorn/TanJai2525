@@ -1,11 +1,12 @@
 import { createClient } from './supabase/server';
 import { notFound } from 'next/navigation';
+import { User } from '@supabase/supabase-js';
 
 /**
  * Validates if the current authenticated user owns the specified tenant.
  * Used in Server Actions and Page components to ensure cross-tenant security.
  */
-export async function validateTenantOwnership(tenantSlug: string) {
+export async function validateTenantOwnership(tenantSlug: string): Promise<{ user: User; tenant: { id: string } }> {
     const supabase = createClient();
 
     // 1. Get current user
@@ -36,16 +37,53 @@ export async function validateTenantOwnership(tenantSlug: string) {
         .single();
 
     if (profileError || !profile) {
-         console.warn(`[Security] User profile not found for ${user.id}`);
-         throw new Error('User profile not found');
+        console.warn(`[Security] User profile not found for ${user.id}`);
+        throw new Error('User profile not found');
     }
 
-    if (profile.tenant_id !== tenant.id || profile.role !== 'owner') {
-        console.warn(`[Security] Unauthorized: User ${user.id} (Tenant: ${profile.tenant_id}) tried to access Tenant ${tenant.id}`);
-        // Allow access if they are 'staff'?? For now strict 'owner' check for admin dashboard.
-        // Or generic 'has access'
+    // Explicit checks to satisfy TS narrowing
+    if (profile.tenant_id !== tenant.id) {
+        console.warn(`[Security] Unauthorized: Tenant Mismatch`);
+        throw new Error('Unauthorized: You do not have permission to access this store');
+    }
+
+    if (profile.role !== 'owner') {
+        console.warn(`[Security] Unauthorized: Role Mismatch`);
         throw new Error('Unauthorized: You do not have permission to access this store');
     }
 
     return { user, tenant };
+}
+
+/**
+ * Validates if the current authenticated user is a Super Admin.
+ * Used for SaaS Admin pages.
+ */
+export async function validateSuperAdmin(): Promise<{ user: User }> {
+    const supabase = createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        throw new Error('Authentication required');
+    }
+
+    // We explicitly type the data interaction if inference fails in certain environments
+    const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError || !profile) {
+        throw new Error('User profile not found');
+    }
+
+    const userProfile = profile as { role: string };
+
+    if (userProfile.role !== 'super_admin') {
+        throw new Error('Unauthorized: Super Admin access required');
+    }
+
+    return { user };
 }

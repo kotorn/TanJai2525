@@ -3,20 +3,31 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { upgradeSubscription } from '@/features/subscription/actions';
+import { uploadSlip } from '@/services/storage-service';
 
 export function BillingClient({ tenantId, currentPlan }: { tenantId: string, currentPlan: string }) {
     const [isUploading, setIsUploading] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
 
     const handleUploadSlip = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!file) {
+            toast.error('Please select a slip image first');
+            return;
+        }
+
         setIsUploading(true);
 
         try {
-            // TODO: Implement real file upload to Storage
-            // For now, using a mock URL to test the flow
-            const mockSlipUrl = `https://mock-slip.com/${Date.now()}.jpg`;
+            const uploadResult = await uploadSlip(file, tenantId);
 
-            const result = await upgradeSubscription(tenantId, 'pro', mockSlipUrl, 499);
+            if (uploadResult.error) {
+                toast.error('Upload failed: ' + uploadResult.error);
+                setIsUploading(false);
+                return;
+            }
+
+            const result = await upgradeSubscription(tenantId, 'pro', uploadResult.fullPath, 499);
 
             if (result.success) {
                 toast.success('Slip uploaded! Waiting for admin approval.');
@@ -55,14 +66,27 @@ export function BillingClient({ tenantId, currentPlan }: { tenantId: string, cur
 
                 <form onSubmit={handleUploadSlip} className="mt-4">
                     <label className="block text-xs text-gray-400 mb-1">Step 1: Transfer 499฿ to SCB 123-456-7890 (Tanjai POS)</label>
-                    <label className="block text-xs text-gray-400 mb-2">Step 2: Click Confirm (Mock Slip Upload)</label>
+                    <label className="block text-xs text-gray-400 mb-2">Step 2: Attach Payment Slip</label>
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        className="block w-full text-xs text-slate-300
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-xs file:font-semibold
+                            file:bg-orange-50 file:text-orange-700
+                            hover:file:bg-orange-100
+                            mb-4"
+                    />
 
                     <button
                         type="submit"
-                        disabled={isUploading}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold transition-all disabled:opacity-50"
+                        disabled={isUploading || !file}
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isUploading ? 'Uploading...' : 'Confirm Payment (Attach Slip)'}
+                        {isUploading ? 'Uploading...' : 'Confirm Payment'}
                     </button>
                 </form>
             </div>

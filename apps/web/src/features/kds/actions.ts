@@ -1,13 +1,15 @@
+'use server';
+
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 function createSupabaseClient() {
-  return createClient();
+    return createClient();
 }
 
 export async function fetchKitchenOrders(tenantId: string) {
     const supabase = createSupabaseClient();
-    
+
     // Fetch orders with status pending or preparing
     const { data, error } = await supabase
         .from('orders')
@@ -42,6 +44,7 @@ export async function updateOrderStatus(tenantId: string, orderId: string, newSt
 
     const { error } = await supabase
         .from('orders')
+        // @ts-ignore
         .update({ status: newStatus })
         .eq('id', orderId);
 
@@ -49,7 +52,7 @@ export async function updateOrderStatus(tenantId: string, orderId: string, newSt
         console.error("Update KDS Error:", error);
         return { success: false, error: error.message };
     }
-    
+
     // Revalidate the KDS page
     revalidatePath(`/${tenantId}/kds`);
     return { success: true };

@@ -110,6 +110,71 @@ export interface Database {
           }
         ]
       }
+      payment_slips: {
+        Row: {
+          id: string
+          subscription_id: string
+          amount: number
+          slip_image_url: string
+          status: 'pending' | 'approved' | 'rejected'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          subscription_id: string
+          amount: number
+          slip_image_url: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          subscription_id?: string
+          amount?: number
+          slip_image_url?: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_slips_subscription_id_fkey"
+            columns: ["subscription_id"]
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      users: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          role: 'owner' | 'staff' | 'super_admin' | 'customer'
+          created_at: string
+          email: string | null
+        }
+        Insert: {
+          id: string
+          tenant_id?: string | null
+          role?: 'owner' | 'staff' | 'super_admin' | 'customer'
+          created_at?: string
+          email?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string | null
+          role?: 'owner' | 'staff' | 'super_admin' | 'customer'
+          created_at?: string
+          email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       menu_categories: {
         Row: {
           id: string

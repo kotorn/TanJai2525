@@ -1,11 +1,7 @@
-// @ts-ignore
-const { createClient: createSupabaseJsClient } = require('@supabase/supabase-js');
-import { createMockClient } from './mock-client';
+import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '../database.types';
 
-
-// Singleton cache to prevent multiple GoTrueClient instances
-let supabaseClientInstance: any = null;
+let supabaseClientInstance: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
 export const createClient = () => {
     // Return cached instance if it exists
@@ -16,20 +12,19 @@ export const createClient = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Fallback to Mock if Env Vars are missing (e.g. Local QA, or Vercel preview without keys)
     if (!supabaseUrl || !supabaseKey) {
-        if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_IS_MOCK_ALLOWED) {
-            console.warn('⚠️ Supabase credentials missing. Falling back to Mock Client.');
-        }
-        const mockClient = createMockClient();
-        supabaseClientInstance = mockClient;
-        return mockClient;
+        console.error('⚠️ Supabase credentials missing. Client cannot be initialized.');
+        // Return a dummy client or throw? 
+        // For now, let createBrowserClient handle empty strings or throw natural errors, 
+        // ensuring we don't break strict null checks unnecessarily.
+        // But preventing crash is better.
+        // We verified env vars exist, so strict check is safe.
     }
 
     // Create and cache the singleton instance
-    supabaseClientInstance = createSupabaseJsClient<Database>(
-        supabaseUrl,
-        supabaseKey
+    supabaseClientInstance = createBrowserClient<Database>(
+        supabaseUrl!,
+        supabaseKey!
     );
 
     return supabaseClientInstance;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { isRateLimited } from './lib/api-auth';
 
 export const config = {
@@ -14,11 +15,47 @@ export const config = {
   ],
 };
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
+  // ============================================
+  // 1. Supabase Auth (SSR) - Session Refresh
+  // ============================================
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+          response = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // Refresh session if expired
+  await supabase.auth.getUser();
+
+  // ============================================
+  // 2. Logic & Routing
+  // ============================================
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || 'localhost:3000';
 
-  // 1. Global Rate Limiting (API only or all?)
+  // 2.1 Global Rate Limiting
   if (url.pathname.startsWith('/api/')) {
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous';
     if (isRateLimited(ip)) {
@@ -26,8 +63,7 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Multi-tenant Routing (Subdomain Mapping)
-  // Logic: [tenant].tanjai.app/* -> tanjai.app/[tenant]/*
+  // 2.2 Multi-tenant Routing
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'tanjai.app';
   const customSubdomain = hostname
     .replace(`.${rootDomain}`, '')
@@ -43,13 +79,19 @@ export default function middleware(request: NextRequest) {
   // If it's a subdomain (e.g. shop1.tanjai.app) and not an internal Next.js path
   if (!isRootDomain && customSubdomain && customSubdomain !== 'www') {
     // Rewrite to the tenant path
-    // e.g. shop1.tanjai.app/menu -> tanjai.app/shop1/menu
-    return NextResponse.rewrite(new URL(`/${customSubdomain}${url.pathname}${url.search}`, request.url));
+    const rewriteResponse = NextResponse.rewrite(new URL(`/${customSubdomain}${url.pathname}${url.search}`, request.url));
+
+    // CRITICAL: Copy Supabase response cookies (session) to the rewrite response
+    // otherwise the session is lost on the rewritten page
+    response.cookies.getAll().forEach((cookie) => {
+      rewriteResponse.cookies.set(cookie);
+    });
+
+    return rewriteResponse;
   }
 
-  // 3. Prevent Manual Path Access (Security)
-  // If user tries to access /shop1 manually on the main domain when they should use subdomain
+  // 2.3 Prevent Manual Path Access (Security)
   // (Optional: can be enforced or left for flexibility)
 
-  return NextResponse.next();
+  return response;
 }
