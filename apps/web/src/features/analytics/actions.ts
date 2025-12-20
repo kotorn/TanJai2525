@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { format, subDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { validateTenantOwnership } from '@/lib/tenant-auth';
 
 // Define Interfaces for Type Safety
 interface DailyStat {
@@ -20,8 +21,11 @@ interface HourlyStat {
 const TZ = 'Asia/Bangkok';
 
 export async function getDashboardMetrics(tenantId: string) {
+    // 0. Security Guard
+    await validateTenantOwnership(tenantId);
+
     const supabase = createClient();
-    
+
     // Get Current Date in Bangkok Time
     const now = new Date();
     const zonedNow = toZonedTime(now, TZ);
@@ -74,13 +78,13 @@ export async function getDashboardMetrics(tenantId: string) {
 
     if (hourlyStats) {
         hourlyStats.forEach((stat: HourlyStat) => {
-            const date = new Date(stat.sale_hour); 
+            const date = new Date(stat.sale_hour);
             // Warning: new Date(ISO) might be UTC or Local.
             // If string has +07, generic JS Date handles it.
             // We want the hour in Bangkok.
             // If running on a server in UTC, we need to shift. properties of date object are in local (UTC presumably).
             // `toZonedTime` helps to inspect.
-            const h = new Date(stat.sale_hour).getHours(); 
+            const h = new Date(stat.sale_hour).getHours();
             // Wait, if string is '2025...T00:00:00+07:00', new Date() parses it to correct absolute time.
             // .getHours() returns hour in LOCAL system time. Vercel is UTC.
             // So +07:00 becomes previous day 17:00.
@@ -90,7 +94,7 @@ export async function getDashboardMetrics(tenantId: string) {
             // Yes `date_trunc('hour', ... AT TIME ZONE 'Asia/Bangkok')` returns a timestamp WITHOUT timezone? No, usually generic timestamp.
             // Let's assume the string format is usable or use sub-string since we trust the view logic.
             // Better: use library to extract hour from date string.
-            
+
             // Hacky but reliable for fixed Timezone View:
             // "2025-12-19T09:00:00..."
             const hourStr = stat.sale_hour.substring(11, 13); // Extract HH
@@ -108,11 +112,14 @@ export async function getDashboardMetrics(tenantId: string) {
 }
 
 export async function getTopItems(tenantId: string) {
+    // 0. Security Guard
+    await validateTenantOwnership(tenantId);
+
     const supabase = createClient();
     const today = new Date();
     const zonedNow = toZonedTime(today, TZ);
     const start = format(zonedNow, 'yyyy-MM-dd') + 'T00:00:00+07:00';
-    
+
     // Fallback to aggregation on raw data for Items (View is for Sales)
     // Assuming Volume is manageable for Top Items or we create another view later.
     const { data: items } = await supabase

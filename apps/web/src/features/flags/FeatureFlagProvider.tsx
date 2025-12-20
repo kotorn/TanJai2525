@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 type FeatureContextType = {
@@ -33,19 +33,19 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
     const [features, setFeatures] = useState<Record<string, any>>({});
     const [tier, setTier] = useState<'free' | 'pro' | 'enterprise'>('free');
     const [isLoading, setIsLoading] = useState(true);
-    
-    const supabase = createClient();
+
+    const supabase = useMemo(() => createClient(), []);
 
     useEffect(() => {
         async function loadFlags() {
             try {
                 // 1. Get User
                 const { data: { user } } = await supabase.auth.getUser();
-                
+
                 if (!user) {
                     setTier('free');
                     // Default Free features if DB is unreachable or guest
-                    setFeatures({ "limit:items": 50, "module:kds": false }); 
+                    setFeatures({ "limit:items": 50, "module:kds": false });
                     setIsLoading(false);
                     return;
                 }
@@ -68,10 +68,10 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
                     // Given simplified schema: restaurants -> plan_id. subscriptions is for stripe status.
                     // Let's check 'restaurants' table for the plan.
                     .single();
-                 
-                 // Fallback or better query:
-                 // Find restaurant owned by user
-                 const { data: restaurant } = await supabase
+
+                // Fallback or better query:
+                // Find restaurant owned by user
+                const { data: restaurant } = await supabase
                     .from('restaurants')
                     .select('plan_id, system_plans(features)')
                     .eq('owner_id', user.id)
@@ -87,7 +87,7 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
                     setTier(planId.includes('pro') ? 'pro' : 'free');
                 } else {
                     // Default Free
-                     setFeatures({ "limit:items": 50, "module:kds": false });
+                    setFeatures({ "limit:items": 50, "module:kds": false });
                 }
 
             } catch (err) {

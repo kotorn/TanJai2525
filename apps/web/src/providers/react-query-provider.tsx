@@ -12,7 +12,7 @@ export function ReactQueryProvider({ children }: { children: React.ReactNode }) 
         defaultOptions: {
           queries: {
             // Cache time for 24 hours (for offline capability)
-            gcTime: 1000 * 60 * 60 * 24, 
+            gcTime: 1000 * 60 * 60 * 24,
             staleTime: 1000 * 60 * 5, // 5 minutes stale
           },
         },
@@ -31,19 +31,18 @@ export function ReactQueryProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  if (!persister) {
-    // Render without persistence during SSR or initial mount
-    // Note: Use standard Provider if persister not ready to avoid hydration mismatch?
-    // Actually, for PersistQueryClientProvider, 'persistOptions' is required.
-    // If not ready, we can return null or just standard provider.
-    // Simplest: Just use persistence only on client.
-    return <>{children}</>;
-  }
-
+  // Use a stable provider structure to avoid "Rendered more hooks" error #310
+  // during hydration/re-render transitions.
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister }}
+      persistOptions={{
+        persister: persister || {
+          persistClient: async () => { },
+          restoreClient: async () => undefined,
+          removeClient: async () => { },
+        }
+      }}
     >
       {children}
     </PersistQueryClientProvider>

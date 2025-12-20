@@ -254,6 +254,114 @@ export interface Database {
           created_at?: string
         }
       }
+      orders: {
+        Row: {
+          id: string
+          restaurant_id: string
+          table_id: string | null
+          items: Json
+          total_amount: number
+          status: string
+          customer_notes: string | null
+          channel_source: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          external_order_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          table_id?: string | null
+          items: Json
+          total_amount: number
+          status?: string
+          customer_notes?: string | null
+          channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          external_order_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          table_id?: string | null
+          items?: Json
+          total_amount?: number
+          status?: string
+          customer_notes?: string | null
+          channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          external_order_id?: string | null
+          created_at?: string
+        }
+      }
+      social_profiles: {
+        Row: {
+          id: string
+          customer_id: string | null
+          provider: 'line' | 'facebook' | 'tiktok' | 'google'
+          provider_user_id: string
+          profile_data: Json | null
+          last_interaction: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          customer_id?: string | null
+          provider: 'line' | 'facebook' | 'tiktok' | 'google'
+          provider_user_id: string
+          profile_data?: Json | null
+          last_interaction?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          customer_id?: string | null
+          provider?: 'line' | 'facebook' | 'tiktok' | 'google'
+          provider_user_id?: string
+          profile_data?: Json | null
+          last_interaction?: string
+          created_at?: string
+        }
+      }
+      communication_logs: {
+        Row: {
+          id: string
+          restaurant_id: string
+          customer_id: string | null
+          social_profile_id: string | null
+          channel: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          direction: 'inbound' | 'outbound'
+          content: string
+          content_type: string
+          external_id: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          customer_id?: string | null
+          social_profile_id?: string | null
+          channel?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          direction: 'inbound' | 'outbound'
+          content: string
+          content_type?: string
+          external_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          customer_id?: string | null
+          social_profile_id?: string | null
+          channel?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          direction?: 'inbound' | 'outbound'
+          content?: string
+          content_type?: string
+          external_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
     }
   }
 }
