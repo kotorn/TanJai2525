@@ -1,9 +1,21 @@
-// Stubbed to unblock build
-// import { createClient } from '@supabase/supabase-js'
+import { Database } from '../database.types';
+
+// @ts-ignore
+const { createClient } = require('@supabase/supabase-js');
 
 export function createAdminClient() {
-  return {
-    from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({ select: () => ({ data: null, error: null }) }), update: () => ({}), eq: () => ({}), single: () => ({ data: null }) }),
-    auth: { admin: { createUser: () => ({ data: { user: null }, error: null }) } }
-  } as any;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Prefer Service Role Key for Admin operations, fallback to Anon Key (which might fail RLS)
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase URL or Key');
+  }
+
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
