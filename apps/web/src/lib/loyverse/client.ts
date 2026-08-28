@@ -142,8 +142,12 @@ export class LoyverseClient {
 
   constructor(config: LoyverseClientConfig) {
     this.config = config;
-    this.baseUrl = (config.baseUrl || LOYVERSE_API_BASE_URL).replace(/\\/$/, '');
+    this.baseUrl = (config.baseUrl || LOYVERSE_API_BASE_URL).replace(/\/$/, '');
     this.timeoutMs = config.timeoutMs || 30000;
+  }
+
+  get storeId(): string {
+    return this.config.storeId;
   }
 
   private async request(url: URL): Promise<unknown> {
