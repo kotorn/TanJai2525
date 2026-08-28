@@ -253,20 +253,20 @@ export async function syncLoyverseReceipts(now = new Date()): Promise<LoyverseSy
       receiptMap.set(row.receipt_number, { source: receipt, row });
     }
 
-    const receipts = [...receiptMap.values()];
+    const receipts = Array.from(receiptMap.values());
     const receiptRows = receipts.map(item => item.row);
     await upsertChunks(supabase, 'loyverse_receipts', receiptRows, 'store_id,receipt_number');
 
     const ids = await receiptIdsByNumber(supabase, storeId, receiptRows.map(row => row.receipt_number as string));
-    const persistedIds = [...ids.values()];
-    const lines = receipts.flatMap(item => {
+    const persistedIds = Array.from(ids.values());
+    const lines: Row[] = [];
+    const payments: Row[] = [];
+    for (const item of receipts) {
       const id = ids.get(item.row.receipt_number as string);
-      return id ? lineRows(item.source, id) : [];
-    });
-    const payments = receipts.flatMap(item => {
-      const id = ids.get(item.row.receipt_number as string);
-      return id ? paymentRows(item.source, id) : [];
-    });
+      if (!id) continue;
+      lines.push(...lineRows(item.source, id));
+      payments.push(...paymentRows(item.source, id));
+    }
 
     if (persistedIds.length > 0) {
       await deleteChildren(supabase, 'loyverse_receipt_lines', persistedIds);
