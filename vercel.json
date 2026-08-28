@@ -1,5 +1,8 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npx turbo run build --filter=web",
-  "outputDirectory": "apps/web/.next"
+  "crons": [
+    {
+      "path": "/api/cron/loyverse",
+      "schedule": "30 12 * * *"
+    }
+  ]
 }
