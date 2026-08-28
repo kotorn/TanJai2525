@@ -2,7 +2,7 @@ import { format, startOfDay, subDays } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createLoyverseClient, type LoyverseLineItem, type LoyverseReceipt, type LoyversePayment } from '@/lib/loyverse/client';
+import { createLoyverseClient, type LoyverseReceipt } from '@/lib/loyverse/client';
 
 const DEFAULT_TIME_ZONE = 'Asia/Tokyo';
 const DEFAULT_LOOKBACK_DAYS = 2;
@@ -204,7 +204,7 @@ export async function syncLoyverseReceipts(now = new Date()): Promise<LoyverseSy
   }
 
   const client = createLoyverseClient();
-  const storeId = client['config'].storeId;
+  const storeId = client.storeId;
   const tenantId = process.env.LOYVERSE_TENANT_ID?.trim() || null;
   const window = getLoyverseSyncWindow(now);
   const maxPages = envNumber('LOYVERSE_SYNC_MAX_PAGES', DEFAULT_MAX_PAGES, 1, 1000);
