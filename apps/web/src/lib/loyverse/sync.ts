@@ -234,8 +234,8 @@ export async function syncLoyverseReceipts(now = new Date()): Promise<LoyverseSy
 
     const listing = await client.getAllReceipts({
       storeId,
-      createdAtMin: window.start,
-      createdAtMax: window.end,
+      updatedAtMin: window.start,
+      updatedAtMax: window.end,
       limit: 250,
       maxPages,
     });
