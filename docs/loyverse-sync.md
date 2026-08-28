@@ -6,7 +6,7 @@ This integration imports Loyverse receipts into Supabase from a protected server
 
 1. Vercel Cron calls `GET /api/cron/loyverse` in Production.
 2. The route validates `Authorization: Bearer $CRON_SECRET`.
-3. The server requests Loyverse receipts with a rolling date window and follows API cursors.
+3. The server requests Loyverse receipts updated within a rolling date window and follows API cursors.
 4. Receipt headers, line items, payments, and the original JSON payload are upserted into Supabase.
 5. `loyverse_daily_sales` and `loyverse_daily_item_sales` provide reporting-ready views.
 
@@ -34,7 +34,7 @@ Never expose `LOYVERSE_API_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, or `CRON_SECRET`
 
 ## Schedule
 
-The committed schedule is `30 12 * * *` (21:30 Japan time when Vercel evaluates the cron in UTC). It is intentionally after the shop's normal closing time and uses a two-day lookback so late edits or refunds are re-read.
+The committed schedule is `30 12 * * *` (21:30 Japan time when Vercel evaluates the cron in UTC). It is intentionally after the shop's normal closing time and uses a two-day updated-at lookback so recent edits or refunds are re-read.
 
 Vercel Cron runs the route in Production. A manual smoke test can be made without revealing the secret in the command history:
 
