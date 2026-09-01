@@ -61,16 +61,18 @@ jobs:
         run: npm install --global npm@10.0.0 --no-audit --fund=false
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --fund=false
+      - name: Run application checks before deployment
+        run: npm run ci:full
       - name: Build and deploy prebuilt preview
         id: deploy
         run: npm run deploy:preview
       - name: Install Chromium
         run: npx --no-install playwright install --with-deps chromium
-      - name: Browser smoke and regression checks
+      - name: Browser deployment smoke
         env:
           BASE_URL: ${{ steps.deploy.outputs.deployment_url }}
           CI: 'true'
-        run: npm run test:regression:ci
+        run: npm run test:smoke
       - name: Upload preview reports on failure
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

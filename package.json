@@ -16,6 +16,7 @@
     "test:e2e": "playwright test -c apps/web/playwright.config.ts",
     "test:regression": "playwright test apps/web/e2e/regression-suite.spec.ts --headed -c apps/web/playwright.config.ts",
     "test:regression:ci": "playwright test apps/web/e2e/regression-suite.spec.ts -c apps/web/playwright.config.ts",
+    "test:smoke": "playwright test apps/web/e2e/deployment-smoke.spec.ts -c apps/web/playwright.config.ts --project=DeploymentSmoke",
     "simulate": "npx playwright test apps/web/e2e/simulation.spec.ts --headed -c apps/web/playwright.config.ts",
     "stress": "npx playwright test apps/web/e2e/stress-test.spec.ts --headed --workers=1 -c apps/web/playwright.config.ts",
     "ci:doctor": "node scripts/ci/doctor.mjs",

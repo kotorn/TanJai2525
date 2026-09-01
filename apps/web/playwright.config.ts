@@ -25,6 +25,12 @@ export default defineConfig({
   },
 
   projects: [
+    {
+      name: 'DeploymentSmoke',
+      testMatch: /deployment-smoke\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+
     /* 0. Regression Suite (Quick Smoke Test) */
     {
       name: 'Regression Suite',

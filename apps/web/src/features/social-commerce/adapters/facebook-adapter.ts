@@ -94,13 +94,14 @@ export class FacebookAdapter implements ISocialChannelAdapter {
     async sendProductCarousel(products: any[], userId: string) {
         if (!this.accessToken) return { success: false, error: 'Config missing' };
 
+        const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
         const elements = products.slice(0, 10).map((product) => ({
             title: String(product.name || 'สินค้า'),
             subtitle: `${product.price} ${product.currency || 'JPY'}`,
             image_url: product.image_url || undefined,
             buttons: [{
                 type: 'web_url',
-                url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/menu/${product.id}`,
+                url: `${baseUrl}/menu`,
                 title: 'สั่งเลย',
             }],
         }));

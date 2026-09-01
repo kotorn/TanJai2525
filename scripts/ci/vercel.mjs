@@ -38,7 +38,7 @@ async function deployPreview() {
   const pullEnvironment = process.env.VERCEL_PULL_ENV || (config.appEnv === 'production' ? 'production' : 'preview');
   const pulled = await runCommand('vercel-pull', NPX, cliArgs(['pull', '--yes', '--environment', pullEnvironment, '--git-branch', config.branch, '--token', process.env.VERCEL_TOKEN]));
   if (pulled.code !== 0) return pulled.code;
-  const envCheck = await runCommand('vercel-env-check', NPM, ['run', 'env:check'], { env: { APP_ENV: config.appEnv, SUPABASE_SCHEMA: config.schema, NEXT_PUBLIC_SUPABASE_SCHEMA: config.schema } });
+  const envCheck = await runCommand('vercel-env-check', NPM, ['run', 'env:check'], { env: { APP_ENV: config.appEnv, SUPABASE_SCHEMA: config.schema, NEXT_PUBLIC_SUPABASE_SCHEMA: config.schema, VERCEL_PULL_ENV: pullEnvironment } });
   if (envCheck.code !== 0) return envCheck.code;
   const built = await runCommand('vercel-build', NPX, cliArgs(['build', '--token', process.env.VERCEL_TOKEN, '--build-env', `APP_ENV=${config.appEnv}`, '--build-env', `SUPABASE_SCHEMA=${config.schema}`, '--build-env', `NEXT_PUBLIC_SUPABASE_SCHEMA=${config.schema}`]));
   if (built.code !== 0) return built.code;

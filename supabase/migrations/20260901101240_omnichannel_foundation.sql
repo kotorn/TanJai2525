@@ -11,13 +11,13 @@
 -- ambiguous legacy values are left for an explicit tenant migration.
 DO $$
 DECLARE
-  table_name text;
+  target_table text;
   has_tenant_id boolean;
   has_restaurant_id boolean;
   tenant_udt text;
   restaurant_udt text;
 BEGIN
-  FOREACH table_name IN ARRAY ARRAY[
+  FOREACH target_table IN ARRAY ARRAY[
     'users',
     'menu_categories',
     'categories',
@@ -25,7 +25,7 @@ BEGIN
     'orders',
     'order_items'
   ] LOOP
-    IF to_regclass(format('public.%I', table_name)) IS NULL THEN
+    IF to_regclass(format('public.%I', target_table)) IS NULL THEN
       CONTINUE;
     END IF;
 
@@ -33,14 +33,14 @@ BEGIN
       SELECT 1
       FROM information_schema.columns c
       WHERE c.table_schema = 'public'
-        AND c.table_name = table_name
+        AND c.table_name = target_table
         AND c.column_name = 'tenant_id'
     ) INTO has_tenant_id;
 
     IF NOT has_tenant_id THEN
       EXECUTE format(
         'ALTER TABLE public.%I ADD COLUMN tenant_id uuid',
-        table_name
+        target_table
       );
     END IF;
 
@@ -48,7 +48,7 @@ BEGIN
       SELECT 1
       FROM information_schema.columns c
       WHERE c.table_schema = 'public'
-        AND c.table_name = table_name
+        AND c.table_name = target_table
         AND c.column_name = 'restaurant_id'
     ) INTO has_restaurant_id;
 
@@ -57,20 +57,20 @@ BEGIN
       INTO tenant_udt
       FROM information_schema.columns c
       WHERE c.table_schema = 'public'
-        AND c.table_name = table_name
+        AND c.table_name = target_table
         AND c.column_name = 'tenant_id';
 
       SELECT c.udt_name
       INTO restaurant_udt
       FROM information_schema.columns c
       WHERE c.table_schema = 'public'
-        AND c.table_name = table_name
+        AND c.table_name = target_table
         AND c.column_name = 'restaurant_id';
 
       IF tenant_udt = 'uuid' AND restaurant_udt = 'uuid' THEN
         EXECUTE format(
           'UPDATE public.%I SET tenant_id = restaurant_id WHERE tenant_id IS NULL AND restaurant_id IS NOT NULL',
-          table_name
+          target_table
         );
       END IF;
     END IF;
@@ -80,6 +80,8 @@ BEGIN
     ALTER TABLE public.menu_items
       ADD COLUMN IF NOT EXISTS sku text,
       ADD COLUMN IF NOT EXISTS stock numeric(12, 3),
+      ADD COLUMN IF NOT EXISTS stock_quantity numeric(12, 3),
+      ADD COLUMN IF NOT EXISTS track_inventory boolean NOT NULL DEFAULT false,
       ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'JPY',
       ADD COLUMN IF NOT EXISTS inventory_managed boolean NOT NULL DEFAULT false,
       ADD COLUMN IF NOT EXISTS is_available boolean NOT NULL DEFAULT true,
@@ -88,6 +90,20 @@ BEGIN
     UPDATE public.menu_items
     SET sku = id::text
     WHERE sku IS NULL;
+
+    UPDATE public.menu_items
+    SET stock_quantity = stock
+    WHERE stock_quantity IS NULL
+      AND stock IS NOT NULL;
+
+    UPDATE public.menu_items
+    SET stock = stock_quantity
+    WHERE track_inventory = true
+      AND stock_quantity IS NOT NULL;
+
+    UPDATE public.menu_items
+    SET inventory_managed = true
+    WHERE track_inventory = true;
   END IF;
 
   IF to_regclass('public.orders') IS NOT NULL THEN
@@ -106,14 +122,52 @@ BEGIN
   END IF;
 END $$;
 
+-- Existing menu migrations used integer inventory columns. Widen them before
+-- the shared reservation function starts accepting fractional quantities.
+DO $$
+DECLARE
+  stock_type text;
+  stock_quantity_type text;
+BEGIN
+  IF to_regclass('public.menu_items') IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT c.udt_name
+  INTO stock_type
+  FROM information_schema.columns AS c
+  WHERE c.table_schema = 'public'
+    AND c.table_name = 'menu_items'
+    AND c.column_name = 'stock';
+
+  IF stock_type IN ('int2', 'int4', 'int8') THEN
+    ALTER TABLE public.menu_items
+      ALTER COLUMN stock TYPE numeric(12, 3)
+      USING stock::numeric;
+  END IF;
+
+  SELECT c.udt_name
+  INTO stock_quantity_type
+  FROM information_schema.columns AS c
+  WHERE c.table_schema = 'public'
+    AND c.table_name = 'menu_items'
+    AND c.column_name = 'stock_quantity';
+
+  IF stock_quantity_type IN ('int2', 'int4', 'int8') THEN
+    ALTER TABLE public.menu_items
+      ALTER COLUMN stock_quantity TYPE numeric(12, 3)
+      USING stock_quantity::numeric;
+  END IF;
+END $$;
+
 -- Keep the new compatibility columns linked to tenants without validating old
 -- rows immediately. This lets existing data be read back and reconciled first.
 DO $$
 DECLARE
-  table_name text;
+  target_table text;
   constraint_name text;
 BEGIN
-  FOREACH table_name IN ARRAY ARRAY[
+  FOREACH target_table IN ARRAY ARRAY[
     'users',
     'menu_categories',
     'categories',
@@ -121,7 +175,7 @@ BEGIN
     'orders',
     'order_items'
   ] LOOP
-    IF to_regclass(format('public.%I', table_name)) IS NULL THEN
+    IF to_regclass(format('public.%I', target_table)) IS NULL THEN
       CONTINUE;
     END IF;
 
@@ -129,13 +183,13 @@ BEGIN
       SELECT 1
       FROM information_schema.columns c
       WHERE c.table_schema = 'public'
-        AND c.table_name = table_name
+        AND c.table_name = target_table
         AND c.column_name = 'tenant_id'
     ) THEN
       CONTINUE;
     END IF;
 
-    constraint_name := format('omni_%s_tenant_id_fkey', table_name);
+    constraint_name := format('omni_%s_tenant_id_fkey', target_table);
     IF NOT EXISTS (
       SELECT 1
       FROM pg_constraint
@@ -143,7 +197,7 @@ BEGIN
     ) THEN
       EXECUTE format(
         'ALTER TABLE public.%I ADD CONSTRAINT %I FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) NOT VALID',
-        table_name,
+        target_table,
         constraint_name
       );
     END IF;
@@ -254,6 +308,9 @@ CREATE TABLE IF NOT EXISTS public.inventory_reservations (
     UNIQUE (tenant_id, idempotency_key)
 );
 
+ALTER TABLE public.inventory_reservations
+  ADD COLUMN IF NOT EXISTS inventory_decremented boolean NOT NULL DEFAULT false;
+
 CREATE INDEX IF NOT EXISTS idx_channel_connections_tenant_status
   ON public.channel_connections (tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_catalog_publications_tenant_status
@@ -264,6 +321,164 @@ CREATE INDEX IF NOT EXISTS idx_channel_sync_runs_tenant_started
   ON public.channel_sync_runs (tenant_id, started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_inventory_reservations_order_status
   ON public.inventory_reservations (order_id, status);
+CREATE INDEX IF NOT EXISTS idx_catalog_publications_tenant_connection
+  ON public.catalog_publications (tenant_id, channel_connection_id);
+CREATE INDEX IF NOT EXISTS idx_catalog_publications_tenant_menu_item
+  ON public.catalog_publications (tenant_id, menu_item_id);
+CREATE INDEX IF NOT EXISTS idx_channel_events_tenant_connection
+  ON public.channel_events (tenant_id, channel_connection_id);
+CREATE INDEX IF NOT EXISTS idx_channel_sync_runs_tenant_connection
+  ON public.channel_sync_runs (tenant_id, channel_connection_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_reservations_tenant_order
+  ON public.inventory_reservations (tenant_id, order_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_reservations_tenant_menu_item
+  ON public.inventory_reservations (tenant_id, menu_item_id);
+
+-- Every child relationship carries the same tenant key as its parent. The
+-- composite constraints prevent an otherwise valid UUID from crossing tenant
+-- boundaries. NOT VALID preserves existing rows for the explicit audit pass.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conrelid = to_regclass('public.channel_connections')
+      AND conname = 'channel_connections_tenant_id_key'
+  ) THEN
+    ALTER TABLE public.channel_connections
+      ADD CONSTRAINT channel_connections_tenant_id_key UNIQUE (tenant_id, id);
+  END IF;
+
+  IF to_regclass('public.menu_items') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1
+       FROM pg_constraint
+       WHERE conrelid = to_regclass('public.menu_items')
+         AND conname = 'menu_items_tenant_id_key'
+     ) THEN
+    ALTER TABLE public.menu_items
+      ADD CONSTRAINT menu_items_tenant_id_key UNIQUE (tenant_id, id);
+  END IF;
+
+  IF to_regclass('public.orders') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1
+       FROM pg_constraint
+       WHERE conrelid = to_regclass('public.orders')
+         AND conname = 'orders_tenant_id_key'
+     ) THEN
+    ALTER TABLE public.orders
+      ADD CONSTRAINT orders_tenant_id_key UNIQUE (tenant_id, id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = to_regclass('public.catalog_publications')
+      AND conname = 'catalog_publications_tenant_connection_fkey'
+  ) THEN
+    ALTER TABLE public.catalog_publications
+      ADD CONSTRAINT catalog_publications_tenant_connection_fkey
+      FOREIGN KEY (tenant_id, channel_connection_id)
+      REFERENCES public.channel_connections (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+
+  IF to_regclass('public.menu_items') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_constraint
+       WHERE conrelid = to_regclass('public.catalog_publications')
+         AND conname = 'catalog_publications_tenant_menu_item_fkey'
+     ) THEN
+    ALTER TABLE public.catalog_publications
+      ADD CONSTRAINT catalog_publications_tenant_menu_item_fkey
+      FOREIGN KEY (tenant_id, menu_item_id)
+      REFERENCES public.menu_items (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = to_regclass('public.channel_events')
+      AND conname = 'channel_events_tenant_connection_fkey'
+  ) THEN
+    ALTER TABLE public.channel_events
+      ADD CONSTRAINT channel_events_tenant_connection_fkey
+      FOREIGN KEY (tenant_id, channel_connection_id)
+      REFERENCES public.channel_connections (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = to_regclass('public.channel_sync_runs')
+      AND conname = 'channel_sync_runs_tenant_connection_fkey'
+  ) THEN
+    ALTER TABLE public.channel_sync_runs
+      ADD CONSTRAINT channel_sync_runs_tenant_connection_fkey
+      FOREIGN KEY (tenant_id, channel_connection_id)
+      REFERENCES public.channel_connections (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+
+  IF to_regclass('public.orders') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_constraint
+       WHERE conrelid = to_regclass('public.inventory_reservations')
+         AND conname = 'inventory_reservations_tenant_order_fkey'
+     ) THEN
+    ALTER TABLE public.inventory_reservations
+      ADD CONSTRAINT inventory_reservations_tenant_order_fkey
+      FOREIGN KEY (tenant_id, order_id)
+      REFERENCES public.orders (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+
+  IF to_regclass('public.menu_items') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_constraint
+       WHERE conrelid = to_regclass('public.inventory_reservations')
+         AND conname = 'inventory_reservations_tenant_menu_item_fkey'
+     ) THEN
+    ALTER TABLE public.inventory_reservations
+      ADD CONSTRAINT inventory_reservations_tenant_menu_item_fkey
+      FOREIGN KEY (tenant_id, menu_item_id)
+      REFERENCES public.menu_items (tenant_id, id)
+      ON DELETE CASCADE NOT VALID;
+  END IF;
+END $$;
+
+-- Keep provider/source values closed to the adapter contract while allowing
+-- old rows to be audited before the constraints are validated.
+DO $$
+BEGIN
+  IF to_regclass('public.orders') IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conrelid = to_regclass('public.orders')
+        AND conname = 'omni_orders_channel_source_check'
+    ) THEN
+      ALTER TABLE public.orders
+        ADD CONSTRAINT omni_orders_channel_source_check
+        CHECK (channel_source IN (
+          'pos', 'liff', 'line_oa', 'facebook_messenger',
+          'facebook_catalog', 'instagram', 'google_business_profile',
+          'tiktok_shop', 'tiktok'
+        )) NOT VALID;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint
+      WHERE conrelid = to_regclass('public.orders')
+        AND conname = 'omni_orders_channel_provider_check'
+    ) THEN
+      ALTER TABLE public.orders
+        ADD CONSTRAINT omni_orders_channel_provider_check
+        CHECK (channel_provider IS NULL OR channel_provider IN (
+          'meta_catalog', 'line_oa', 'google_business_profile', 'tiktok_shop'
+        )) NOT VALID;
+    END IF;
+  END IF;
+END $$;
 
 -- The external order uniqueness contract is kept on the central orders table.
 -- The connection identifies the provider account, so two accounts may use the
@@ -306,10 +521,9 @@ AS $$
   );
 $$;
 
--- 4. Atomic reservation primitives. A finite menu_items.stock value is locked
--- and decremented in the same transaction as the reservation insert. NULL
--- stock means the item is not inventory-managed yet and is audited without a
--- decrement until inventory is configured.
+-- 4. Atomic reservation primitives. The established stock_quantity/
+-- track_inventory columns remain the inventory source of truth. The additive
+-- stock and inventory_managed columns are kept in sync for compatibility.
 CREATE OR REPLACE FUNCTION public.omni_reserve_stock(
   p_tenant_id uuid,
   p_order_id uuid,
@@ -324,10 +538,34 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   existing_reservation public.inventory_reservations;
+  order_belongs_to_tenant boolean;
   current_stock numeric;
+  current_stock_quantity numeric;
+  is_inventory_managed boolean;
 BEGIN
   IF p_quantity IS NULL OR p_quantity <= 0 THEN
     RAISE EXCEPTION 'reservation quantity must be positive' USING ERRCODE = '22023';
+  END IF;
+
+  IF NULLIF(BTRIM(p_idempotency_key), '') IS NULL THEN
+    RAISE EXCEPTION 'reservation idempotency key is required' USING ERRCODE = '22023';
+  END IF;
+
+  IF to_regclass('public.orders') IS NULL THEN
+    RAISE EXCEPTION 'orders table is required for stock reservation' USING ERRCODE = '42P01';
+  END IF;
+
+  EXECUTE 'SELECT EXISTS (
+    SELECT 1
+    FROM public.orders
+    WHERE id = $1
+      AND tenant_id = $2
+  )'
+  INTO order_belongs_to_tenant
+  USING p_order_id, p_tenant_id;
+
+  IF NOT order_belongs_to_tenant THEN
+    RAISE EXCEPTION 'order does not belong to this tenant' USING ERRCODE = '42501';
   END IF;
 
   SELECT *
@@ -340,8 +578,10 @@ BEGIN
     RETURN existing_reservation;
   END IF;
 
-  SELECT mi.stock
-  INTO current_stock
+  SELECT COALESCE(mi.inventory_managed, false) OR COALESCE(mi.track_inventory, false),
+         mi.stock_quantity,
+         mi.stock
+  INTO is_inventory_managed, current_stock_quantity, current_stock
   FROM public.menu_items AS mi
   WHERE mi.id = p_menu_item_id
     AND mi.tenant_id = p_tenant_id
@@ -352,7 +592,8 @@ BEGIN
     RAISE EXCEPTION 'menu item is unavailable for this tenant' USING ERRCODE = 'P0002';
   END IF;
 
-  IF current_stock IS NOT NULL AND current_stock < p_quantity THEN
+  is_inventory_managed := COALESCE(is_inventory_managed, false);
+  IF is_inventory_managed AND COALESCE(current_stock_quantity, current_stock, 0) < p_quantity THEN
     RAISE EXCEPTION 'insufficient stock' USING ERRCODE = 'P0001';
   END IF;
 
@@ -361,21 +602,24 @@ BEGIN
     order_id,
     menu_item_id,
     quantity,
-    idempotency_key
+    idempotency_key,
+    inventory_decremented
   )
   VALUES (
     p_tenant_id,
     p_order_id,
     p_menu_item_id,
     p_quantity,
-    p_idempotency_key
+    p_idempotency_key,
+    is_inventory_managed
   )
   RETURNING * INTO existing_reservation;
 
-  IF current_stock IS NOT NULL THEN
+  IF is_inventory_managed THEN
     UPDATE public.menu_items
-    SET stock = stock - p_quantity,
-        updated_at = COALESCE(updated_at, now())
+    SET stock_quantity = COALESCE(stock_quantity, stock, 0) - p_quantity,
+        stock = COALESCE(stock, stock_quantity, 0) - p_quantity,
+        updated_at = now()
     WHERE id = p_menu_item_id
       AND tenant_id = p_tenant_id;
   END IF;
@@ -416,15 +660,16 @@ BEGIN
         released_at = now()
     WHERE order_id = p_order_id
       AND status = 'reserved'
-    RETURNING tenant_id, menu_item_id, quantity
+    RETURNING tenant_id, menu_item_id, quantity, inventory_decremented
   ), restored AS (
     UPDATE public.menu_items AS mi
-    SET stock = mi.stock + released.quantity,
-        updated_at = COALESCE(mi.updated_at, now())
+    SET stock_quantity = COALESCE(mi.stock_quantity, mi.stock, 0) + released.quantity,
+        stock = COALESCE(mi.stock, mi.stock_quantity, 0) + released.quantity,
+        updated_at = now()
     FROM released
     WHERE mi.id = released.menu_item_id
       AND mi.tenant_id = released.tenant_id
-      AND mi.stock IS NOT NULL
+      AND released.inventory_decremented
     RETURNING mi.id
   )
   SELECT COUNT(*) INTO released_count FROM released;
@@ -457,7 +702,9 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-  IF OLD.status::text NOT IN ('cancelled', 'canceled', 'refunded') THEN
+  IF OLD.status::text IS DISTINCT FROM 'cancelled'
+     AND OLD.status::text IS DISTINCT FROM 'canceled'
+     AND OLD.status::text IS DISTINCT FROM 'refunded' THEN
     PERFORM public.omni_release_order_reservations(NEW.id, 'order_cancelled');
   END IF;
   RETURN NEW;

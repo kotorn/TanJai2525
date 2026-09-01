@@ -76,6 +76,10 @@ function effectiveEnvironment() {
   ]) {
     Object.assign(values, readEnvFile(path.join(ROOT, fileName)));
   }
+  const pulledEnvironment = String(process.env.VERCEL_PULL_ENV || process.env.APP_ENV || '').trim();
+  if (pulledEnvironment) {
+    Object.assign(values, readEnvFile(path.join(ROOT, '.vercel', `.env.${pulledEnvironment}.local`)));
+  }
   Object.assign(values, process.env);
   return values;
 }
