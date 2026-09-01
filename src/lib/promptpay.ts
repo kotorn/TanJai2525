@@ -1,10 +1,14 @@
 // lib/promptpay.ts
+// UDPated to remove dependency on 'crc'
+// CRC16-CCITT (XModem) implementation for correct EMVCo Checksum
 
 /**
  * Generate PromptPay Payload with CRC16 (CRC-16/CCITT-FALSE)
+ * Supports phone numbers, tax IDs, and e-wallet IDs
  */
 
-function crc16(data: string): string {
+// CRC16-CCITT (XModem) implementation for correct EMVCo Checksum
+function calculateCRC16(data: string): string {
     let crc = 0xFFFF;
     for (let i = 0; i < data.length; i++) {
         let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
@@ -14,45 +18,74 @@ function crc16(data: string): string {
     return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 
-export function generatePromptPayPayload(phoneNumber: string, amount?: number): string {
-    // 1. Payload Format Indicator (00)
-    let payload = "000201";
+// TLV Formatter (Tag-Length-Value)
+function formatTLV(id: string, value: string): string {
+    const length = value.length.toString().padStart(2, '0');
+    return `${id}${length}${value}`;
+}
+
+/**
+ * Generate PromptPay QR code payload
+ * @param target - Phone number, tax ID, or e-wallet ID
+ * @param amount - Optional transaction amount (if provided, creates dynamic QR)
+ * @returns EMVCo QR code payload string
+ */
+export function generatePromptPayQR(target: string, amount?: number): string {
+    // 1. Payload Format Indicator (ID 00)
+    let payload = formatTLV('00', '01');
+
+    // 2. Point of Initiation Method (ID 01)
+    // 11 = Static (Reusable), 12 = Dynamic (One-time)
+    // If amount is present, usually Dynamic (12), otherwise Static (11)
+    const method = amount && amount > 0 ? '12' : '11';
+    payload += formatTLV('01', method);
+
+    // 3. Merchant Account Information (ID 29 for PromptPay)
+    // AID = A000000677010111 (PromptPay)
+    let merchantInfo = formatTLV('00', 'A000000677010111');
     
-    // 2. Point of Initiation Method (01) - 12 = Dynamic (QR used once), 11 = Static
-    payload += amount ? "010212" : "010211";
-    
-    // 3. Merchant Account Information (29) - PromptPay ID
-    // 00 - Application ID (A000000677010111)
-    const merchantInfoId = "0016A000000677010111";
-    
-    // 01 - Tag for PromptPay ID (Phone or Tax ID)
-    // Phone needs 0066 prefix, remove 0
-    let target = phoneNumber.replace(/[^0-9]/g, '');
-    if (target.startsWith('0')) {
-        target = '66' + target.substring(1);
+    // Target Formatting
+    const cleanTarget = target.replace(/[^0-9]/g, '');
+    let targetType = '00'; // Phone -> 01, TaxID -> 02, E-Wallet -> 03
+    let formattedTarget = cleanTarget;
+
+    if (cleanTarget.length >= 15) { 
+        // Likely E-Wallet ID
+        targetType = '03'; 
+    } else if (cleanTarget.length >= 13) {
+        // Tax ID (13 chars)
+        targetType = '02';
+    } else {
+        // Phone (10 chars, need to start with 0066...)
+        targetType = '01';
+        if (cleanTarget.startsWith('0')) {
+            formattedTarget = '0066' + cleanTarget.substring(1);
+        }
     }
-    const targetTag = `01${target.length.toString().padStart(2, '0')}${target}`;
+
+    merchantInfo += formatTLV('01', targetType);
+    merchantInfo += formatTLV('02', formattedTarget);
     
-    const merchantInfoContent = merchantInfoId + targetTag;
-    payload += `29${merchantInfoContent.length.toString().padStart(2, '0')}${merchantInfoContent}`;
-    
-    // 4. Country Code (58)
-    payload += "5802TH";
-    
-    // 5. Currency Code (53) - 764 (THB)
-    payload += "5303764";
-    
-    // 6. Transaction Amount (54)
-    if (amount) {
-        const amountStr = amount.toFixed(2);
-        payload += `54${amountStr.length.toString().padStart(2, '0')}${amountStr}`;
+    payload += formatTLV('29', merchantInfo);
+
+    // 4. Country Code (ID 58) = TH
+    payload += formatTLV('58', 'TH');
+
+    // 5. Currency (ID 53) = 764 (THB)
+    payload += formatTLV('53', '764');
+
+    // 6. Transaction Amount (ID 54) - Optional
+    if (amount && amount > 0) {
+        payload += formatTLV('54', amount.toFixed(2));
     }
+
+    // 7. Checksum (ID 63)
+    // Step 1: Append '6304'
+    payload += '6304';
     
-    // 7. Checksum (63)
-    payload += "6304"; // Placeholder for CRC
+    // Step 2: Calculate CRC16 of the entire string so far
+    const checksum = calculateCRC16(payload);
     
-    // Calculate CRC
-    const checksum = crc16(payload);
-    
+    // Step 3: Append CRC
     return payload + checksum;
 }
