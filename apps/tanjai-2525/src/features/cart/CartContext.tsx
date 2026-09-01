@@ -30,6 +30,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const savedCart = localStorage.getItem('tanjai-cart');
     if (savedCart) {
       try {
+        // localStorage is an external source, so restore it after the initial render.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setItems(JSON.parse(savedCart));
       } catch (e) {
         console.error('Failed to parse cart from localStorage', e);

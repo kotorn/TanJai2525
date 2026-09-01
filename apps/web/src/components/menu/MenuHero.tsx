@@ -13,7 +13,7 @@ export const MenuHero = () => {
 
        <div className="absolute bottom-5 left-5 right-5 z-10">
          <div className="glass-panel inline-flex items-center px-3 py-1 rounded-full mb-3 border border-white/10 backdrop-blur-md">
-           <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Chef's Special</span>
+           <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Chef&apos;s Special</span>
          </div>
          <h2 className="text-3xl font-display font-bold text-white mb-2 leading-tight">Midnight <br/>Truffle Ramen</h2>
          <p className="text-sm text-gray-300 mb-4 font-light leading-relaxed max-w-[90%]">

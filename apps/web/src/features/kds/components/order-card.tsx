@@ -76,7 +76,7 @@ export function OrderCard({ order, onUpdateStatus }: OrderCardProps) {
                             )}
                             {item.notes && (
                                 <div className="text-xs text-red-400 pl-6 italic">
-                                    "{item.notes}"
+                                    &quot;{item.notes}&quot;
                                 </div>
                             )}
                         </div>

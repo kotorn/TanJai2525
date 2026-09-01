@@ -34,7 +34,7 @@ export default function DailyDish() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
                         <TrendingUp className="text-pink-500" />
-                        Today's Viral Hit
+                        Today&apos;s Viral Hit
                     </h2>
                     
                     <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-6">

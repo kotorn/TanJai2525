@@ -128,9 +128,10 @@ export class LoyverseClient {
       console.log(`[Loyverse] Successfully synced ${menuItems.length} items.`);
       return { synced: menuItems.length, errors: [] };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Loyverse] Sync failed:', error);
-      return { synced: 0, errors: [error.message] };
+      const message = error instanceof Error ? error.message : String(error);
+      return { synced: 0, errors: [message] };
     }
   }
 }

@@ -10,7 +10,7 @@ export default function BabelOrderPage() {
           Babel Order
         </h1>
         <p className="text-gray-500 mt-2">
-            Experience the future of ordering. Speak in any language, and we'll translate it for the kitchen instantly.
+            Experience the future of ordering. Speak in any language, and we&apos;ll translate it for the kitchen instantly.
         </p>
       </div>
       

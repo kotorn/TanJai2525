@@ -360,7 +360,7 @@ function MenuPageContent({ params }: { params: { tenant: string } }) {
             {!loading && filteredItems.length > 0 && (
               <div className="col-span-2 py-8 text-center">
                 <p className="text-[10px] text-TEXT_SECONDARY/40 font-medium tracking-widest uppercase">
-                  You've reached the end of the menu
+                  You&apos;ve reached the end of the menu
                 </p>
               </div>
             )}
