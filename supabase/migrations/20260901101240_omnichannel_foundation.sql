@@ -6,6 +6,36 @@
 -- migration can make tenant_id NOT NULL after production read-back proves the
 -- mapping is complete.
 
+-- Currency is tenant configuration, not a global application constant. Existing
+-- Thai tenants retain the legacy THB default, while 2525minishop resolves to
+-- JPY until an explicit settings.currency value is configured.
+CREATE OR REPLACE FUNCTION public.omni_tenant_currency(p_tenant_id uuid)
+RETURNS text
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+  configured_currency text;
+  tenant_label text;
+BEGIN
+  SELECT upper(NULLIF(BTRIM(t.settings ->> 'currency'), '')),
+         lower(concat_ws(' ', t.slug, t.name))
+  INTO configured_currency, tenant_label
+  FROM public.tenants AS t
+  WHERE t.id = p_tenant_id;
+
+  IF configured_currency ~ '^[A-Z]{3}$' THEN
+    RETURN configured_currency;
+  END IF;
+
+  IF tenant_label LIKE '%2525%' THEN
+    RETURN 'JPY';
+  END IF;
+
+  RETURN 'THB';
+END;
+$$;
+
 -- 1. Introduce the canonical tenant_id compatibility column where the legacy
 -- table is present. Only UUID-to-UUID mappings are backfilled automatically;
 -- ambiguous legacy values are left for an explicit tenant migration.
@@ -82,7 +112,7 @@ BEGIN
       ADD COLUMN IF NOT EXISTS stock numeric(12, 3),
       ADD COLUMN IF NOT EXISTS stock_quantity numeric(12, 3),
       ADD COLUMN IF NOT EXISTS track_inventory boolean NOT NULL DEFAULT false,
-      ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'JPY',
+      ADD COLUMN IF NOT EXISTS currency text,
       ADD COLUMN IF NOT EXISTS inventory_managed boolean NOT NULL DEFAULT false,
       ADD COLUMN IF NOT EXISTS is_available boolean NOT NULL DEFAULT true,
       ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
@@ -113,12 +143,120 @@ BEGIN
       ADD COLUMN IF NOT EXISTS channel_connection_id uuid,
       ADD COLUMN IF NOT EXISTS external_order_id text,
       ADD COLUMN IF NOT EXISTS external_idempotency_key text,
-      ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'JPY';
+      ADD COLUMN IF NOT EXISTS currency text;
   END IF;
 
   IF to_regclass('public.order_items') IS NOT NULL THEN
     ALTER TABLE public.order_items
-      ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'JPY';
+      ADD COLUMN IF NOT EXISTS currency text;
+  END IF;
+END $$;
+
+-- Backfill new currency columns without relabeling existing orders as JPY.
+-- The trigger functions below keep future rows aligned with the tenant config.
+DO $$
+BEGIN
+  IF to_regclass('public.menu_items') IS NOT NULL THEN
+    ALTER TABLE public.menu_items ALTER COLUMN currency DROP DEFAULT;
+    UPDATE public.menu_items
+    SET currency = CASE
+      WHEN NULLIF(BTRIM(currency), '') IS NOT NULL THEN UPPER(BTRIM(currency))
+      ELSE public.omni_tenant_currency(tenant_id)
+    END;
+    ALTER TABLE public.menu_items ALTER COLUMN currency SET NOT NULL;
+  END IF;
+
+  IF to_regclass('public.orders') IS NOT NULL THEN
+    ALTER TABLE public.orders ALTER COLUMN currency DROP DEFAULT;
+    UPDATE public.orders
+    SET currency = CASE
+      WHEN NULLIF(BTRIM(currency), '') IS NOT NULL THEN UPPER(BTRIM(currency))
+      ELSE public.omni_tenant_currency(tenant_id)
+    END;
+    ALTER TABLE public.orders ALTER COLUMN currency SET NOT NULL;
+  END IF;
+
+  IF to_regclass('public.order_items') IS NOT NULL THEN
+    ALTER TABLE public.order_items ALTER COLUMN currency DROP DEFAULT;
+    IF to_regclass('public.orders') IS NOT NULL THEN
+      UPDATE public.order_items AS oi
+      SET currency = CASE
+        WHEN NULLIF(BTRIM(oi.currency), '') IS NOT NULL THEN UPPER(BTRIM(oi.currency))
+        ELSE COALESCE(o.currency, 'THB')
+      END
+      FROM public.orders AS o
+      WHERE o.id = oi.order_id;
+    END IF;
+    UPDATE public.order_items
+    SET currency = 'THB'
+    WHERE NULLIF(BTRIM(currency), '') IS NULL;
+    ALTER TABLE public.order_items ALTER COLUMN currency SET NOT NULL;
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.omni_apply_menu_item_currency()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.currency := public.omni_tenant_currency(NEW.tenant_id);
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.omni_apply_order_currency()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.currency := public.omni_tenant_currency(NEW.tenant_id);
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.omni_apply_order_item_currency()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  parent_currency text;
+BEGIN
+  IF to_regclass('public.orders') IS NOT NULL THEN
+    SELECT o.currency
+    INTO parent_currency
+    FROM public.orders AS o
+    WHERE o.id = NEW.order_id;
+  END IF;
+
+  NEW.currency := COALESCE(parent_currency, public.omni_tenant_currency(NEW.tenant_id), 'THB');
+  RETURN NEW;
+END;
+$$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.menu_items') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS omni_apply_menu_item_currency ON public.menu_items;
+    CREATE TRIGGER omni_apply_menu_item_currency
+      BEFORE INSERT OR UPDATE OF tenant_id ON public.menu_items
+      FOR EACH ROW
+      EXECUTE FUNCTION public.omni_apply_menu_item_currency();
+  END IF;
+
+  IF to_regclass('public.orders') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS omni_apply_order_currency ON public.orders;
+    CREATE TRIGGER omni_apply_order_currency
+      BEFORE INSERT OR UPDATE OF tenant_id ON public.orders
+      FOR EACH ROW
+      EXECUTE FUNCTION public.omni_apply_order_currency();
+  END IF;
+
+  IF to_regclass('public.order_items') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS omni_apply_order_item_currency ON public.order_items;
+    CREATE TRIGGER omni_apply_order_item_currency
+      BEFORE INSERT OR UPDATE OF order_id, tenant_id ON public.order_items
+      FOR EACH ROW
+      EXECUTE FUNCTION public.omni_apply_order_item_currency();
   END IF;
 END $$;
 
