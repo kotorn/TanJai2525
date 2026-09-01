@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   transpilePackages: ['@tanjai/ui', '@tanjai/database'],
   i18n: {
     locales: ['th', 'en'],
