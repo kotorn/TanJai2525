@@ -77,8 +77,11 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
                     .eq('owner_id', user.id)
                     .single();
 
-                if (restaurant && restaurant.system_plans) {
-                    const planFeatures = (restaurant.system_plans.features as Record<string, any>) || {};
+                const systemPlan = Array.isArray(restaurant?.system_plans)
+                    ? restaurant.system_plans[0]
+                    : restaurant?.system_plans;
+                if (systemPlan) {
+                    const planFeatures = (systemPlan.features as Record<string, any>) || {};
                     setFeatures(planFeatures);
                     // Determine Tier Name from ID or just use 'pro' if features say so? 
                     // Let's stick to simple "plan_free" = free.

@@ -37,7 +37,7 @@ export async function submitOrder(restaurantId: string, tableId: string, items: 
       import('@/lib/line').then(({ sendOrderNotification }) => {
         // Find the LINE provider ID safely
         const lineIdentity = user.identities?.find(i => i.provider === 'line');
-        const lineUserId = lineIdentity?.provider_id || user.id;
+        const lineUserId = (lineIdentity as any)?.identity_data?.user_id || lineIdentity?.id || user.id;
 
         sendOrderNotification(
           lineUserId,

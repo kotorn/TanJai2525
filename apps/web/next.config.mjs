@@ -24,7 +24,7 @@ const nextConfig = {
     experimental: {
         serverComponentsExternalPackages: [],
     },
-    transpilePackages: ['@tanjai/ui', '@supabase/ssr', '@supabase/supabase-js'],
+    transpilePackages: ['@tanjai/ui', '@tanjai/database', '@supabase/ssr', '@supabase/supabase-js'],
     images: {
         remotePatterns: [
             {

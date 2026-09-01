@@ -30,6 +30,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const savedCart = localStorage.getItem('tanjai-cart');
     if (savedCart) {
       try {
+        // This one-time hydration read intentionally updates local state from
+        // the browser storage boundary after the server render.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setItems(JSON.parse(savedCart));
       } catch (e) {
         console.error('Failed to parse cart from localStorage', e);

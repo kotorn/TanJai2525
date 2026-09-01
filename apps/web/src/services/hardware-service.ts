@@ -13,7 +13,9 @@ interface BridgeResponse {
 
 export class HardwareService {
   private bridgeUrl = process.env.NEXT_PUBLIC_HARDWARE_BRIDGE_URL || 'http://localhost:8080';
-  private bridgeToken = process.env.NEXT_PUBLIC_HARDWARE_BRIDGE_TOKEN || '';
+  // The bridge token is server-side configuration. It must not use a
+  // NEXT_PUBLIC_ variable because that value is embedded in the browser bundle.
+  private bridgeToken = process.env.HARDWARE_BRIDGE_TOKEN || '';
 
   private getHeaders() {
       return {

@@ -10,19 +10,38 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "env:check": "node scripts/ci/env-contract.mjs --mode=runtime",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "test:e2e": "playwright test -c apps/web/playwright.config.ts",
     "test:regression": "playwright test apps/web/e2e/regression-suite.spec.ts --headed -c apps/web/playwright.config.ts",
     "test:regression:ci": "playwright test apps/web/e2e/regression-suite.spec.ts -c apps/web/playwright.config.ts",
     "simulate": "npx playwright test apps/web/e2e/simulation.spec.ts --headed -c apps/web/playwright.config.ts",
-    "stress": "npx playwright test apps/web/e2e/stress-test.spec.ts --headed --workers=1 -c apps/web/playwright.config.ts"
+    "stress": "npx playwright test apps/web/e2e/stress-test.spec.ts --headed --workers=1 -c apps/web/playwright.config.ts",
+    "ci:doctor": "node scripts/ci/doctor.mjs",
+    "ci:check": "node scripts/ci/run.mjs check",
+    "ci:changed": "node scripts/ci/run.mjs changed",
+    "ci:full": "node scripts/ci/run.mjs full",
+    "test:unit": "node scripts/ci/run.mjs unit",
+    "security:scan": "node scripts/ci/secret-scan.mjs",
+    "db:local": "node scripts/ci/supabase.mjs local",
+    "db:dry-run": "node scripts/ci/supabase.mjs dry-run",
+    "db:apply": "node scripts/ci/supabase.mjs apply",
+    "deploy:preview": "node scripts/ci/vercel.mjs preview",
+    "deploy:promote": "node scripts/ci/vercel.mjs promote"
+  },
+  "engines": {
+    "node": "24.x",
+    "npm": "10.x"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/react": "^18.2.0",
     "prettier": "^3.1.0",
+    "supabase": "2.116.0",
     "turbo": "^1.11.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "vercel": "59.10.0"
   },
   "packageManager": "npm@10.0.0",
   "overrides": {

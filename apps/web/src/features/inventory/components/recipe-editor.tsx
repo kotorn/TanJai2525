@@ -169,7 +169,7 @@ export default function RecipeEditor({
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
                     <p className="font-bold mb-1">💡 Pro Tip</p>
                     <p>
-                        Accurate recipes allow the system to calculate your <strong>Gross Margin</strong> and warn you when you're running low on stock automatically.
+                        Accurate recipes allow the system to calculate your <strong>Gross Margin</strong> and warn you when you&apos;re running low on stock automatically.
                     </p>
                 </div>
             </div>

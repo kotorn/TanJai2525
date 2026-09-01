@@ -53,6 +53,20 @@ export const signInWithApple = async () => {
 };
 
 /**
+ * Trigger Facebook Login. The provider must be enabled in Supabase Auth
+ * before this becomes available in a deployed environment.
+ */
+export const signInWithFacebook = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: { redirectTo: getRedirectUrl() },
+    });
+    if (error) throw error;
+    return data;
+};
+
+/**
  * Trigger Email Login
  */
 export const signInWithEmail = async (email: string, password: string) => {
