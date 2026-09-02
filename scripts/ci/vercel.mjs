@@ -29,20 +29,20 @@ function parseDeploymentUrl(stdout) {
 }
 async function link() {
   requireEnv(['VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID'], 'vercel');
-  return runCommand('vercel-link', NPX, cliArgs(['link', '--yes', '--project', process.env.VERCEL_PROJECT_ID, '--scope', process.env.VERCEL_ORG_ID, '--token', process.env.VERCEL_TOKEN]));
+  return runCommand('vercel-link', NPX, cliArgs(['link', '--yes', '--project', process.env.VERCEL_PROJECT_ID, '--scope', process.env.VERCEL_ORG_ID]));
 }
 async function deployPreview() {
   const config = environmentConfig();
   const linked = await link();
   if (linked.code !== 0) return linked.code;
   const pullEnvironment = process.env.VERCEL_PULL_ENV || (config.appEnv === 'production' ? 'production' : 'preview');
-  const pulled = await runCommand('vercel-pull', NPX, cliArgs(['pull', '--yes', '--environment', pullEnvironment, '--git-branch', config.branch, '--token', process.env.VERCEL_TOKEN]));
+  const pulled = await runCommand('vercel-pull', NPX, cliArgs(['pull', '--yes', '--environment', pullEnvironment, '--git-branch', config.branch]));
   if (pulled.code !== 0) return pulled.code;
   const envCheck = await runCommand('vercel-env-check', NPM, ['run', 'env:check'], { env: { APP_ENV: config.appEnv, SUPABASE_SCHEMA: config.schema, NEXT_PUBLIC_SUPABASE_SCHEMA: config.schema, VERCEL_PULL_ENV: pullEnvironment } });
   if (envCheck.code !== 0) return envCheck.code;
-  const built = await runCommand('vercel-build', NPX, cliArgs(['build', '--token', process.env.VERCEL_TOKEN, '--build-env', `APP_ENV=${config.appEnv}`, '--build-env', `SUPABASE_SCHEMA=${config.schema}`, '--build-env', `NEXT_PUBLIC_SUPABASE_SCHEMA=${config.schema}`]));
+  const built = await runCommand('vercel-build', NPX, cliArgs(['build', '--target', pullEnvironment, '--yes']));
   if (built.code !== 0) return built.code;
-  const deployed = await runCommand('vercel-deploy-prebuilt', NPX, cliArgs(['deploy', '--prebuilt', '--token', process.env.VERCEL_TOKEN, '--meta', `githubCommitSha=${config.sha}`, '--meta', `githubCommitRef=${config.branch}`]));
+  const deployed = await runCommand('vercel-deploy-prebuilt', NPX, cliArgs(['deploy', '--prebuilt', '--meta', `githubCommitSha=${config.sha}`, '--meta', `githubCommitRef=${config.branch}`]));
   if (deployed.code !== 0) return deployed.code;
   const url = parseDeploymentUrl(deployed.stdout);
   if (!url) throw new Error('Vercel deploy completed without a deployment URL');
@@ -58,7 +58,7 @@ async function promote() {
   requireEnv(['VERCEL_DEPLOYMENT_URL'], 'vercel promote');
   const linked = await link();
   if (linked.code !== 0) return linked.code;
-  const promoted = await runCommand('vercel-promote', NPX, cliArgs(['promote', process.env.VERCEL_DEPLOYMENT_URL, '--scope', process.env.VERCEL_ORG_ID, '--token', process.env.VERCEL_TOKEN]));
+  const promoted = await runCommand('vercel-promote', NPX, cliArgs(['promote', process.env.VERCEL_DEPLOYMENT_URL, '--scope', process.env.VERCEL_ORG_ID]));
   const summary = { status: promoted.code === 0 ? 'ok' : 'fail', commitSha: config.sha, deploymentUrl: process.env.VERCEL_DEPLOYMENT_URL };
   writeJson('vercel-promote-summary.json', summary);
   console.log(`VERCEL_PROMOTE status=${summary.status} commit_sha=${config.sha} deployment_url=${summary.deploymentUrl}`);
