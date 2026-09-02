@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { CheckCircle2, MessageCircle, ArrowLeft, Printer } from 'lucide-react';
 import { Button } from '@tanjai/ui';
 import { createClient } from '@/lib/supabase/client';
-import { hardwareService } from '@/services/hardware-service';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -52,7 +51,17 @@ export default function OrderSuccessPage() {
             }))
         };
 
-        await hardwareService.printReceipt(payload);
+        const response = await fetch('/api/hardware/print-receipt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json().catch(() => ({ success: false }));
+        if (!response.ok || !result.success) {
+          toast.error(result.error || 'ไม่สามารถพิมพ์ใบเสร็จได้');
+          return;
+        }
+        toast.success('พิมพ์ใบเสร็จเรียบร้อย 🖨️');
 
     } catch (err) {
         console.error(err);

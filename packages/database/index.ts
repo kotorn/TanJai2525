@@ -1,2 +1,3 @@
-export * from './package.json';
+export * from './omnichannel';
+
 export const name = '@tanjai/database';

@@ -1,13 +1,14 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import type { Provider, Session, User } from '@supabase/supabase-js';
 import type { LiffState, LiffProfile, LiffContext } from '@/types/liff';
 import { createClient } from '@/lib/supabase';
 
 // Extended State for Supabase
 interface LiffStateWithSupabase extends LiffState {
-  supabaseUser: any | null;
-  supabaseSession: any | null;
+  supabaseUser: User | null;
+  supabaseSession: Session | null;
 }
 
 // LIFF Context
@@ -122,7 +123,9 @@ export function LiffProvider({ children }: LiffProviderProps) {
     } else {
       // If already LIFF logged in, trigger Supabase Bridge
       await supabase.auth.signInWithOAuth({
-        provider: 'line' as any,
+        // LINE is configured as a custom provider in the deployed auth layer;
+        // the current Supabase SDK union does not include custom providers.
+        provider: 'line' as unknown as Provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         }

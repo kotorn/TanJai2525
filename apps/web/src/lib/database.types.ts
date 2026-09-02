@@ -6,6 +6,23 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type ChannelProvider =
+  | 'meta_catalog'
+  | 'line_oa'
+  | 'google_business_profile'
+  | 'tiktok_shop'
+
+export type OrderChannelSource =
+  | 'pos'
+  | 'liff'
+  | 'line_oa'
+  | 'facebook_messenger'
+  | 'facebook_catalog'
+  | 'instagram'
+  | 'google_business_profile'
+  | 'tiktok_shop'
+  | 'tiktok'
+
 export interface Database {
   public: {
     Tables: {
@@ -223,6 +240,7 @@ export interface Database {
       menu_categories: {
         Row: {
           id: string
+          tenant_id?: string | null
           restaurant_id: string
           name: string
           sort_order: number
@@ -230,6 +248,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          tenant_id?: string | null
           restaurant_id: string
           name: string
           sort_order?: number
@@ -237,6 +256,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          tenant_id?: string | null
           restaurant_id?: string
           name?: string
           sort_order?: number
@@ -254,6 +274,7 @@ export interface Database {
       menu_items: {
         Row: {
           id: string
+          tenant_id?: string | null
           restaurant_id: string
           category_id: string | null
           name: string
@@ -261,11 +282,17 @@ export interface Database {
           price: number
           image_url: string | null
           is_available: boolean
+          sku?: string | null
+          stock?: number | null
+          currency?: string
+          inventory_managed?: boolean
           sort_order: number
           created_at: string
+          updated_at?: string
         }
         Insert: {
           id?: string
+          tenant_id?: string | null
           restaurant_id: string
           category_id?: string | null
           name: string
@@ -273,11 +300,17 @@ export interface Database {
           price: number
           image_url?: string | null
           is_available?: boolean
+          sku?: string | null
+          stock?: number | null
+          currency?: string
+          inventory_managed?: boolean
           sort_order?: number
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
+          tenant_id?: string | null
           restaurant_id?: string
           category_id?: string | null
           name?: string
@@ -285,8 +318,13 @@ export interface Database {
           price?: number
           image_url?: string | null
           is_available?: boolean
+          sku?: string | null
+          stock?: number | null
+          currency?: string
+          inventory_managed?: boolean
           sort_order?: number
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -367,14 +405,21 @@ export interface Database {
       orders: {
         Row: {
           id: string
+          tenant_id?: string | null
           restaurant_id: string
           table_id: string | null
-          items: Json
+          table_no?: string | null
+          table_number?: string | null
+          items?: Json
           total_amount: number
           status: string
           customer_notes: string | null
-          channel_source: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
-          external_order_id: string | null
+          channel_source: OrderChannelSource
+          channel_provider?: ChannelProvider | null
+          channel_connection_id?: string | null
+          external_order_id?: string | null
+          external_idempotency_key?: string | null
+          currency?: string
           utm_source: string | null
           utm_medium: string | null
           source_url: string | null
@@ -382,14 +427,19 @@ export interface Database {
         }
         Insert: {
           id?: string
+          tenant_id?: string | null
           restaurant_id: string
           table_id?: string | null
           items: Json
           total_amount: number
           status?: string
           customer_notes?: string | null
-          channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          channel_source?: OrderChannelSource
+          channel_provider?: ChannelProvider | null
+          channel_connection_id?: string | null
           external_order_id?: string | null
+          external_idempotency_key?: string | null
+          currency?: string
           utm_source?: string | null
           utm_medium?: string | null
           source_url?: string | null
@@ -397,14 +447,19 @@ export interface Database {
         }
         Update: {
           id?: string
+          tenant_id?: string | null
           restaurant_id?: string
           table_id?: string | null
           items?: Json
           total_amount?: number
           status?: string
           customer_notes?: string | null
-          channel_source?: 'pos' | 'liff' | 'line_oa' | 'facebook_messenger' | 'tiktok'
+          channel_source?: OrderChannelSource
+          channel_provider?: ChannelProvider | null
+          channel_connection_id?: string | null
           external_order_id?: string | null
+          external_idempotency_key?: string | null
+          currency?: string
           utm_source?: string | null
           utm_medium?: string | null
           source_url?: string | null
@@ -600,6 +655,288 @@ export interface Database {
           last_interaction?: string
           created_at?: string
         }
+      }
+      order_items: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          order_id: string
+          menu_item_id: string | null
+          name: string
+          quantity: number
+          unit_price: number
+          total_price: number | null
+          currency: string
+          modifiers: Json | null
+          notes: string | null
+          status: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id?: string | null
+          order_id: string
+          menu_item_id?: string | null
+          name: string
+          quantity?: number
+          unit_price: number
+          total_price?: number | null
+          currency?: string
+          modifiers?: Json | null
+          notes?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string | null
+          order_id?: string
+          menu_item_id?: string | null
+          name?: string
+          quantity?: number
+          unit_price?: number
+          total_price?: number | null
+          currency?: string
+          modifiers?: Json | null
+          notes?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      channel_connections: {
+        Row: {
+          id: string
+          tenant_id: string
+          provider: ChannelProvider
+          external_account_id: string
+          display_name: string | null
+          status: 'draft' | 'active' | 'paused' | 'error'
+          scopes: string[]
+          credential_ref: string
+          settings: Json
+          last_sync_at: string | null
+          last_error: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          provider: ChannelProvider
+          external_account_id: string
+          display_name?: string | null
+          status?: 'draft' | 'active' | 'paused' | 'error'
+          scopes?: string[]
+          credential_ref: string
+          settings?: Json
+          last_sync_at?: string | null
+          last_error?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          provider?: ChannelProvider
+          external_account_id?: string
+          display_name?: string | null
+          status?: 'draft' | 'active' | 'paused' | 'error'
+          scopes?: string[]
+          credential_ref?: string
+          settings?: Json
+          last_sync_at?: string | null
+          last_error?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_publications: {
+        Row: {
+          id: string
+          tenant_id: string
+          channel_connection_id: string
+          menu_item_id: string
+          external_item_id: string
+          content_hash: string
+          status: 'pending' | 'synced' | 'failed' | 'disabled'
+          last_good_hash: string | null
+          last_synced_at: string | null
+          last_error: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          channel_connection_id: string
+          menu_item_id: string
+          external_item_id: string
+          content_hash: string
+          status?: 'pending' | 'synced' | 'failed' | 'disabled'
+          last_good_hash?: string | null
+          last_synced_at?: string | null
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          channel_connection_id?: string
+          menu_item_id?: string
+          external_item_id?: string
+          content_hash?: string
+          status?: 'pending' | 'synced' | 'failed' | 'disabled'
+          last_good_hash?: string | null
+          last_synced_at?: string | null
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      channel_events: {
+        Row: {
+          id: string
+          tenant_id: string
+          channel_connection_id: string
+          provider: ChannelProvider
+          external_event_id: string
+          idempotency_key: string
+          external_order_id: string | null
+          event_type: string
+          status: 'received' | 'processing' | 'processed' | 'ignored' | 'failed'
+          payload_metadata: Json
+          received_at: string
+          processed_at: string | null
+          last_error: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          channel_connection_id: string
+          provider: ChannelProvider
+          external_event_id: string
+          idempotency_key: string
+          external_order_id?: string | null
+          event_type: string
+          status?: 'received' | 'processing' | 'processed' | 'ignored' | 'failed'
+          payload_metadata?: Json
+          received_at?: string
+          processed_at?: string | null
+          last_error?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          channel_connection_id?: string
+          provider?: ChannelProvider
+          external_event_id?: string
+          idempotency_key?: string
+          external_order_id?: string | null
+          event_type?: string
+          status?: 'received' | 'processing' | 'processed' | 'ignored' | 'failed'
+          payload_metadata?: Json
+          received_at?: string
+          processed_at?: string | null
+          last_error?: string | null
+        }
+        Relationships: []
+      }
+      channel_sync_runs: {
+        Row: {
+          id: string
+          tenant_id: string
+          channel_connection_id: string
+          operation: 'catalog_publish' | 'order_import' | 'reconcile'
+          mode: 'dry_run' | 'live'
+          status: 'running' | 'succeeded' | 'partial' | 'failed'
+          item_count: number
+          success_count: number
+          failure_count: number
+          result_metadata: Json
+          error_summary: string | null
+          started_at: string
+          finished_at: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          channel_connection_id: string
+          operation: 'catalog_publish' | 'order_import' | 'reconcile'
+          mode?: 'dry_run' | 'live'
+          status?: 'running' | 'succeeded' | 'partial' | 'failed'
+          item_count?: number
+          success_count?: number
+          failure_count?: number
+          result_metadata?: Json
+          error_summary?: string | null
+          started_at?: string
+          finished_at?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          channel_connection_id?: string
+          operation?: 'catalog_publish' | 'order_import' | 'reconcile'
+          mode?: 'dry_run' | 'live'
+          status?: 'running' | 'succeeded' | 'partial' | 'failed'
+          item_count?: number
+          success_count?: number
+          failure_count?: number
+          result_metadata?: Json
+          error_summary?: string | null
+          started_at?: string
+          finished_at?: string | null
+        }
+        Relationships: []
+      }
+      inventory_reservations: {
+        Row: {
+          id: string
+          tenant_id: string
+          order_id: string
+          menu_item_id: string
+          quantity: number
+          status: 'reserved' | 'released' | 'committed'
+          idempotency_key: string
+          release_reason: string | null
+          created_at: string
+          released_at: string | null
+          committed_at: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          order_id: string
+          menu_item_id: string
+          quantity: number
+          status?: 'reserved' | 'released' | 'committed'
+          idempotency_key: string
+          release_reason?: string | null
+          created_at?: string
+          released_at?: string | null
+          committed_at?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          order_id?: string
+          menu_item_id?: string
+          quantity?: number
+          status?: 'reserved' | 'released' | 'committed'
+          idempotency_key?: string
+          release_reason?: string | null
+          created_at?: string
+          released_at?: string | null
+          committed_at?: string | null
+        }
+        Relationships: []
       }
       communication_logs: {
         Row: {

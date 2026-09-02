@@ -1,113 +1,47 @@
-# CI/CD Setup Guide - Tanjai POS
+# TanJai POS CI/CD and release gates
 
-This project uses **GitHub Actions** for automated testing and deployment.
+The canonical repository is `kotorn/TanJai2525`. Pull requests run affected checks and a same-repository Vercel preview when the preview environment is configured. A push to `main` runs the protected staging workflow. Production is a manual workflow dispatch after staging evidence and environment approval.
 
-## 📋 Required Secrets
+## Required environment values
 
-Configure these in GitHub repository settings (`Settings → Secrets and variables → Actions`):
+Keep all values in GitHub Environments or Vercel. Never commit credentials or copy production values into the repository.
 
-### Supabase (Required for builds)
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
+| Environment | Required configuration |
+| --- | --- |
+| CI | public-only Supabase URL/key placeholders supplied by the workflow |
+| Preview | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, public Supabase URL/key |
+| Staging | Preview values plus `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `CRON_SECRET` |
+| Production | Staging values plus protected `SUPABASE_PRODUCTION_APPROVED=1` and a required reviewer environment |
 
-### Production Domain
-```
-NEXT_PUBLIC_ROOT_DOMAIN=tanjai.app
-```
+Server-only values include `SUPABASE_SERVICE_ROLE_KEY`, provider access tokens, OAuth refresh tokens and `CRON_SECRET`. Browser code may only receive `NEXT_PUBLIC_*` values that are intentionally public.
 
-### Vercel Deployment (Optional)
-```
-VERCEL_TOKEN=your-vercel-token
-VERCEL_ORG_ID=your-org-id
-VERCEL_PROJECT_ID=your-project-id
-```
+## Release flow
 
-**How to get Vercel tokens**:
-1. Go to https://vercel.com/account/tokens
-2. Create new token
-3. Get ORG_ID and PROJECT_ID from project settings
-
-## 🚀 Workflow Triggers
-
-**Runs on**:
-- Push to `main` or `develop` branches
-- Pull requests to `main`
-
-**Jobs**:
-1. **Build & Test** - Production build + Regression tests (84 tests)
-2. **Lint & Type Check** - Code quality validation
-3. **Deploy** - Auto-deploy to Vercel (only on `main` push after tests pass)
-4. **Security** - npm audit + secret scanning
-
-## 📊 Test Results
-
-**Artifacts uploaded on failure**:
-- `playwright-test-results/` - Screenshots, videos, traces
-- `playwright-report/` - HTML test report
-
-**Retention**: 7 days
-
-## 🔧 Local Testing
-
-**Test CI workflow locally** (using `act`):
-```bash
-# Install act
-npm install -g act
-
-# Run all jobs
-act push
-
-# Run specific job
-act push -j test
+```text
+pull request
+  -> affected lint/type-check/build + secret scan
+  -> Vercel preview + browser smoke
+  -> review and squash merge
+main push
+  -> Supabase dry-run -> apply staging migration
+  -> Vercel prebuilt staging deployment -> browser smoke
+manual production dispatch
+  -> protected approval -> dry-run -> apply -> build -> smoke -> promote same artifact
 ```
 
-## ⚡ Performance
+The deployment wrappers refuse remote database operations without explicit guard variables. Production migration also requires protected approval metadata. Vercel is always built and deployed as a prebuilt artifact so the artifact tested by smoke is the one promoted.
 
-**Expected durations**:
-- Build & Test: ~8-10 minutes
-- Lint: ~2-3 minutes
-- Deploy: ~3-5 minutes
-- Security: ~1-2 minutes
+## Local commands
 
-**Total**: ~15 minutes (jobs run in parallel)
-
-## 🎯 Deployment Flow
-
-```
-Push to main
-    ↓
-Build & Test (parallel) ✅
-Lint & Type Check (parallel) ✅
-Security Audit (parallel) ✅
-    ↓
-All passed?
-    ↓
-Deploy to Vercel Production 🚀
+```powershell
+npm ci --ignore-scripts --no-audit --fund=false
+npm run ci:doctor
+npm run env:check
+npm run ci:check
 ```
 
-## 🚨 Troubleshooting
+`npm run db:local` is the explicit local Supabase reset path. Do not use `supabase db reset --linked`.
 
-### Build fails with "Missing environment variables"
-→ Check GitHub Secrets are configured correctly
+## Failure reporting
 
-### Playwright tests timeout
-→ Increase `timeout-minutes` in workflow or optimize tests
-
-### Vercel deployment fails
-→ Verify `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` are correct
-
-### npm audit fails
-→ Review vulnerabilities, run `npm audit fix` locally
-
-## 📈 Monitoring
-
-**Check workflow status**:
-- GitHub repository → Actions tab
-- Badge: `![CI](https://github.com/your-org/TanJai2525/workflows/Production%20Pre-flight%20%26%20Deployment/badge.svg)`
-
-**Email notifications**:
-- GitHub sends emails on workflow failures
-- Configure in: Settings → Notifications
+Wrappers write redacted logs and JSON summaries to ignored `_artifacts/ci/`. Report the failed step, commit SHA, deployment URL and artifact path; never report token values or raw environment contents.

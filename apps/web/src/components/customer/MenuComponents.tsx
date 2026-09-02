@@ -82,7 +82,7 @@ export const MenuHero = () => {
         <div className="absolute top-4 left-4 z-20">
           <span className="glass-panel px-3 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5 border border-white/10 shadow-lg">
             <span className="material-symbols-outlined text-sm text-secondary-500">star</span>
-            Chef's Pick
+            Chef&apos;s Pick
           </span>
         </div>
         

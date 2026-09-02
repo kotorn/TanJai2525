@@ -26,7 +26,6 @@ export function CartSheet() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'tanjai_secret_internal_key_2025',
         },
         body: JSON.stringify({
           restaurantId: '61b1c93e-ae38-4244-85ef-0f263d2b614b',

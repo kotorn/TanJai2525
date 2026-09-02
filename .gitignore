@@ -1,11 +1,43 @@
-```
 # Dependencies
 node_modules/
+.pnp.*
+.yarn/
 
 # Logs
 *.log
 
-# Environment
+# Environment and local secrets
 .env
-.env.
-```
+.env.*
+!.env.example
+!.env.*.example
+.dev.vars
+.dev.vars.*
+
+# Vercel / local platform state
+.vercel/
+.wrangler/
+supabase/.temp/
+
+# Generated build and test output
+.next/
+**/.next/
+*.tsbuildinfo
+dist/
+coverage/
+playwright-report/
+test-results/
+_artifacts/
+
+# Local source mirrors and backups
+_sources/
+_secure-backups/
+*.bundle
+*.dump
+*.sql.gz
+
+# Private credentials/certificates
+*.pem
+*.p12
+*.pfx
+*.key

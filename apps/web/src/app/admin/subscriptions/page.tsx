@@ -46,19 +46,13 @@ export default async function AdminSubscriptionsPage() {
     // Helper Component for Actions
     const ActionButtons = ({ subId }: { subId: string }) => (
         <div className="flex gap-2">
-            <form action={async () => {
-                'use server';
-                await approveSubscription(subId, 1); // Default 1 month
-            }}>
+            <form action={approveSubscription.bind(null, subId, 1) as any}>
                 <button className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm transition-colors">
                     <CheckCircle size={14} /> Approve (1 Mo)
                 </button>
             </form>
 
-            <form action={async () => {
-                'use server';
-                await rejectSubscription(subId, 'Invalid');
-            }}>
+            <form action={rejectSubscription.bind(null, subId, 'Invalid') as any}>
                 <button className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm transition-colors">
                     <XCircle size={14} /> Reject
                 </button>

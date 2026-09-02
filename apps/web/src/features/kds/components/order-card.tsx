@@ -10,6 +10,7 @@ type Order = Database['public']['Tables']['orders']['Row'];
 interface OrderCardProps {
     order: Order;
     onUpdateStatus: (orderId: string, status: string) => void;
+    displayLanguage?: 'en' | 'my' | 'km' | 'la';
 }
 
 export function OrderCard({ order, onUpdateStatus }: OrderCardProps) {
@@ -76,7 +77,7 @@ export function OrderCard({ order, onUpdateStatus }: OrderCardProps) {
                             )}
                             {item.notes && (
                                 <div className="text-xs text-red-400 pl-6 italic">
-                                    "{item.notes}"
+                                    &quot;{item.notes}&quot;
                                 </div>
                             )}
                         </div>

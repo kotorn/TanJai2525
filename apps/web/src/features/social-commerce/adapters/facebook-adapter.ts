@@ -9,6 +9,8 @@ export class FacebookAdapter implements ISocialChannelAdapter {
         this.pageId = process.env.FACEBOOK_PAGE_ID || '';
     }
 
+    private readonly messagesUrl = 'https://graph.facebook.com/v19.0/me/messages';
+
     async sendMessage(userId: string, message: string) {
         if (!this.accessToken) {
             console.error('[FacebookAdapter] Access Token missing');
@@ -16,9 +18,12 @@ export class FacebookAdapter implements ISocialChannelAdapter {
         }
 
         try {
-            const response = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${this.accessToken}`, {
+            const response = await fetch(this.messagesUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
                 body: JSON.stringify({
                     recipient: { id: userId },
                     message: { text: message }
@@ -61,9 +66,12 @@ export class FacebookAdapter implements ISocialChannelAdapter {
                 }
             };
 
-            const response = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${this.accessToken}`, {
+            const response = await fetch(this.messagesUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
                 body: JSON.stringify({
                     recipient: { id: userId },
                     message: genericTemplate
@@ -83,17 +91,61 @@ export class FacebookAdapter implements ISocialChannelAdapter {
         return { success: true };
     }
 
-    async getProfile(userId: string) {
+    async sendProductCarousel(products: any[], userId: string) {
+        if (!this.accessToken) return { success: false, error: 'Config missing' };
+
+        const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+        const elements = products.slice(0, 10).map((product) => ({
+            title: String(product.name || 'สินค้า'),
+            subtitle: `${product.price} ${product.currency || 'JPY'}`,
+            image_url: product.image_url || undefined,
+            buttons: [{
+                type: 'web_url',
+                url: `${baseUrl}/menu`,
+                title: 'สั่งเลย',
+            }],
+        }));
+
         try {
-            const response = await fetch(`https://graph.facebook.com/${userId}?fields=first_name,last_name,profile_pic&access_token=${this.accessToken}`);
+            const response = await fetch(this.messagesUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
+                body: JSON.stringify({
+                    recipient: { id: userId },
+                    message: {
+                        attachment: {
+                            type: 'template',
+                            payload: { template_type: 'generic', elements },
+                        },
+                    },
+                }),
+            });
             const data = await response.json();
-            return {
-                name: `${data.first_name} ${data.last_name}`,
-                avatarUrl: data.profile_pic,
-                success: true
-            };
+            return response.ok
+                ? { success: true, messageId: data.message_id }
+                : { success: false, error: data.error?.message || 'Facebook API Error' };
         } catch (error) {
             return { success: false, error };
+        }
+    }
+
+    async getProfile(userId: string) {
+        try {
+            const profileUrl = new URL(`https://graph.facebook.com/${userId}`);
+            profileUrl.searchParams.set('fields', 'first_name,last_name,profile_pic');
+            const response = await fetch(profileUrl, {
+                headers: { Authorization: `Bearer ${this.accessToken}` },
+            });
+            const data = await response.json();
+            return {
+                name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+                avatarUrl: data.profile_pic,
+            };
+        } catch (error) {
+            return { name: '', error };
         }
     }
 }

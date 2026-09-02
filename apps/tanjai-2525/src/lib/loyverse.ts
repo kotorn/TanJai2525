@@ -116,7 +116,7 @@ export class LoyverseClient {
       }));
 
       // 3. Upsert into menu_items table
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('menu_items')
         .upsert(menuItems, { onConflict: 'id' });
 
@@ -128,9 +128,12 @@ export class LoyverseClient {
       console.log(`[Loyverse] Successfully synced ${menuItems.length} items.`);
       return { synced: menuItems.length, errors: [] };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Loyverse] Sync failed:', error);
-      return { synced: 0, errors: [error.message] };
+      return {
+        synced: 0,
+        errors: [error instanceof Error ? error.message : 'Unknown sync error'],
+      };
     }
   }
 }

@@ -101,7 +101,7 @@ export default function SubscriptionExpiredPage({
         </p>
 
         {tenantSlug ? (
-          <form action={handleSubmit} className="space-y-4 text-left">
+          <form action={handleSubmit as any} className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1">Amount Paid (฿)</label>
               <input

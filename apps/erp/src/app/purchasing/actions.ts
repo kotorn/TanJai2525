@@ -1,6 +1,17 @@
 "use server"
 
-export async function getPOs() {
+export type PurchaseOrderStatus = 'pending_approval' | 'draft' | 'received' | 'sent' | 'cancelled';
+
+export interface PurchaseOrder {
+  id: string;
+  po_number: string;
+  supplier: string;
+  date: string;
+  amount: number;
+  status: PurchaseOrderStatus;
+}
+
+export async function getPOs(): Promise<PurchaseOrder[]> {
   return [
     { 
         id: "1", 

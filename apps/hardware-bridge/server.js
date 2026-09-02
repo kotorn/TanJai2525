@@ -1,13 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { timingSafeEqual } = require('crypto');
 const { ThermalPrinter, PrinterTypes, CharacterSet, BreakLine } = require('node-thermal-printer');
 
 const app = express();
 const port = 8080;
 
-// Security Token (In production, this should be in .env or a config file)
-const BRIDGE_TOKEN = "tanjai_bridge_secure_token_2025";
+// The bridge must fail closed when it has not been provisioned with a token.
+const BRIDGE_TOKEN = String(process.env.HARDWARE_BRIDGE_TOKEN || '').trim();
+if (!BRIDGE_TOKEN) {
+    console.error('[Bridge] HARDWARE_BRIDGE_TOKEN is required');
+    process.exit(1);
+}
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -15,7 +20,13 @@ app.use(bodyParser.json());
 // Auth Middleware
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== `Bearer ${BRIDGE_TOKEN}`) {
+    const providedToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+        ? authHeader.slice('Bearer '.length)
+        : '';
+    const expected = Buffer.from(BRIDGE_TOKEN);
+    const provided = Buffer.from(providedToken);
+    const valid = expected.length === provided.length && timingSafeEqual(expected, provided);
+    if (!valid) {
         console.warn(`[Bridge] Unauthorized access attempt from ${req.ip}`);
         return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
@@ -116,5 +127,5 @@ app.post('/open-drawer', authenticate, async (req, res) => {
 
 app.listen(port, () => {
     console.log(`🖨️ Hardware Bridge running on http://localhost:${port}`);
-    console.log(`🔒 Security Token: ${BRIDGE_TOKEN}`);
+    console.log('🔒 Hardware Bridge authentication enabled');
 });
