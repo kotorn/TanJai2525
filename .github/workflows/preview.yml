@@ -16,6 +16,7 @@ jobs:
   preview-config:
     name: preview configuration
     runs-on: ubuntu-latest
+    environment: Preview
     outputs:
       configured: ${{ steps.check.outputs.configured }}
     steps:
@@ -37,7 +38,7 @@ jobs:
     needs: preview-config
     if: github.event.pull_request.head.repo.full_name == github.repository && needs.preview-config.outputs.configured == 'true'
     runs-on: ubuntu-latest
-    environment: preview
+    environment: Preview
     env:
       APP_ENV: preview
       SUPABASE_SCHEMA: public
